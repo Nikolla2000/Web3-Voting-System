@@ -1,5 +1,10 @@
+import LoginForm from "../ui/login-form";
+
 export default function Page() {
     return (
-        <div>Login Page</div>
+        <main>
+            <h1>Login Page</h1>
+            <LoginForm/>
+        </main>
     )
 }

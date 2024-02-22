@@ -25,8 +25,11 @@ body {
     )
     rgb(var(--background-start-rgb));
 
-     background: rgb(159,159,159);
-    background: linear-gradient(0deg, rgba(159,159,159,1) 0%, rgba(181,181,181,1) 9%, rgba(207,207,207,1) 22%, rgba(255,255,255,1) 100%);
+    /* background: rgb(159,159,159);
+    background: linear-gradient(0deg, rgba(159,159,159,1) 0%, rgba(181,181,181,1) 9%, rgba(207,207,207,1) 22%, rgba(255,255,255,1) 100%); */
+
+    background: rgb(135,135,135);
+    background: linear-gradient(0deg, rgb(88, 88, 88) 1%, rgb(138, 138, 138) 9%, rgba(207,207,207,1) 22%, rgba(255,255,255,1) 100%);
 } 
 
 
