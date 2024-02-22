@@ -2,8 +2,8 @@ import LoginForm from "../ui/login-form";
 
 export default function Page() {
     return (
-        <main>
-            <h1>Login Page</h1>
+        <main className="min-h-screen p-20">
+            <h1 className="text-center text-7xl font-bold text-blue-700 mb-10">Login</h1>
             <LoginForm/>
         </main>
     )
