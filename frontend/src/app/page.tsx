@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-15 relative animate__animated animate__fadeIn">
+    <main className="flex flex-col items-center justify-center p-15 relative animate__animated animate__fadeIn">
       <div>
         <img src="/heading-img2.png" alt="heading image" className='w-80 mb-10' />
       </div>
