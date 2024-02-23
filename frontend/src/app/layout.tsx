@@ -5,8 +5,12 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Web3 Voting System",
+  title: {
+    template: '%s | Web3 Voting System',
+    default: 'Web3 Voting System'
+  },
   description: "A decentralized voting system built with Next.js, Nest.js and Solidity leveraging blockchain technology for secure and transparent voting processes.",
+  metadataBase: new URL('http://localhost:3000'),
 };
 
 export default function RootLayout({
