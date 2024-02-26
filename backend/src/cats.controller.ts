@@ -1,4 +1,5 @@
-import { Body, Controller, Delete, Get, Header, HostParam, HttpCode, Param, Post, Put, Redirect, Req } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Header, HostParam, HttpCode, HttpStatus, Param, Post, Put, Redirect, Req, Res } from "@nestjs/common";
+import { Response } from "express";
 
 export class CreateCatDto {
     name: string;
@@ -22,8 +23,8 @@ export class CatsController{
     // }
 
     @Get()
-    async findAll(): Promise<any[]> {
-        return [];
+    findAll(@Res({ passthrough: true }) res: Response) {
+        res.status(HttpStatus.OK).json('Hellooo cats');
     }
 
     @Post()
