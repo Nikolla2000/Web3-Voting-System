@@ -1,10 +1,10 @@
-import { fetchPollsData } from "@/lib/data";
+import { fetchPollsData } from "@/app/lib/data";
 
 export default async function PollsBoard() {
   const data = await fetchPollsData();
 
   return (
-    <div className="polls-board grid gap-6 sm:grid-cols-2 md:grid-cols-3">
+    <div className="polls-board mt-10 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
       {data?.map((poll, i) => (
         <Card 
           pollData={poll}
