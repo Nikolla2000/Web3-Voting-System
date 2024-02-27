@@ -5,9 +5,10 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/user.entity';
 import { AccountController, CatsController } from './cats/cats.controller';
 import { CatsService } from './cats/cats.service';
+import { CatsModule } from './cats/cats.module';
 
 @Module({
-  imports: [
+  imports: [CatsModule,
     // TypeOrmModule.forRoot({
     //   type: 'mysql',
     //   host: 'localhost',
@@ -19,7 +20,7 @@ import { CatsService } from './cats/cats.service';
     //   synchronize: true,
     // })
   ],
-  controllers: [AppController, CatsController, AccountController],
-  providers: [AppService, CatsService],
+  controllers: [AppController, AccountController],
+  providers: [AppService,],
 })
 export class AppModule {}
