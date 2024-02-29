@@ -1,5 +1,6 @@
 export const votingPolls = [
   {
+    id: 1,
     title: 'Cucumbers in your tarator',
     description: 'Do you prefer your cucumber sliced or chopped in the tarator',
     image: '/polls-images/tarator.webp',
@@ -9,6 +10,7 @@ export const votingPolls = [
     votesSecondOption: 9,
   },
   {
+    id: 2,
     title: 'Cucumbers in your tarator',
     description: 'Do you prefer your cucumber sliced or chopped in the tarator',
     image: '/polls-images/tarator.webp',
@@ -18,6 +20,7 @@ export const votingPolls = [
     votesSecondOption: 9,
   },
   {
+    id: 3,
     title: 'Cucumbers in your tarator',
     description: 'Do you prefer your cucumber sliced or chopped in the tarator',
     image: '/polls-images/tarator.webp',
@@ -27,6 +30,7 @@ export const votingPolls = [
     votesSecondOption: 9,
   },
   {
+    id: 4,
     title: 'Cucumbers in your tarator',
     description: 'Do you prefer your cucumber sliced or chopped in the tarator',
     image: '/polls-images/tarator.webp',

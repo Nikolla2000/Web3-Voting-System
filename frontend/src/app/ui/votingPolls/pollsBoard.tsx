@@ -1,4 +1,5 @@
 import { fetchPollsData } from "@/app/lib/data";
+import Link from "next/link";
 
 export default async function PollsBoard() {
   const data = await fetchPollsData();
@@ -15,6 +16,7 @@ export default async function PollsBoard() {
 }
 
 export interface PollData {
+  id: number,
   title: string,
   description: string,
   image: string,
@@ -27,6 +29,7 @@ export interface PollData {
 export function Card({ pollData } : { pollData: PollData }){
   return (
     <div className="cursor-pointer">
+      <Link href={`/votingPolls/${pollData.id}`}>
       <h3 className="text-purple-700 text-center font-bold my-5">{pollData.title}</h3>
       <div className="w-56 h-56 mx-auto">
         <img src={pollData.image} alt="poll image" className="w-full h-full"/>
@@ -45,6 +48,7 @@ export function Card({ pollData } : { pollData: PollData }){
       <div>
         <p className="text-center">Total Votes: {pollData.votesFirstOption + pollData.votesSecondOption}</p>
       </div>
+      </Link>
     </div>
   )
 }
