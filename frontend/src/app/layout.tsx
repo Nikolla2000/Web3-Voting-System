@@ -20,7 +20,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen `}>{children}</body>
+      <body className={`${inter.className} min-h-screen `}>{children}
+      {/* <img src="/network3.png" className="network-bg-image"/>
+      <img src="/network3.png" className="network-bg-image network-bg-image2"/>
+      <img src="/network3.png" className="network-bg-image network-bg-image3"/> */}
+      </body>
     </html>
   );
 }
