@@ -4,12 +4,15 @@ import Link from "next/link"
 
 export default function LoginForm() {
     return (
-            <form action="">
+            <form action="" className="text-center">
                 <label htmlFor="name" className="block text-center mb-2">Username</label>
-                <input type="text" id="username" name="username" className="block mx-auto mb-4"/>
+                <input type="text" id="username" name="username" className="block mx-auto mb-7 border-b-2"/>
 
                 <label htmlFor="name" className="block text-center mb-2">Password</label>
-                <input type="password" id="password" name="password" className="block mx-auto mb-4"/>
+                <input type="password" id="password" name="password" className="block mx-auto mb-7 border-b-2"/>
+                <button className='bg-blue-700 text-white font-bold px-8 py-3 mt-10 rounded-lg hover:bg-blue-500 transition-all duration-200'>
+                    Login
+                </button>
                 <Link 
                     href='/register'
                     className="mt-2">
