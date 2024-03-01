@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <main className="flex flex-col items-center justify-center p-15 relative animate__animated animate__fadeIn">
+    <main className="flex flex-col items-center justify-center lg:h-screen p-15 relative animate__animated animate__fadeIn">
       <div>
         <img src="/heading-img2.png" alt="heading image" className='w-80 mb-10' />
       </div>
@@ -26,6 +26,13 @@ export default function Home() {
         {/* <button type="button" className="mt-10 text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Sign In To Vote</button> */}
         </Link>
       </div>
+      <Link 
+          href='/register'
+          className="mt-2">
+          <p className="text-blue-700 text-center mt-2 text-md hover:font-bold transition-all duration-200 underline">
+              Or <span className='font-bold'>Register</span> from here
+          </p>
+      </Link>
       {/* <div className='w-5 h-5 bg-red-400 absolute top-50 shadow-md left-10 rounded-xl'></div>
       <div className='w-5 h-5 bg-red-400 absolute top-20 shadow-md right-10 rounded-xl'></div>
       <div className='w-5 h-5 bg-red-400 absolute top-30 shadow-md left-50 rounded-xl'></div>
