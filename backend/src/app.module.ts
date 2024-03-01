@@ -6,6 +6,7 @@ import { User } from './users/user.entity';
 import { AccountController, CatsController } from './cats/cats.controller';
 import { CatsService } from './cats/cats.service';
 import { CatsModule } from './cats/cats.module';
+import { UsersModule } from './users/users.module';
 
 const db_port = parseInt(process.env.DB_PORT);
 const db_host = process.env.DB_HOST;
@@ -15,6 +16,7 @@ const db_pass = process.env.DB_PASS;
 
 @Module({
   imports: [CatsModule,
+    UsersModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: db_host,
