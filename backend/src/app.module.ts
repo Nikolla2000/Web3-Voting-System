@@ -9,16 +9,16 @@ import { CatsModule } from './cats/cats.module';
 
 @Module({
   imports: [CatsModule,
-    // TypeOrmModule.forRoot({
-    //   type: 'mysql',
-    //   host: 'localhost',
-    //   port: 3306,
-    //   username: 'root',
-    //   password: 'root',
-    //   database: 'test',
-    //   entities: [User],
-    //   synchronize: true,
-    // })
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: 'localhost',
+      port: 3306,
+      username: 'root',
+      password: '0047090983Kk',
+      database: 'test',
+      entities: [User],
+      synchronize: true,
+    })
   ],
   controllers: [AppController, AccountController],
   providers: [AppService,],
