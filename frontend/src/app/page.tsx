@@ -6,7 +6,7 @@ export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center lg:h-screen p-15 relative animate__animated animate__fadeIn">
       <div>
-        <img src="/heading-img2.png" alt="heading image" className='w-80 mb-10' />
+        <img src="/heading-img2.png" alt="heading image" className='w-72 mb-10' />
       </div>
       <div>
         <h1 className="text-blue-700 text-5xl font-bold  mb-6">Welcome to Web3!</h1>
@@ -29,7 +29,7 @@ export default function Home() {
       <Link 
           href='/register'
           className="mt-2">
-          <p className="text-blue-700 text-center mt-2 text-md hover:font-bold transition-all duration-200 underline">
+          <p className="text-blue-700 text-center mt-2 text-md hover:font-bold transition-all duration-200 hover:underline">
               Or <span className='font-bold'>Register</span> from here
           </p>
       </Link>

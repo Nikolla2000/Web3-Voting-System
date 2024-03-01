@@ -16,7 +16,7 @@ export default function LoginForm() {
                 <Link 
                     href='/register'
                     className="mt-2">
-                    <p className="text-blue-700 text-center mt-7 text-md hover:font-bold transition-all duration-200">
+                    <p className="text-blue-700 text-center mt-7 text-md hover:font-bold transition-all duration-200 hover:underline">
                         You don't have an account? Click here to register!
                     </p>
                 </Link>
