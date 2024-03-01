@@ -7,15 +7,21 @@ import { AccountController, CatsController } from './cats/cats.controller';
 import { CatsService } from './cats/cats.service';
 import { CatsModule } from './cats/cats.module';
 
+const db_port = parseInt(process.env.DB_PORT);
+const db_host = process.env.DB_HOST;
+const db_name = process.env.DB_NAME;
+const db_username = process.env.DB_USERNAME;
+const db_pass = process.env.DB_PASS;
+
 @Module({
   imports: [CatsModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '0047090983Kk',
-      database: 'test',
+      host: db_host,
+      port: db_port,
+      username: db_username,
+      password: db_pass,
+      database: db_name,
       entities: [User],
       synchronize: true,
     })
