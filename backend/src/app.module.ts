@@ -25,6 +25,7 @@ const db_pass = process.env.DB_PASS;
       password: db_pass,
       database: db_name,
       entities: [User],
+      autoLoadEntities: true,
       synchronize: true,
     })
   ],
