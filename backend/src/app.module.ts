@@ -3,8 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './users/user.entity';
-import { AccountController, CatsController } from './cats/cats.controller';
-import { CatsService } from './cats/cats.service';
+import { AccountController } from './cats/cats.controller';
 import { CatsModule } from './cats/cats.module';
 import { UsersModule } from './users/users.module';
 
@@ -25,7 +24,6 @@ const db_pass = process.env.DB_PASS;
       password: db_pass,
       database: db_name,
       entities: [User],
-      autoLoadEntities: true,
       synchronize: true,
     })
   ],
