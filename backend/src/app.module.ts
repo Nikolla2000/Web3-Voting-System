@@ -17,14 +17,19 @@ const db_pass = process.env.DB_PASS;
   imports: [CatsModule,
     UsersModule,
     TypeOrmModule.forRoot({
-      type: 'mysql',
+      type: 'postgres',
       host: db_host,
       port: db_port,
       username: db_username,
       password: db_pass,
       database: db_name,
       entities: [User],
-      synchronize: true,
+      autoLoadEntities: true,
+      synchronize: false,
+      ssl: {
+        rejectUnauthorized: false,
+        // ca: '/C:/Users/Nikola Uzunov/AppData/Roaming/postgresql/root.crt'
+      }
     })
   ],
   controllers: [AppController, AccountController],
