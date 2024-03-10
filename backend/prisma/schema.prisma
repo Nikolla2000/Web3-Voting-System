@@ -20,5 +20,11 @@ model User {
   country String
   password String
   IsActive Boolean @default(true)
+}
 
+model Car {
+  id Int @id @default(sequence())
+  brand String
+  model String
+  horsePower String
 }

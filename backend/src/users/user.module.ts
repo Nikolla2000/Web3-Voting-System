@@ -1,9 +1,11 @@
-import { Prisma } from "@prisma/client";
+import { Module } from "@nestjs/common";
+import { UserController } from "./user.controller";
+import { UserSevice } from "./user.service";
+import { PrismaService } from "src/prisma.service";
 
-export class User implements Prisma.UserCreateInput {
-  id: number;
-  username: string;
-  email: string;
-  password: string;
-  country: string;
-}
+@Module({
+  // imports: [],
+  controllers: [UserController],
+  providers: [UserSevice, PrismaService]
+})
+export class UserModule {}
