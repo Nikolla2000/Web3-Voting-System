@@ -2,10 +2,10 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './users/user.entity';
+import { User } from './usersOld/user.entity';
 import { AccountController } from './cats/cats.controller';
 import { CatsModule } from './cats/cats.module';
-import { UsersModule } from './users/users.module';
+import { UsersModule } from './usersOld/users.module';
 
 const db_port = parseInt(process.env.DB_PORT);
 const db_host = process.env.DB_HOST;
