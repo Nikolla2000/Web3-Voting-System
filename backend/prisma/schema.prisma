@@ -14,17 +14,20 @@ datasource db {
 }
 
 model User {
-  id Int @id @default(sequence())
-  username String
-  email String
+  id BigInt @id @default(sequence())
+  name String?
+  email String @unique
   country String
   password String
   IsActive Boolean @default(true)
 }
 
-model Car {
-  id Int @id @default(sequence())
-  brand String
-  model String
-  horsePower String
+model Post {
+  id        BigInt   @id @default(sequence())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String   @db.Char(255)
+  content   String?
+  published Boolean  @default(false)
+  authorId  BigInt
 }
