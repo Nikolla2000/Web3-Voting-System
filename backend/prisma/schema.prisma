@@ -14,12 +14,12 @@ datasource db {
 }
 
 model User {
-  id BigInt @id @default(sequence())
+  id Int @id @default(sequence())
   name String?
   email String @unique
   country String
   password String
-  IsActive Boolean @default(true)
+  IsActive Boolean? @default(true)
 }
 
 model Post {
