@@ -1,22 +1,24 @@
-import { Controller, Delete, Get, Param } from "@nestjs/common";
-import { UsersService } from "./users.service";
+import { Body, Controller, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
+import { UserSevice } from "./user.service";
+import { User } from "./user.model";
 
-@Controller('users')
-export class UsersController {
-    constructor (private usersService: UsersService) {}
+@Controller('user')
+export class UserController {
 
-    @Get()
-    async findAll() {
-        return this.usersService.findAll();
-    }
+  constructor(private readonly userService: UserSevice) {}
 
-    @Get(':id')
-    async findOne(@Param() params: any): Promise<any> {
-        return this.usersService.findOne(params.id);
-    }
+  @Get()
+  async getAllUsers(): Promise <User[]> {
+    return this.userService.getAllUsers();
+  }
 
-    @Delete(':id')
-    remove(@Param('id') id: number) {
-        return this.usersService.delete(id);
-    }
+  @Get(":id")
+  async getUser(@Param('id', ParseIntPipe) id: number): Promise<User | null> {
+    return this.userService.getUser(id);
+  }
+
+  @Post('/create')
+  async createUser(@Body() userData: User): Promise <User> {
+    return this.userService.createUser(userData);
+  }
 }
