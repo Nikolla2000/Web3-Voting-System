@@ -22,6 +22,14 @@ model User {
   IsActive Boolean? @default(true)
 }
 
+model Poll {
+  id Int @id @default(sequence())
+  name String
+  description String
+  votes1 Int @default(0)
+  votes2 Int @default(0)
+}
+
 model Post {
   id        BigInt   @id @default(sequence())
   createdAt DateTime @default(now())
