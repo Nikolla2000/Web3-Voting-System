@@ -1,18 +1,15 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './usersOld/user.entity';
 import { AccountController } from './cats/cats.controller';
 import { CatsModule } from './cats/cats.module';
-import { UsersModule } from './usersOld/users.module';
 import { UserModule } from './users/user.module';
 
-const db_port = parseInt(process.env.DB_PORT);
-const db_host = process.env.DB_HOST;
-const db_name = process.env.DB_NAME;
-const db_username = process.env.DB_USERNAME;
-const db_pass = process.env.DB_PASS;
+// const db_port = parseInt(process.env.DB_PORT);
+// const db_host = process.env.DB_HOST;
+// const db_name = process.env.DB_NAME;
+// const db_username = process.env.DB_USERNAME;
+// const db_pass = process.env.DB_PASS;
 
 @Module({
   imports: [CatsModule,
