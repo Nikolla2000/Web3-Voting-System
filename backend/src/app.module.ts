@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { AccountController } from './cats/cats.controller';
 import { CatsModule } from './cats/cats.module';
 import { UserModule } from './users/user.module';
+import { PollsModule } from './polls/polls.module';
 
 // const db_port = parseInt(process.env.DB_PORT);
 // const db_host = process.env.DB_HOST;
@@ -14,6 +15,7 @@ import { UserModule } from './users/user.module';
 @Module({
   imports: [CatsModule,
     UserModule,
+    PollsModule,
     // UsersModule,
     // TypeOrmModule.forRoot({
     //   type: 'postgres',
