@@ -17,8 +17,13 @@ export class UserController {
     return this.userService.getUser(id);
   }
 
+  // @Post('/create')
+  // async createUser(@Body() userData: User): Promise <User> {
+  //   return this.userService.createUser(userData);
+  // }
+
   @Post('/create')
   async createUser(@Body() userData: User): Promise <User> {
-    return this.userService.createUser(userData);
+    return this.userService.createTestTwo(userData);
   }
 }
