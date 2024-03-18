@@ -38,13 +38,13 @@ export class AuthService {
 }
 
   async validateUser(dto: LoginDto) {
-    const user = await this.userService.getUserByEmail(dto.username);
+    const user = await this.userService.getUserByEmail(dto.email);
 
     if(user && (await compare(dto.password, user.password))) {
       const { password, ...result } = user;
       return result;
     }
 
-    throw new UnauthorizedException('username or password incorrect');
+    throw new UnauthorizedException('email or password incorrect');
   }
 }
