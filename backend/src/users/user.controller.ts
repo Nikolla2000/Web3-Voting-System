@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
 import { UserSevice } from "./user.service";
 import { User } from "./user.model";
+import { JwtGuard } from "src/auth/guards/jwt.guard";
 
 @Controller('user')
 export class UserController {
@@ -12,13 +13,19 @@ export class UserController {
     return this.userService.getAllUsers();
   }
 
+  @UseGuards(JwtGuard)
   @Get(":id")
   async getUser(@Param('id', ParseIntPipe) id: number): Promise<User | null> {
-    return this.userService.getUser(id);
+    return this.userService.getUserById(id);
   }
+
+  // @Post('/create')
+  // async createUser(@Body() userData: User): Promise <User> {
+  //   return this.userService.createUser(userData);
+  // }
 
   @Post('/create')
   async createUser(@Body() userData: User): Promise <User> {
-    return this.userService.createUser(userData);
+    return this.userService.createTestTwo(userData);
   }
 }
