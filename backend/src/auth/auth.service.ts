@@ -13,7 +13,7 @@ export class AuthService {
   async login(dto: LoginDto) {
     const user = await this.validateUser(dto);
     const payload = {
-      username: user.email,
+      email: user.email,
       sub: {
         name: user.name,
       }
@@ -46,5 +46,26 @@ export class AuthService {
     }
 
     throw new UnauthorizedException('email or password incorrect');
+  }
+
+  async refreshToken(user: any) {
+    const payload = {
+      email: user.email,
+      sub: user.sub
+    };
+
+    return {
+      accessToken: await this.jwtService.signAsync(payload, {
+        expiresIn: '1h',
+        secret: process.env.JwtSecretKey, 
+
+      }),
+      refreshTokens: {
+          accessToken: await this.jwtService.signAsync(payload, {
+          expiresIn: '7d',
+          secret: process.env.JwtRefreshToken, 
+      }),
+    }
+    }
   }
 }

@@ -3,7 +3,7 @@ import { JwtService } from "@nestjs/jwt";
 import { Request } from "express";
 
 @Injectable()
-export class RefreshGuard implements CanActivate {
+export class RefreshJwtGuard implements CanActivate {
   constructor(private jwtService: JwtService) {}
 
   async canActivate(
