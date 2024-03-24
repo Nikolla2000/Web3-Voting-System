@@ -1,5 +1,7 @@
 import 'animate.css';
 import Link from 'next/link';
+import SignInButton from './ui/login/SignInButton';
+import RegisterButton from './ui/login/RegisterButton';
 
 
 export default function Home() {
@@ -17,20 +19,11 @@ export default function Home() {
           <div
               className="absolute transitiona-all duration-1000 opacity-70 -inset-px bg-gradient-to-r from-[#44BCFF] via-[#FF44EC] to-[#FF675E] rounded-xl blur-lg group-hover:opacity-100 group-hover:-inset-1 group-hover:duration-200 animate-tilt">
           </div>
-        <Link href="/login" title='Get quote now'
-              className="relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-blue-900 font-pj rounded-xl focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-900"
-              role="button">Sign in To Vote     
-        </Link>
+          <SignInButton/>
         </div>
         {/* <button type="button" className="mt-10 text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2">Sign In To Vote</button> */}
       </div>
-      <Link 
-          href='/register'
-          className="mt-2">
-          <p className="text-blue-700 text-center mt-2 text-md hover:font-bold transition-all duration-200 hover:underline">
-              Or <span className='font-bold'>Register</span> from here
-          </p>
-      </Link>
+      <RegisterButton/>
       {/* <div className='w-5 h-5 bg-red-400 absolute top-50 shadow-md left-10 rounded-xl'></div>
       <div className='w-5 h-5 bg-red-400 absolute top-20 shadow-md right-10 rounded-xl'></div>
       <div className='w-5 h-5 bg-red-400 absolute top-30 shadow-md left-50 rounded-xl'></div>

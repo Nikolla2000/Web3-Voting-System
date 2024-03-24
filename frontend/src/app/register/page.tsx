@@ -1,4 +1,4 @@
-import RegisterForm from "../ui/register-form";
+import RegisterForm from "../ui/login/register-form";
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {

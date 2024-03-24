@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Providers from "./ui/Providers";
+import { Toaster } from 'react-hot-toast';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,10 +22,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${inter.className} min-h-screen `}>{children}
-      {/* <img src="/network3.png" className="network-bg-image"/>
-      <img src="/network3.png" className="network-bg-image network-bg-image2"/>
-      <img src="/network3.png" className="network-bg-image network-bg-image3"/> */}
+      <body className={`${inter.className} min-h-screen `}>
+        <Providers>
+          {children}
+      </Providers>
+      <Toaster />
       </body>
     </html>
   );
