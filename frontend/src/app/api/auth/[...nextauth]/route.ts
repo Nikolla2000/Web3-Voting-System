@@ -19,7 +19,7 @@ export const authOptions: NextAuthOptions = {
                 if (!credentials?.email || !credentials?.password) return null;
                 const { email, password } = credentials;
                 try {
-                    const res = await axios.post('localhost:5000/auth/login', {
+                    const res = await axios.post('http://localhost:5000/auth/login', {
                         email,
                         password
                     });
