@@ -24,7 +24,7 @@ export class UserController {
   //   return this.userService.createUser(userData);
   // }
 
-  @Post('/create')
+  @Post('/register')
   async createUser(@Body() userData: User): Promise <User> {
     return this.userService.createTestTwo(userData);
   }
