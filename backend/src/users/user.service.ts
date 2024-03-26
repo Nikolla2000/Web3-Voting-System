@@ -9,23 +9,20 @@ export class UserSevice {
 
   constructor(private prisma: PrismaService) {}
 
+  //List all the users
   async getAllUsers(): Promise <User[]> {
     return this.prisma.user.findMany();
   }
 
+
+  //Get user by id
   async getUserById(id:number): Promise<User | null> {
     return this.prisma.user.findUnique({ where: {id:Number(id)}})
   }
 
-  // async createUser(data: Prisma.UserCreateInput): Promise<User> {
-  //   try {
-  //     return await this.prisma.user.create({ data })
-  //   } catch (error) {
-  //     throw new BadRequestException('Could not create user')
-  //   }
-  // }
 
-  async createTestTwo(dto: CreateUserDto): Promise<User> {
+  //Create/register new user
+  async createUser(dto: CreateUserDto): Promise<User> {
     const user = await this.prisma.user.findUnique({
       where: {
         email: dto.email,
@@ -45,12 +42,24 @@ export class UserSevice {
     return newUser;
   }
 
-  async getUserByEmail(email: string) : Promise<User | null> {
+
+  //Get user by email
+  async getUserByEmail(email: string): Promise<User | null> {
     return await this.prisma.user.findUnique({
       where: {
         email: email
       }
     })
   }
+
+
+  //Delete user by id
+  async deleteUser(id: number): Promise<User | null> {
+    return await this.prisma.user.delete({
+      where: {
+        id:Number (id)
+      }
+    })
+  } 
   
 }
