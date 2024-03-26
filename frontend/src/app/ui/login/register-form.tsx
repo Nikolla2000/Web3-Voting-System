@@ -20,7 +20,7 @@ export default function RegisterForm() {
 
     const schema: ZodType<Inputs> = z.object({
         email: z.string().email(),
-        name: z.string().min(3).max(8),
+        name: z.string().min(3),
         country: z.string(),
         password: z.string().min(6).max(6),
         confirmPass: z.string()
@@ -31,7 +31,6 @@ export default function RegisterForm() {
     });
     
     type FormFields = z.infer<typeof schema>;
-
 
     const {
         register,
