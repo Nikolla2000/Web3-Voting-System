@@ -19,7 +19,8 @@ model User {
   email String @unique
   country String
   password String
-  IsActive Boolean? @default(true)
+  registeredAt DateTime @default(now())
+  polls Poll[]
 }
 
 model Poll {
@@ -28,6 +29,8 @@ model Poll {
   description String
   votes1 Int @default(0)
   votes2 Int @default(0)
+  userId Int
+  users User[]
 }
 
 model Post {
