@@ -1,7 +1,7 @@
 import { unstable_noStore as noStore } from 'next/cache';
 import { votingPolls } from './placeholder-data'
-import axios from 'axios';
-import { Inputs } from '../ui/login/register-form';
+import axios, { AxiosError } from 'axios';
+import { Inputs } from "../ui/login/register-form"
 import { toast } from "react-hot-toast"
 
 export async function fetchPollsData() {
@@ -23,11 +23,31 @@ export async function fetchPollById(id: number) {
   }
 }
 
-export async function fetchRegister(data: Inputs) {
-  if(data.confirmPass != data.password) {
-    console.log(data);
-    toast.error("Passwords do not match");
+export async function fetchRegisterUser(data: Inputs) {
+  if(data.confirmPass !== data.password) {
     return;
   }
-  // axios.post('http://localhost:5000/user/regiseter', data);
+
+  const { confirmPass, ...registerData } = data;
+
+  try {
+    const response = await axios.post("http://localhost:5000/auth/register", registerData);
+    console.log(data, response);
+    toast.success("Account created successfully!");
+
+    setTimeout(() => {
+      window.location.href = ('/api/auth/signin');
+    }, 800)
+
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      const axiosError = error as AxiosError;
+      if (axiosError.response && axiosError.response.status === 409) {
+        toast.error("User with this email already exists");
+      } else {
+        // Handle other error cases
+        console.error("An error occurred:", axiosError.message);
+        toast.error("An error occurred. Please try again later.");
+      }
 }
+  }}

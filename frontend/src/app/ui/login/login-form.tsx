@@ -13,13 +13,21 @@ export default function LoginForm() {
                 <button className='bg-blue-700 text-white font-bold px-8 py-3 mt-10 rounded-lg hover:bg-blue-500 transition-all duration-200'>
                     Login
                 </button>
-                <Link 
+                {/* <Link 
                     href='/register'
                     className="mt-2">
                     <p className="text-blue-700 text-center mt-7 text-md hover:font-bold transition-all duration-200 hover:underline">
                         You don't have an account? Click here to register!
                     </p>
+                </Link> */}
+                <p className="text-blue-700 text-center mt-2 text-md transition-all duration-200">You don't have an account?
+                <Link
+                    href='/register'
+                    className="mt-2 ml-2 font-bold hover:underline">
+                        Clich Here
                 </Link>
+                to Register
+            </p>
             </form>
     )
 }
