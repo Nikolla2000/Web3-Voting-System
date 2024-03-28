@@ -29,7 +29,6 @@ model Poll {
   description String
   votes1 Int @default(0)
   votes2 Int @default(0)
-  userId Int
   users User[]
 }
 

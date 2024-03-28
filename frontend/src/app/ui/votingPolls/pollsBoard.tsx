@@ -1,3 +1,4 @@
+import { Poll } from "@/app/_types/types";
 import { fetchPollsData } from "@/app/lib/data";
 import Link from "next/link";
 
@@ -15,18 +16,7 @@ export default async function PollsBoard() {
   )
 }
 
-export interface PollData {
-  id: number,
-  title: string,
-  description: string,
-  image: string,
-  optionOne: string,
-  optionTwo: string,
-  votesFirstOption: number,
-  votesSecondOption: number,
-}
-
-export function Card({ pollData } : { pollData: PollData }){
+export function Card({ pollData } : { pollData: Poll }){
   return (
     <div className="cursor-pointer">
       <Link href={`/votingPolls/${pollData.id}`}>
