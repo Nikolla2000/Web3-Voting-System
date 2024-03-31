@@ -22,11 +22,11 @@ export class PollsService {
     }
   }
 
-  // update(id: number, updatePollDto: UpdatePollDto) {
-  //   return `This action updates a #${id} poll`;
-  // }
-
-  remove(id: number) {
-    return `This action removes a #${id} poll`;
+  async deletePoll(id: number): Promise<Poll | null> {
+    return await this.prisma.poll.delete({
+      where: {
+        id:Number (id)
+      }
+    })
   }
 }

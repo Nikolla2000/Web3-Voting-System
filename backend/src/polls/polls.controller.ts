@@ -1,15 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, ParseIntPipe } from '@nestjs/common';
 import { PollsService } from './polls.service';
 import { Poll } from './entities/poll.entity';
 
 @Controller('polls')
 export class PollsController {
   constructor(private readonly pollsService: PollsService) {}
-
-  @Post()
-  create(@Body() pollData: Poll) {
-    return this.pollsService.create(pollData);
-  }
 
   @Get()
   findAll() {
@@ -21,13 +16,13 @@ export class PollsController {
     return this.pollsService.findOne(+id);
   }
 
-  // @Patch(':id')
-  // update(@Param('id') id: string, @Body() updatePollDto: UpdatePollDto) {
-  //   return this.pollsService.update(+id, updatePollDto);
-  // }
+  @Post()
+  async create(@Body() pollData: Poll) {
+    return this.pollsService.create(pollData);
+  }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.pollsService.remove(+id);
+  async delete(@Param('id', ParseIntPipe) id: number): Promise <Poll | null> {
+    return this.pollsService.deletePoll(id);
   }
 }
