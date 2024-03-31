@@ -1,10 +1,10 @@
 export interface Poll {
     id: number,
-    title: string,
+    name: string,
     description: string,
     image: string,
     optionOne: string,
     optionTwo: string,
-    votesFirstOption: number,
-    votesSecondOption: number,
+    votes1: number,
+    votes2: number,
   }

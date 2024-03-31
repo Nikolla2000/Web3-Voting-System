@@ -6,10 +6,11 @@ import { toast } from "react-hot-toast"
 
 export async function fetchPollsData() {
   try {
-    const data = votingPolls;
-    return data;
+    const response = await axios.get("http://localhost:5000/polls");
+    console.log(response.data);
+    return response.data;
   } catch (error) {
-    console.error('Error: ', error);
+    console.log(error);
   }
 }
 
