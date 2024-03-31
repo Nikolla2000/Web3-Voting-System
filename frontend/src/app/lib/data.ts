@@ -3,10 +3,11 @@ import { votingPolls } from './placeholder-data'
 import axios, { AxiosError } from 'axios';
 import { Inputs } from "../ui/login/register-form"
 import { toast } from "react-hot-toast"
+import api from '../../../axios.config';
 
 export async function fetchPollsData() {
   try {
-    const response = await axios.get("http://localhost:5000/polls");
+    const response = await api.get("/polls");
     console.log(response.data);
     return response.data;
   } catch (error) {
