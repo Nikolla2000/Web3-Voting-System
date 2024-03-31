@@ -21,7 +21,7 @@ export function Card({ pollData }: { pollData: Poll }) {
       <Link href={`/votingPolls/${pollData.id}`}>
         <h3 className="text-purple-700 text-center font-bold my-5">{pollData.name}</h3>
         <div className="w-56 h-56 mx-auto">
-          <img src={pollData.image} alt="poll image" className="w-full h-full"/>
+          <img src={pollData.mainImgUrl} alt="poll image" className="w-full h-full"/>
         </div>
         <div className="text-center flex justify-center gap-5 my-4">
           <div>

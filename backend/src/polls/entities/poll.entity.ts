@@ -9,4 +9,5 @@ export class Poll implements Prisma.PollCreateInput{
     img2URL: string;
     votes1?: number;
     votes2?: number;
+    users?: Prisma.UserCreateNestedManyWithoutPollsInput;
 }

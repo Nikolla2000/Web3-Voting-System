@@ -30,6 +30,8 @@ model Poll {
   mainImgURL String
   img1URL String
   img2URL String
+  option1Name String
+  option2Name String
   votes1 Int @default(0)
   votes2 Int @default(0)
   users User[]
