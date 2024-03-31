@@ -27,6 +27,9 @@ model Poll {
   id Int @id @default(sequence())
   name String
   description String
+  mainImgURL String
+  img1URL String
+  img2URL String
   votes1 Int @default(0)
   votes2 Int @default(0)
   users User[]
