@@ -10,10 +10,11 @@ export default async function Page({ params }: { params: {id: string} }) {
     }
 
     return (
-        <div>
-            <h1>Poll №{poll.id} {poll.title}</h1>
+        <div className="mx-auto w-1/2 py-10">
+            <h1>Poll №{poll.id} {poll.name}</h1>
             <div className="w-20">
-                <img src={poll.image} alt="poll image" />
+                <img src={poll.img1URL} alt="First choice image" />
+                <img src={poll.img2URL} alt="Second choice image" />
             </div>
             <div>
                 <p>{poll.description}</p>

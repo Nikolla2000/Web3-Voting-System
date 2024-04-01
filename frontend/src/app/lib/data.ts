@@ -11,15 +11,15 @@ export async function fetchPollsData() {
     console.log(response.data);
     return response.data;
   } catch (error) {
-    console.log(error);
+    console.error('Error: ', error);
   }
 }
 
 export async function fetchPollById(id: number) {
   noStore()
   try {
-    const poll = votingPolls.find(poll => poll.id === id)
-    return poll;
+    const poll = await api.get(`/polls/${id}`)
+    return poll.data;
   } catch (error) {
     console.error('Error: ', error);
   }
