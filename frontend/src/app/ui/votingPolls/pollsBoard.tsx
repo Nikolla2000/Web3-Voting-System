@@ -21,16 +21,16 @@ export function Card({ pollData }: { pollData: Poll }) {
       <Link href={`/votingPolls/${pollData.id}`}>
         <h3 className="text-purple-700 text-center font-bold my-5">{pollData.name}</h3>
         <div className="w-56 h-56 mx-auto">
-          <img src={pollData.mainImgUrl} alt="poll image" className="w-full h-full"/>
+          <img src={pollData.mainImgURL} alt="poll image" className="w-full h-full"/>
         </div>
         <div className="text-center flex justify-center gap-5 my-4">
           <div>
             <span className="mr-1">{pollData.votes1}</span>
-            <span>{pollData.optionOne}</span>
+            <span>{pollData.optionOneName}</span>
           </div>
           <span>vs</span>
           <div>
-            <span>{pollData.optionTwo}</span>
+            <span>{pollData.optionTwoName}</span>
             <span className="ml-1">{pollData.votes2}</span>
           </div>
         </div>
