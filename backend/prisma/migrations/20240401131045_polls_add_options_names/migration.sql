@@ -1,0 +1,10 @@
+/*
+  Warnings:
+
+  - Added the required column `optionOneName` to the `Poll` table without a default value. This is not possible if the table is not empty.
+  - Added the required column `optionTwoName` to the `Poll` table without a default value. This is not possible if the table is not empty.
+
+*/
+-- AlterTable
+ALTER TABLE "Poll" ADD COLUMN     "optionOneName" STRING NOT NULL;
+ALTER TABLE "Poll" ADD COLUMN     "optionTwoName" STRING NOT NULL;

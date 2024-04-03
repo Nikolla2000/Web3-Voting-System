@@ -1,53 +1,42 @@
-import { fetchPollsData } from "@/app/lib/data";
+import { Poll } from "@/app/_types/types";
 import Link from "next/link";
 
-export default async function PollsBoard() {
-  const data = await fetchPollsData();
 
+export default function PollsBoard({ pollsData }: { pollsData: Poll[] }) {
+console.log(pollsData);
   return (
     <div className="polls-board mt-10 grid gap-6 sm:grid-cols-2 md:grid-cols-3">
-      {data?.map((poll, i) => (
+      {pollsData?.map((poll) => (
         <Card 
           pollData={poll}
-          key={i + 1}/>
+          key={poll.id}/>
       ))}
     </div>
   )
 }
 
-export interface PollData {
-  id: number,
-  title: string,
-  description: string,
-  image: string,
-  optionOne: string,
-  optionTwo: string,
-  votesFirstOption: number,
-  votesSecondOption: number,
-}
-
-export function Card({ pollData } : { pollData: PollData }){
+export function Card({ pollData }: { pollData: Poll }) {
   return (
     <div className="cursor-pointer">
       <Link href={`/votingPolls/${pollData.id}`}>
-      <h3 className="text-purple-700 text-center font-bold my-5">{pollData.title}</h3>
-      <div className="w-56 h-56 mx-auto">
-        <img src={pollData.image} alt="poll image" className="w-full h-full"/>
-      </div>
-      <div className="text-center flex justify-center gap-5 my-4">
-        <div>
-          <span className="mr-1">{pollData.votesFirstOption}</span>
-          <span>{pollData.optionOne}</span>
+        <h3 className="text-purple-700 text-center font-bold my-5">{pollData.name}</h3>
+        <div className="w-56 h-56 mx-auto">
+          <img src={pollData.mainImgURL} alt="poll image" className="w-full h-full"/>
         </div>
-        <span>vs</span>
-        <div>
-          <span>{pollData.optionTwo}</span>
-          <span className="ml-1">{pollData.votesSecondOption}</span>
+        <div className="text-center flex justify-center gap-5 my-4">
+          <div>
+            <span className="mr-1">{pollData.votes1}</span>
+            <span>{pollData.optionOneName}</span>
+          </div>
+          <span>vs</span>
+          <div>
+            <span>{pollData.optionTwoName}</span>
+            <span className="ml-1">{pollData.votes2}</span>
+          </div>
         </div>
-      </div>
-      <div>
-        <p className="text-center">Total Votes: {pollData.votesFirstOption + pollData.votesSecondOption}</p>
-      </div>
+        <div>
+          <p className="text-center">Total Votes: {pollData.votes1 + pollData.votes2}</p>
+        </div>
       </Link>
     </div>
   )

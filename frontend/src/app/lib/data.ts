@@ -3,11 +3,13 @@ import { votingPolls } from './placeholder-data'
 import axios, { AxiosError } from 'axios';
 import { Inputs } from "../ui/login/register-form"
 import { toast } from "react-hot-toast"
+import api from '../../../axios.config';
 
 export async function fetchPollsData() {
   try {
-    const data = votingPolls;
-    return data;
+    const response = await api.get("/polls");
+    console.log(response.data);
+    return response.data;
   } catch (error) {
     console.error('Error: ', error);
   }
@@ -16,8 +18,8 @@ export async function fetchPollsData() {
 export async function fetchPollById(id: number) {
   noStore()
   try {
-    const poll = votingPolls.find(poll => poll.id === id)
-    return poll;
+    const poll = await api.get(`/polls/${id}`)
+    return poll.data;
   } catch (error) {
     console.error('Error: ', error);
   }
