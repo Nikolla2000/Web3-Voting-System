@@ -1,5 +1,7 @@
 import { Poll } from "@/app/_types/types";
 import Link from "next/link";
+import { PollLink } from "./PollLink";
+import { ReactNode } from "react";
 
 
 export default function PollsBoard({ pollsData }: { pollsData: Poll[] }) {
@@ -15,10 +17,16 @@ console.log(pollsData);
   )
 }
 
+export interface PollLinkProps {
+  id: number;
+  children: ReactNode; // Accept children
+}
+
+
 export function Card({ pollData }: { pollData: Poll }) {
   return (
     <div className="cursor-pointer">
-      <Link href={`/votingPolls/${pollData.id}`}>
+      <PollLink id={pollData.id}>
         <h3 className="text-purple-700 text-center font-bold my-5">{pollData.name}</h3>
         <div className="w-56 h-56 mx-auto">
           <img src={pollData.mainImgURL} alt="poll image" className="w-full h-full"/>
@@ -37,7 +45,7 @@ export function Card({ pollData }: { pollData: Poll }) {
         <div>
           <p className="text-center">Total Votes: {pollData.votes1 + pollData.votes2}</p>
         </div>
-      </Link>
+      </PollLink>
     </div>
   )
 }
