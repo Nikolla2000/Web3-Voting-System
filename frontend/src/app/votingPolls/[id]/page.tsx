@@ -1,4 +1,5 @@
 import { fetchPollById } from "@/app/lib/data";
+import { VoteButton } from "@/app/ui/votingPolls/VoteButton";
 import { notFound } from "next/navigation";
 
 export default async function Page({ params }: { params: {id: string} }) {
@@ -19,6 +20,7 @@ export default async function Page({ params }: { params: {id: string} }) {
             <div>
                 <p>{poll.description}</p>
             </div>
+            <VoteButton/>
         </div>
     )
 }
