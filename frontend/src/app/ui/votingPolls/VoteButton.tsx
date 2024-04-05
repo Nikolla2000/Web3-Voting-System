@@ -16,7 +16,7 @@ export function VoteButton() {
         }
     }
     return (
-        <div className="absolute top-1/2 left-32 bg-white">
+        <div className="absolute top-1/2 left-36 bg-white">
             <button onClick={handleVote}>
                 Vote
             </button>
