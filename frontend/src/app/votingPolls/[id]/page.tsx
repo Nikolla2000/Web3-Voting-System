@@ -2,6 +2,7 @@ import { fetchPollById } from "@/app/lib/data";
 import { VoteButton } from "@/app/ui/votingPolls/VoteButton";
 import { notFound } from "next/navigation";
 import styles from "./styles.module.css";
+import PercentageBar from "./PercentageBar";
 
 
 export default async function Page({ params }: { params: {id: string} }) {
@@ -36,9 +37,7 @@ export default async function Page({ params }: { params: {id: string} }) {
                 <div>
                     <p className="text-center font-bold text-3xl">{poll.description}</p>
                 </div>
-                <div className={styles.percentBarWrapper}>
-                    <div className={styles.percentBar}></div>
-                </div>
+                <PercentageBar/>
                 <div>
                     <button>View Statistics</button>
                 </div>
