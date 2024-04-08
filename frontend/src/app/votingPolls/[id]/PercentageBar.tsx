@@ -1,6 +1,7 @@
 'use client'
 
 import styles from "./styles.module.css";
+import "./styles.css";
 
 export default function PercentageBar() {
     const votes1 = 3;

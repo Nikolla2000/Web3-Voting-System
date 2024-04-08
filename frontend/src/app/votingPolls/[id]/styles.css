@@ -1,0 +1,6 @@
+
+.leftPercentage:before{
+    height: 100%;
+    width: 50px;
+    background-color: blue;
+}

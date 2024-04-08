@@ -38,6 +38,7 @@
     position: relative;
     display: flex;
     justify-content: center;
+    border-radius: 30px;
     
 }
 
@@ -53,6 +54,7 @@
     animation: leftPercentageAnimation 1.3s linear forwards;
     height: 100%;
     float: right;
+    border-radius: 30px 0 0 30px;
 }
 
 .rightPercentBar {
@@ -66,6 +68,7 @@
     height: 100%;
     float: left;
     animation: rightPercentageAnimation 1.3s linear forwards;
+    border-radius: 0 30px 30px 0;
 
 }
 
