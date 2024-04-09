@@ -29,4 +29,33 @@ export class PollsService {
       }
     })
   }
+
+  async voteForOption1(id: number): Promise<Poll> {
+    return this.addVote(id, 'votes1');
+  }
+  
+  async voteForOption2(id: number): Promise<Poll> {
+    return this.addVote(id, 'votes2');
+  }
+
+  private async addVote(id: number, option: 'votes1' | 'votes2'): Promise<Poll | null> {
+    const poll = await this.findOne(id);
+
+    if(!poll) {
+      throw new BadRequestException('Poll was not found');
+    }
+
+    try {
+      const dataToUpdate = { [option]: { increment: 1 } };
+      const votedPoll = await this.prisma.poll.update({
+        where: { id },
+        data: dataToUpdate,
+      })
+
+      return votedPoll;
+
+    } catch (error) {
+      throw new BadRequestException('Could not vote')
+    }
+  }
 }
