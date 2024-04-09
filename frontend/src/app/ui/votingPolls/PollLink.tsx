@@ -1,8 +1,8 @@
 'use client'
 
+import { PollLinkProps } from "@/app/_types/types";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { PollLinkProps } from "./pollsBoard";
 
 export function PollLink({ id, children }: PollLinkProps) {
     const { data: session } = useSession();

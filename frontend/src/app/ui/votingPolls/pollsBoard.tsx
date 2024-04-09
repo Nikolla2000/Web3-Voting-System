@@ -17,12 +17,6 @@ console.log(pollsData);
   )
 }
 
-export interface PollLinkProps {
-  id: number;
-  children: ReactNode;
-}
-
-
 export function Card({ pollData }: { pollData: Poll }) {
   return (
     <div className="cursor-pointer">

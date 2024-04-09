@@ -4,7 +4,7 @@ import { vote } from "@/app/lib/actions";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
-export function VoteButton() {
+export function VoteButton({ isHovered }) {
     const { data: session } = useSession();
     const router = useRouter();
 
@@ -16,7 +16,7 @@ export function VoteButton() {
         }
     }
     return (
-        <div className="absolute top-1/2 left-36 bg-white">
+        <div className={`absolute top-1/2 left-36 bg-white ${!isHovered && 'hidden'}`}>
             <button onClick={handleVote}>
                 Vote
             </button>
