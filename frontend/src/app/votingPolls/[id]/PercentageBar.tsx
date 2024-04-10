@@ -1,6 +1,6 @@
 'use client'
 
-import styles from "./styles.module.css";
+import styles from "../../ui/votingPolls/styles.module.css";
 import "./styles.css";
 import { useEffect, useState } from "react";
 

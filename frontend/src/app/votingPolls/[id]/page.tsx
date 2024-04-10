@@ -1,9 +1,10 @@
 import { fetchPollById } from "@/app/lib/data";
 import { VoteButton } from "@/app/ui/votingPolls/VoteButton";
 import { notFound } from "next/navigation";
-import styles from "./styles.module.css";
+import styles from "../../ui/votingPolls/styles.module.css";
 import PercentageBar from "./PercentageBar";
 import PollImage from "./PollImage";
+import VoteModal from "./VoteModal";
 
 
 export default async function Page({ params }: { params: {id: string} }) {
@@ -28,19 +29,12 @@ export default async function Page({ params }: { params: {id: string} }) {
                 <h1 className="text-5xl font-bold text-blue-900 text-center pt-5">{poll.name}</h1>
                 <div className="flex justify-center gap-2 p-14">
                     <div>
-                        {/* <div className={`relative ${styles.boxShadow} rounded-lg`}>
-                            <img src={poll.img1URL} alt="First choice image" className={styles.images}/>
-                            <VoteButton/> 
-                        </div> */}
                         <PollImage pollImg={poll.img1URL}/>
                         <p className="text-center my-5 font-bold text-xl">{poll.optionOneName}</p>              
                     </div>
                     <p className="self-end mb-6 text-xl">vs</p>
                     <div>
-                        <div className={`relative ${styles.boxShadow} rounded-lg`}>
-                            <img src={poll.img2URL} alt="Second choice image" className={styles.images}/>
-                            <VoteButton/> 
-                        </div>
+                        <PollImage pollImg={poll.img2URL}/>
                         <p className="text-center my-6 font-bold text-xl">{poll.optionTwoName}</p>              
                     </div>
                 </div>
