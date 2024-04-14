@@ -18,7 +18,7 @@ export function VoteButton({ isHovered } : {isHovered: boolean}) {
     }
     return (
         <div className={`absolute ${!isHovered && 'hidden'} z-10 ${styles.voteBtn}`}>
-            <button className="z-20 bg-transparent  text-3xl font-bold uppercase py-4 px-10">
+            <button className="z-20 bg-transparent  text-2xl font-bold uppercase py-4 px-10">
                 Vote
             </button>
         </div>

@@ -5,6 +5,8 @@ import styles from "../../ui/votingPolls/styles.module.css";
 import PercentageBar from "./PercentageBar";
 import PollImage from "./PollImage";
 import VoteModal from "./VoteModal";
+import { Button } from "react-bootstrap";
+import Link from "next/link";
 
 
 export default async function Page({ params }: { params: {id: string} }) {
@@ -26,24 +28,32 @@ export default async function Page({ params }: { params: {id: string} }) {
     return (
         <div className="flex justify-center align-center min-h-screen">
             <div className="justify-center items-center">
-                <h1 className="text-5xl font-bold text-blue-900 text-center pt-5">{poll.name}</h1>
-                <div className="flex justify-center gap-2 p-14">
+                <h1 className="text-4.5xl font-bold text-blue-900 text-center pt-5">{poll.name}</h1>
+                <div className="flex justify-center gap-2 p-14 pb-9">
                     <div>
                         <PollImage pollImg={poll.img1URL}/>
-                        <p className="text-center my-5 font-bold text-xl">{poll.optionOneName}</p>              
+                        <p className="text-center my-4 font-bold text-xl">{poll.optionOneName}</p>              
                     </div>
-                    <p className="self-end mb-6 text-xl">vs</p>
+                    <p className="self-end mb-4 text-xl">vs</p>
                     <div>
                         <PollImage pollImg={poll.img2URL}/>
-                        <p className="text-center my-6 font-bold text-xl">{poll.optionTwoName}</p>              
+                        <p className="text-center my-4 font-bold text-xl">{poll.optionTwoName}</p>              
                     </div>
                 </div>
                 <div>
-                    <p className="text-center font-bold text-3xl w-3/4 mx-auto">{poll.description}</p>
+                    <p className="text-center font-bold text-2xl w-3/4 mx-auto">{poll.description}</p>
                 </div>
                 <PercentageBar percentages={percentages}/>
                 <div>
-                    <button>View Statistics</button>
+                    <div className="text-center mb-5">
+                        <Button variant="success">
+                            <Link 
+                                href={`/votingPolls/${id}/statistics`}
+                                className="text-white no-underline ">
+                                View Statistics
+                            </Link>
+                        </Button>
+                    </div>
                 </div>
             </div>
         </div>

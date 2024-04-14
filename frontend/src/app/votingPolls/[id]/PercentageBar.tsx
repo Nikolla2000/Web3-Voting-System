@@ -36,14 +36,14 @@ export default function PercentageBar({ percentages }: {percentages: Percentages
             <div className={`${styles.percentBar} ${styles.boxShadow}`}>
                 <div className={styles.leftPercentBar}>
                     <div className={`${styles.leftPercentage} relative`} >
-                        <span className="text-white text-lg font-bold absolute top-1/3 right-3">
+                        <span className="text-white text-lg font-bold absolute top-1/4 right-3">
                             {percentageNum.left}%
                         </span>
                     </div>
                 </div>
                 <div className={styles.rightPercentBar}>
                     <div className={`${styles.rightPercentage} relative`}>
-                        <span className="text-white text-lg font-bold absolute top-1/3 left-3">
+                        <span className="text-white text-lg font-bold absolute top-1/4 left-3">
                             {percentageNum.right}%
                         </span>
                     </div>
