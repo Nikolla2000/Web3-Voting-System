@@ -7,7 +7,7 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import VoteModal from "./VoteModal";
 
-export default function PollImage({ pollImg } : { pollImg: string}){
+export default function PollImage({ pollImg, chosenOption } : { pollImg: string, chosenOption: string}){
     const [isHovered, setIsHovered] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
@@ -35,7 +35,7 @@ export default function PollImage({ pollImg } : { pollImg: string}){
                     <VoteButton isHovered={isHovered}/>
                     <div className={`${isHovered && styles.darkOverlay} cursor-pointer`}></div>
             </div>
-            {showModal && <VoteModal show={showModal} setShow={setShowModal}/>}
+            {showModal && <VoteModal show={showModal} setShow={setShowModal} chosenOption={chosenOption}/>}
         </>
     )
 }

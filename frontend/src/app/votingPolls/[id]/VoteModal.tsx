@@ -1,15 +1,16 @@
 'use client'
 
+import { fetchPollById } from '@/app/lib/data';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 
-export default function VoteModal({show, setShow} : {show: boolean, setShow: any}) {
+export default function VoteModal({show, setShow, chosenOption} : {show: boolean, setShow: any, chosenOption: string}) {
+  const id = params.id
+  const poll = fetchPollById(parseInt(id));
+console.log(chosenOption);
   const handleClose = () => {
-    console.log("Closing modal");
     setShow(false);
   }
-
-  console.log("Modal show state:", show);
 
   return (
     <>

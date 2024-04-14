@@ -8,7 +8,6 @@ import VoteModal from "./VoteModal";
 import { Button } from "react-bootstrap";
 import Link from "next/link";
 
-
 export default async function Page({ params }: { params: {id: string} }) {
     const id = params.id;
     const poll = await fetchPollById(parseInt(id))
@@ -28,17 +27,19 @@ export default async function Page({ params }: { params: {id: string} }) {
     return (
         <div className="flex justify-center align-center min-h-screen">
             <div className="justify-center items-center">
-                <h1 className="text-4.5xl font-bold text-blue-900 text-center pt-5">{poll.name}</h1>
-                <div className="flex justify-center gap-2 p-14 pb-9">
-                    <div>
-                        <PollImage pollImg={poll.img1URL}/>
-                        <p className="text-center my-4 font-bold text-xl">{poll.optionOneName}</p>              
+                <h1 className="text-4xl font-bold text-blue-900 text-center pt-5 mt-3">{poll.name}</h1>
+                <div className={`p-12 pb-2 text-center ${styles.imagesWrapper}`}>
+                    <div className="inline-block mx-4">
+                        <PollImage pollImg={poll.img1URL} chosenOption='first'/>
                     </div>
+                    <div className="inline-block mx-4">
+                        <PollImage pollImg={poll.img2URL} chosenOption='second'/>
+                    </div>
+                </div>
+                <div className={`flex justify-center gap-24 ml-10 mb-3 ${styles.pollNames}`}>
+                    <p className="text-center my-4 font-bold text-xl text-blue-900">{poll.optionOneName}</p>
                     <p className="self-end mb-4 text-xl">vs</p>
-                    <div>
-                        <PollImage pollImg={poll.img2URL}/>
-                        <p className="text-center my-4 font-bold text-xl">{poll.optionTwoName}</p>              
-                    </div>
+                    <p className="text-center my-4 font-bold text-xl text-red-900">{poll.optionTwoName}</p>
                 </div>
                 <div>
                     <p className="text-center font-bold text-2xl w-3/4 mx-auto">{poll.description}</p>

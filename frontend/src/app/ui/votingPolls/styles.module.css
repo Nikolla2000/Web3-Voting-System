@@ -42,8 +42,8 @@
 }
 
 .images {
-    width: 280px;
-    height: 330px;
+    width: 250px;
+    height: 300px;
     cursor: pointer;
     border-radius: 10px;
 }
@@ -125,11 +125,39 @@
 
 .voteBtn {
     top:37%;
-    left:25%;
+    left:22%;
     animation: voteBtnAnimation 1s linear forwards;
 }
 
 
-@media screen and(max-width:800px) {
-    .percentBarWrapper { width: 100% !important;}
+@media screen and (max-width:800px) {
+    .percentBarWrapper { width: 90%;}
+
+    .imagesWrapper {
+        padding:30px 0 0 0;
+    }
+    .images {
+        width:170px;
+        height: 250px;
+    }
+
+    .pollNames { gap: 30px;}
+
+    .voteBtn {
+        top:35%;
+        left:10%;
+    }
+}
+
+@media screen and (max-width: 456px) {
+    :first-of-type .images {
+        margin-bottom: 20px;
+    }
+
+    .images {
+        width: 200px;
+        height: 280px;
+    }
+
+    .voteBtn { left: 15%;}
 }
