@@ -1,5 +1,7 @@
 import { Poll } from "@/app/_types/types";
 import Link from "next/link";
+import { PollLink } from "./PollLink";
+import { ReactNode } from "react";
 
 
 export default function PollsBoard({ pollsData }: { pollsData: Poll[] }) {

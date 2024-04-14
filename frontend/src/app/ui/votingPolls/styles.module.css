@@ -1,0 +1,163 @@
+@keyframes leftPercentageAnimation {
+    0% {
+        width: 0%;
+    }
+
+    100% {
+        width: var(--left-percentage);
+    }
+}
+
+@keyframes rightPercentageAnimation {
+    0% {
+        width: 0%;
+    }
+
+    100% {
+        width: var(--right-percentage);
+    }
+}
+
+@keyframes voteBtnAnimation {
+    0% {
+        color: white;
+    }
+    25% {
+        color: red;
+        transform: scale(1.2);
+    }
+    50% {
+        color: white;
+        transform: scale(1);
+    }
+    75% {
+        color: red;
+        transform: scale(1.2);
+    }
+    100%  {
+        color: white;
+        transform: scale(1);
+    }
+
+}
+
+.images {
+    width: 250px;
+    height: 300px;
+    cursor: pointer;
+    border-radius: 10px;
+}
+
+.percentBarWrapper {
+    margin: 40px auto;
+    width: 60%;
+}
+
+.percentBar {
+    border:1px solid black;
+    height: 55px;
+    width: 100%;
+    background-color: gainsboro;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    border-radius: 30px;
+    
+}
+
+.leftPercentBar {
+    width: 50%;
+    height: 100%;
+    border-right: 1px solid black;
+}
+
+.leftPercentage {
+    background: linear-gradient(135deg, rgb(82, 229, 231) 10%, rgb(19, 12, 183) 100%);
+    width: 60%;
+    animation: leftPercentageAnimation 1.3s linear forwards;
+    height: 100%;
+    float: right;
+    border-radius: 30px 0 0 30px;
+}
+
+.rightPercentBar {
+    width: 50%;
+    height: 100%;
+}
+
+.rightPercentage {
+    background: linear-gradient(107.2deg, rgb(150, 15, 15) 10.6%, rgb(247, 0, 0) 91.1%);
+    width: 40%;
+    height: 100%;
+    float: left;
+    animation: rightPercentageAnimation 1.3s linear forwards;
+    border-radius: 0 30px 30px 0;
+
+}
+
+.middleLine {
+    width: 1px;
+    height: 100%;
+    background-color: black;
+    /* margin: 0 auto; */
+    position: absolute;
+    top: 0;
+    left: 50%;
+}
+
+.boxShadow {
+    -webkit-box-shadow: 5px 10px 30px -7px rgba(0,0,0,0.75);
+    -moz-box-shadow: 5px 10px 30px -7px rgba(0,0,0,0.75);
+    box-shadow: 5px 10px 30px -7px rgba(0,0,0,0.75);
+}
+
+.darkOverlay {
+    width: 100%;
+    height: 100%;
+    background-color: black;
+    opacity: 0.3;
+    z-index: 1;
+    position: absolute;
+    top:0;
+    transition: 0.5s;
+    border-radius: 10px;
+}
+
+.voteBtn {
+    top:37%;
+    left:22%;
+    animation: voteBtnAnimation 1s linear forwards;
+}
+
+
+@media screen and (max-width:800px) {
+    .percentBarWrapper { width: 90%;}
+
+    .imagesWrapper {
+        padding:30px 0 0 0;
+    }
+    .images {
+        width:170px;
+        height: 250px;
+    }
+
+    .pollNames { gap: 30px;}
+
+    .voteBtn {
+        top:35%;
+        left:10%;
+    }
+}
+
+@media screen and (max-width: 456px) {
+    :first-of-type .images {
+        margin-bottom: 20px;
+    }
+
+    .images {
+        width: 200px;
+        height: 280px;
+    }
+
+    .voteBtn { left: 15%;}
+}

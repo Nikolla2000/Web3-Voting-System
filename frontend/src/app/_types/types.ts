@@ -1,3 +1,5 @@
+import { ReactNode } from "react";
+
 export interface Poll {
     id: number,
     name: string,
@@ -9,4 +11,14 @@ export interface Poll {
     optionTwoName: string,
     votes1: number,
     votes2: number,
+  }
+
+  export interface Percentages {
+    left: number,
+    right: number,
+  }
+
+  export interface PollLinkProps {
+    id: number;
+    children: ReactNode;
   }
