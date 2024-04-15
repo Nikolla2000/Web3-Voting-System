@@ -40,6 +40,11 @@
     }
 
 }
+.title {
+    background: -webkit-linear-gradient(#d3d3d3, #0d1eb8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
 
 .images {
     width: 250px;

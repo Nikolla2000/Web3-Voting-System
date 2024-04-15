@@ -6,18 +6,20 @@ import { useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import VoteModal from "./VoteModal";
+import { ChosenOption, Poll } from "@/app/_types/types";
 
-export default function PollImage({ pollImg, chosenOption } : { pollImg: string, chosenOption: string}){
+export default function PollImage({ poll, chosenOption } : {poll: Poll, chosenOption: ChosenOption}){
     const [isHovered, setIsHovered] = useState(false);
     const [showModal, setShowModal] = useState(false);
 
     const { data: session } = useSession();
     const router = useRouter();
 
-
     const openVoteModal = () => {
         if(!session || !session?.user) {
-            router.push('/api/auth/signin')
+            // router.push('/api/auth/signin')
+            setShowModal(true);
+            setIsHovered(false);
         } else {
             setShowModal(true);
             setIsHovered(false);
@@ -31,11 +33,15 @@ export default function PollImage({ pollImg, chosenOption } : { pollImg: string,
                 onMouseEnter={() => setIsHovered(true)}
                 onMouseLeave={() => setIsHovered(false)}
                 onClick={openVoteModal}>
-                    <img src={pollImg} alt="Poll image" className={styles.images}/>
+                    <img src={chosenOption === 'first' ? poll.img1URL : poll.img2URL} alt="Poll image" className={styles.images}/>
                     <VoteButton isHovered={isHovered}/>
                     <div className={`${isHovered && styles.darkOverlay} cursor-pointer`}></div>
             </div>
-            {showModal && <VoteModal show={showModal} setShow={setShowModal} chosenOption={chosenOption}/>}
+            {showModal && <VoteModal 
+                                show={showModal} 
+                                setShow={setShowModal} 
+                                poll={poll}
+                                chosenOption={chosenOption}/>}
         </>
     )
 }

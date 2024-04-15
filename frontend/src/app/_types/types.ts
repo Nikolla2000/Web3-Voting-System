@@ -22,3 +22,8 @@ export interface Poll {
     id: number;
     children: ReactNode;
   }
+
+  export enum ChosenOption {
+    First = 'first',
+    Second = 'second'
+  }
