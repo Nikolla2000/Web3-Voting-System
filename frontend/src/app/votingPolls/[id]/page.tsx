@@ -7,6 +7,7 @@ import PollImage from "./PollImage";
 import VoteModal from "./VoteModal";
 import { Button } from "react-bootstrap";
 import Link from "next/link";
+import { ChosenOption } from "@/app/_types/types";
 
 export default async function Page({ params }: { params: {id: string} }) {
     const id = params.id;
@@ -27,13 +28,13 @@ export default async function Page({ params }: { params: {id: string} }) {
     return (
         <div className="flex justify-center align-center min-h-screen">
             <div className="justify-center items-center">
-                <h1 className="text-4xl font-bold text-blue-900 text-center pt-5 mt-3">{poll.name}</h1>
+                <h1 className={`text-4xl font-bold text-blue-900 text-center pt-5 mt-3 ${styles.title}`}>{poll.name}</h1>
                 <div className={`p-12 pb-2 text-center ${styles.imagesWrapper}`}>
                     <div className="inline-block mx-4">
-                        <PollImage pollImg={poll.img1URL} chosenOption='first'/>
+                        <PollImage poll={poll} chosenOption={ChosenOption.First} />
                     </div>
                     <div className="inline-block mx-4">
-                        <PollImage pollImg={poll.img2URL} chosenOption='second'/>
+                        <PollImage poll={poll} chosenOption={ChosenOption.Second} />
                     </div>
                 </div>
                 <div className={`flex justify-center gap-24 ml-10 mb-3 ${styles.pollNames}`}>

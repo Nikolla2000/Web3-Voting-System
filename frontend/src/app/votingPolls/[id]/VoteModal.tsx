@@ -1,13 +1,12 @@
-'use client'
-
-import { fetchPollById } from '@/app/lib/data';
+import { ChosenOption, Poll } from '@/app/_types/types';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import "./modal.css"
 
-export default function VoteModal({show, setShow, chosenOption} : {show: boolean, setShow: any, chosenOption: string}) {
-  const id = params.id
-  const poll = fetchPollById(parseInt(id));
-console.log(chosenOption);
+export default function VoteModal({show, setShow, poll, chosenOption} 
+  : {show: boolean, setShow: any, poll: Poll, chosenOption: ChosenOption}) {
+  console.log(poll)
+  
   const handleClose = () => {
     setShow(false);
   }
@@ -16,15 +15,23 @@ console.log(chosenOption);
     <>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
-          <Modal.Title>Modal heading</Modal.Title>
+          <Modal.Title>
+              {`Vote for ${
+                chosenOption == ChosenOption.First ? poll.optionOneName : poll.optionTwoName}
+              `}         
+            </Modal.Title>
         </Modal.Header> 
-        <Modal.Body>Woohoo, you are reading this text in a modal!</Modal.Body>
+        <Modal.Body>
+          <img src={chosenOption == ChosenOption.First ? poll.img1URL : poll.img2URL} alt='Option Image'/>
+          <p className='my-4 text-xl text-center'>You are about to vote for <span>{chosenOption == ChosenOption.First ? poll.optionOneName : poll.optionTwoName}</span> in the poll of <span>{poll.optionOneName} vs {poll.optionTwoName}</span>.</p>
+          <p className='text-center text-xl font-bold'>Confirm your vote?</p>
+        </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
+          {/* <Button variant="secondary" onClick={handleClose}>
             Close
-          </Button>
+          </Button> */}
           <Button variant="primary" onClick={handleClose}>
-            Save Changes
+            {`Vote for ${chosenOption == ChosenOption.First ? poll.optionOneName : poll.optionTwoName}`}
           </Button>
         </Modal.Footer>
       </Modal>

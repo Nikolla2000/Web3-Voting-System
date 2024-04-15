@@ -1,0 +1,48 @@
+.modal-content .modal-header {
+    flex-direction: column-reverse;
+}
+
+.modal-content .modal-header .h4 {
+    font-size: 1.8em;
+    font-weight: bold;
+    text-transform: uppercase;
+
+    background: -webkit-linear-gradient(#888888, #3f14ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    }
+
+.modal-content img {
+    border-radius: 8px;
+    max-width: 80%;
+    margin:20px auto;
+
+    -webkit-box-shadow: 5px 10px 30px -7px rgba(0,0,0,0.75);
+    -moz-box-shadow: 5px 10px 30px -7px rgba(0,0,0,0.75);
+    box-shadow: 5px 10px 30px -7px rgba(0,0,0,0.75);
+}
+
+.modal-content p:first-of-type span:first-of-type {
+    font-weight: bold;
+    background: -webkit-linear-gradient(#707070, #2e06e2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.modal-content p:first-of-type span:nth-of-type(2) {
+    font-weight: bold;
+    background: -webkit-linear-gradient(#808080, #333);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.modal-footer { justify-content: center;}
+.modal-footer button {
+    font-weight: bold;
+    background-color: #2e06e2;
+    border-color: #2e06e2;
+}
+
+@media screen and (max-width: 465px) {
+    .modal-content img { max-width: 100%; }
+}
