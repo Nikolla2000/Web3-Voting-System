@@ -2,6 +2,7 @@ import { ChosenOption, Poll } from '@/app/_types/types';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import "./modal.css"
+import { VoteButton } from '@/app/ui/votingPolls/VoteButton';
 
 export default function VoteModal({show, setShow, poll, chosenOption} 
   : {show: boolean, setShow: any, poll: Poll, chosenOption: ChosenOption}) {
@@ -30,9 +31,10 @@ export default function VoteModal({show, setShow, poll, chosenOption}
           {/* <Button variant="secondary" onClick={handleClose}>
             Close
           </Button> */}
-          <Button variant="primary" onClick={handleClose}>
+          {/* <Button variant="primary" onClick={handleClose}>
             {`Vote for ${chosenOption == ChosenOption.First ? poll.optionOneName : poll.optionTwoName}`}
-          </Button>
+          </Button> */}
+          <VoteButton chosenOption={chosenOption} poll={poll}/>
         </Modal.Footer>
       </Modal>
     </>

@@ -37,7 +37,7 @@ export default async function Page({ params }: { params: {id: string} }) {
                         <PollImage poll={poll} chosenOption={ChosenOption.Second} />
                     </div>
                 </div>
-                <div className={`flex justify-center gap-24 ml-10 mb-3 ${styles.pollNames}`}>
+                <div className={`flex justify-center gap-28 ml-8 mb-3 ${styles.pollNames}`}>
                     <p className="text-center my-4 font-bold text-xl text-blue-900">{poll.optionOneName}</p>
                     <p className="self-end mb-4 text-xl">vs</p>
                     <p className="text-center my-4 font-bold text-xl text-red-900">{poll.optionTwoName}</p>

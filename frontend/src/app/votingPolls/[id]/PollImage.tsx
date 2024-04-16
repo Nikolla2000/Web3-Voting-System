@@ -34,7 +34,11 @@ export default function PollImage({ poll, chosenOption } : {poll: Poll, chosenOp
                 onMouseLeave={() => setIsHovered(false)}
                 onClick={openVoteModal}>
                     <img src={chosenOption === 'first' ? poll.img1URL : poll.img2URL} alt="Poll image" className={styles.images}/>
-                    <VoteButton isHovered={isHovered}/>
+                    <div className={`absolute ${!isHovered && 'hidden'} z-10 ${styles.voteBtn}`}>
+                        <button className="z-20 bg-transparent  text-2xl font-bold uppercase py-4 px-10">
+                            Vote
+                        </button>
+                    </div>
                     <div className={`${isHovered && styles.darkOverlay} cursor-pointer`}></div>
             </div>
             {showModal && <VoteModal 
