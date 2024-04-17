@@ -13,12 +13,11 @@ export function VoteButton({ chosenOption, poll } : { chosenOption: ChosenOption
 
     const handleVote = () => {
         if(!session || !session?.user) {
-            vote(chosenOption, poll.id);
-            // router.push('/api/auth/signin')
+            router.push('/api/auth/signin')
         } else {
-            vote(chosenOption, poll.id);
+            vote(chosenOption, poll.id, session?.user.id);
         }
-        window.location.reload();
+        // window.location.reload();
     }
     return (
         <Button variant="primary" onClick={handleVote}>
