@@ -1,10 +1,14 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Poll } from './entities/poll.entity';
 import { PrismaService } from 'src/prisma.service';
+import { UserSevice } from 'src/users/user.service';
 
 @Injectable()
 export class PollsService {
-  constructor (private prisma: PrismaService) {}
+  constructor (
+    private prisma: PrismaService,
+    private userService: UserSevice
+    ) {}
   
   findAll(): Promise<Poll[]> {
     return this.prisma.poll.findMany();
@@ -45,16 +49,7 @@ export class PollsService {
       throw new BadRequestException('Poll was not found');
     }
 
-    const hasUserVoted = await this.prisma.user.findFirst({
-      where: {
-        id: userId,
-        polls: {
-          some: {
-            id: poll.id
-          }
-        }
-      }
-    })
+    const hasUserVoted = await this.userService.hasUserVoted(userId, poll.id);
 
     if (hasUserVoted) {
       throw new BadRequestException('User has already voted for this poll');
