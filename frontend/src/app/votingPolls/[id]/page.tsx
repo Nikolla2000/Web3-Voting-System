@@ -8,6 +8,7 @@ import VoteModal from "./VoteModal";
 import { Button } from "react-bootstrap";
 import Link from "next/link";
 import { ChosenOption } from "@/app/_types/types";
+import HasVoted from "@/app/ui/votingPolls/HasVoted";
 
 export default async function Page({ params }: { params: {id: string} }) {
     const id = params.id;
@@ -42,6 +43,7 @@ export default async function Page({ params }: { params: {id: string} }) {
                     <p className="self-end mb-4 text-xl">vs</p>
                     <p className="text-center my-4 font-bold text-xl text-red-900">{poll.optionTwoName}</p>
                 </div>
+                <HasVoted pollId={poll.id}/>
                 <div>
                     <p className="text-center font-bold text-2xl w-3/4 mx-auto">{poll.description}</p>
                 </div>

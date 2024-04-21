@@ -53,3 +53,9 @@ export async function fetchRegisterUser(data: Inputs) {
       }
 }
   }}
+
+
+export async function fetchHasUserVoted(userId: number, pollId: number): Promise<boolean> {
+  const hasVoted = await api.get('/user/hasVoted', { params: { userId, pollId }});
+  return !!hasVoted;
+}

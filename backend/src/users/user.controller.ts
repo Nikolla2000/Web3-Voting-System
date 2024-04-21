@@ -24,6 +24,14 @@ export class UserController {
     return this.userService.createUser(userData);
   }
 
+  @Get('/hasVoted')
+  async hasUserVoted(
+    @Body('userId', ParseIntPipe) userId: number,
+    @Body('pollId', ParseIntPipe) pollId: number,
+  ) : Promise<boolean> {
+    return await this.userService.hasUserVoted(userId, pollId);
+  }
+
   @Delete(':id')
   async deleteUser(@Param('id', ParseIntPipe)id: number): Promise<User | null> {
     return this.userService.deleteUser(id);
