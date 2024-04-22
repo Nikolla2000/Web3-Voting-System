@@ -56,6 +56,19 @@ export async function fetchRegisterUser(data: Inputs) {
 
 
 export async function fetchHasUserVoted(userId: number, pollId: number): Promise<boolean> {
-  const hasVoted = await api.get('/user/hasVoted', { params: { userId, pollId }});
-  return !!hasVoted;
+  // const hasVoted = await api.get('/user/hasVoted', { params: { userId, pollId }});
+  // return !!hasVoted;
+
+  if (isNaN(userId) || isNaN(pollId)) {
+    console.error('Invalid userId or pollId. Both must be numbers.');
+    return false;
+  }
+  try {
+    const response = await api.get(`/user/hasVoted/${userId.toString()}/${pollId.toString()}`);
+    return response.data;
+
+  } catch (error) {
+    console.error('Couldn\'t check if the user has voted: ', error);
+    return false;
+  }
 }
