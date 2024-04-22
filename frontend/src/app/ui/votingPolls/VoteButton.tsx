@@ -17,7 +17,7 @@ export function VoteButton({ chosenOption, poll } : { chosenOption: ChosenOption
         } else {
             vote(chosenOption, poll.id, session?.user.id);
         }
-        // window.location.reload();
+        window.location.reload();
     }
     return (
         <Button variant="primary" onClick={handleVote}>
