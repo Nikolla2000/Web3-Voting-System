@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Post, Query, UseGuards } from "@nestjs/common";
 import { UserSevice } from "./user.service";
 import { User } from "./user.model";
 import { JwtGuard } from "src/auth/guards/jwt.guard";
@@ -22,6 +22,14 @@ export class UserController {
   @Post('/register')
   async createUser(@Body() userData: User): Promise <User> {
     return this.userService.createUser(userData);
+  }
+
+  @Get('/hasVoted/:userId/:pollId')
+  async hasUserVoted(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Param('pollId', ParseIntPipe) pollId: number,
+  ) : Promise<boolean> {
+    return await this.userService.hasUserVoted(userId, pollId);
   }
 
   @Delete(':id')

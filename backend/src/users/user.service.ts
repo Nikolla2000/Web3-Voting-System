@@ -53,6 +53,22 @@ export class UserSevice {
   }
 
 
+  //Checks if the user has voted for a particular poll
+  public async hasUserVoted(userId: number, pollId: number) : Promise<boolean> {
+    const hasVoted = await this.prisma.user.findFirst({
+      where: {
+        id: userId,
+        polls: {
+          some: {
+            id: pollId
+          }
+        }
+      }
+    })
+    return !!hasVoted;
+  }
+
+
   //Delete user by id
   async deleteUser(id: number): Promise<User | null> {
     return await this.prisma.user.delete({

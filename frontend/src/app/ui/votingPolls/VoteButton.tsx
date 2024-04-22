@@ -4,8 +4,10 @@ import { vote } from "@/app/lib/actions";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import styles from "./styles.module.css"
+import { Button } from "react-bootstrap";
+import { ChosenOption, Poll } from "@/app/_types/types";
 
-export function VoteButton({ isHovered } : {isHovered: boolean}) {
+export function VoteButton({ chosenOption, poll } : { chosenOption: ChosenOption, poll: Poll}) {
     const { data: session } = useSession();
     const router = useRouter();
 
@@ -13,14 +15,13 @@ export function VoteButton({ isHovered } : {isHovered: boolean}) {
         if(!session || !session?.user) {
             router.push('/api/auth/signin')
         } else {
-            vote();
+            vote(chosenOption, poll.id, session?.user.id);
         }
+        window.location.reload();
     }
     return (
-        <div className={`absolute ${!isHovered && 'hidden'} z-10 ${styles.voteBtn}`}>
-            <button className="z-20 bg-transparent  text-2xl font-bold uppercase py-4 px-10">
-                Vote
-            </button>
-        </div>
+        <Button variant="primary" onClick={handleVote}>
+            {`Vote for ${chosenOption == ChosenOption.First ? poll.optionOneName : poll.optionTwoName}`}
+        </Button>
     )
 }

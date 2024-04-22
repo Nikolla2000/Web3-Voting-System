@@ -22,7 +22,7 @@ export default function RegisterForm() {
         email: z.string().email(),
         name: z.string().min(3),
         country: z.string(),
-        password: z.string().min(6).max(6),
+        password: z.string().min(6).max(30),
         confirmPass: z.string()
     })
     .refine((data) => data.confirmPass === data.password, {
