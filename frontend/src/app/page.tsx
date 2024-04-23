@@ -2,6 +2,7 @@ import 'animate.css';
 import Link from 'next/link';
 import SignInButton from './ui/login/SignInButton';
 import RegisterButton from './ui/login/RegisterButton';
+import MetamaskButton from './ui/metamask/MetamaskButton';
 
 
 export default function Home() {
@@ -11,7 +12,8 @@ export default function Home() {
         <img src="/heading-img2.png" alt="heading image" className='w-72 mb-10' />
       </div>
       <div>
-        <h1 className="text-blue-700 text-5xl font-bold  mb-6">Welcome to Web3!</h1>
+        <h1 className="text-blue-700 text-5xl font-bold mb-6 text-center">Welcome to Web3</h1>
+        <MetamaskButton/>
         <h3 className='text-purple-700 text-center text-xl'>The Future of the Web</h3>
       </div>
       <div>
