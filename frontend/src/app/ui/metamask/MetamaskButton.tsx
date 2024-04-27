@@ -24,7 +24,7 @@ export default function MetamaskButton() {
     }
 
     return (
-        session?.user.id && (
+        !session?.user.id && (
             <div className={styles.metamaskButtonWrapper}>
                 {!connectedAccount && <button onClick={() => connect()} className="flex flex-row  gap-2 items-center bg-white border-1 border-gray-400 rounded-xl py-1 px-2">
                     <img src="/metamask.png" alt="metamask-logo" className="w-5"/>

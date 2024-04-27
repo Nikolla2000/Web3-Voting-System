@@ -134,6 +134,13 @@
     animation: voteBtnAnimation 1s linear forwards;
 }
 
+.viewPollsButton {
+    background: linear-gradient(-225deg, #AC32E4 0%, #7918F2 48%, #4801FF 100%);
+    /* background: linear-gradient(90.4deg, rgb(248, 52, 246) 0.6%, rgb(152, 38, 252) 90%); */
+
+    /* background: linear-gradient(109.6deg, rgba(119, 44, 232, 0.68) 11.5%, rgb(119, 44, 232) 91.2%); */
+}
+
 
 @media screen and (max-width:800px) {
     .percentBarWrapper { width: 90%;}
