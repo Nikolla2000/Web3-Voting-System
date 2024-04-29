@@ -4,11 +4,13 @@ import SignInButton from './ui/login/SignInButton';
 import RegisterButton from './ui/login/RegisterButton';
 import MetamaskButton from './ui/metamask/MetamaskButton';
 import ViewPollsButton from './ui/votingPolls/ViewPollsButton';
+import MetamaskAccount from './ui/metamask/MetamaskAccount';
 
 
 export default function Home() {
   return (
     <main className="flex flex-col items-center justify-center lg:h-screen p-15 relative animate__animated animate__fadeIn">
+      <MetamaskAccount/>
       <div>
         <img src="/heading-img2.png" alt="heading image" className='w-72 mb-10' />
       </div>
@@ -17,7 +19,7 @@ export default function Home() {
         {/* <MetamaskButton/> */}
         <h3 className='text-purple-700 text-center text-xl'>The Future of the Web</h3>
       </div>
-      <div className='ml-5  mt-4 flex flex-col sm:flex-row items-center gap-2'>
+      <div className='ml-5  mt-4 flex flex-col sm:flex-row items-center gap-3'>
         <div className='inline xs:block'>
         <ViewPollsButton/>
 

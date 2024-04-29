@@ -5,8 +5,10 @@ interface MetamaskContextType {
   setConnectedAccount: (value: string | null) => void;
 }
 
-const MetamaskContext = createContext<MetamaskContextType | null>(null);
-
+const MetamaskContext = createContext<MetamaskContextType>({ 
+  connectedAccount: null, 
+  setConnectedAccount: () => {} 
+});
 
 export const useMetamask = () => useContext(MetamaskContext);
 

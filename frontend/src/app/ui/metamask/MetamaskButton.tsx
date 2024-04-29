@@ -6,13 +6,15 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import styles from './styles.module.css';
 import Web3 from "web3";
+import { useMetamask } from "../MetamaskProvider";
 
 export interface EthWindow {
     ethereum?: any; 
 }
 
 export default function MetamaskButton() {
-    const [connectedAccount, setConnectedAccount] = useState<string | null>(null);
+    // const [connectedAccount, setConnectedAccount] = useState<string | null>(null);
+    const { connectedAccount, setConnectedAccount } = useMetamask();
     const { data: session } = useSession();
 
     const connect = async () => {
