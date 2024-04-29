@@ -15,6 +15,12 @@ const config: Config = {
       },
     },
   },
+  variants: {
+    extend: {
+      display: ['responsive'],
+    },
+  },
   plugins: [],
 };
+
 export default config;
