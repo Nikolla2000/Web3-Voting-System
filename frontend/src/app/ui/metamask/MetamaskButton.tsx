@@ -13,7 +13,6 @@ export interface EthWindow {
 }
 
 export default function MetamaskButton() {
-    // const [connectedAccount, setConnectedAccount] = useState<string | null>(null);
     const { connectedAccount, setConnectedAccount } = useMetamask();
     const { data: session } = useSession();
 
