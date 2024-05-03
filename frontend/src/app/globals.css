@@ -25,33 +25,13 @@ body {
     )
     rgb(var(--background-start-rgb));
 
-    /* background: rgb(159,159,159);
-    background: linear-gradient(0deg, rgba(159,159,159,1) 0%, rgba(181,181,181,1) 9%, rgba(207,207,207,1) 22%, rgba(255,255,255,1) 100%); */
-
-    background: rgb(135,135,135);
-    background: linear-gradient(0deg, rgb(88, 88, 88) 1%, rgb(138, 138, 138) 9%, rgba(207,207,207,1) 22%, rgba(255,255,255,1) 100%);
+    /* background: rgb(135,135,135);
+    background: linear-gradient(0deg, rgb(88, 88, 88) 1%, rgb(138, 138, 138) 9%, rgba(207,207,207,1) 22%, rgba(255,255,255,1) 100%); */
     background: url('/background2.jpg');
     background-repeat: no-repeat;
     background-size:100% 100%;
     background-position: center;
 } 
-
-/* .network-bg-image {
-  position: absolute;
-  display: inline;
-  width: 35%;
-  height: 200px;
-  top:68%;
-  z-index: 1 !important;
-  opacity: 0.7;
-  pointer-events: none;
-}
-.network-bg-image2 {
-  left: 31%;
-}
-.network-bg-image3 {
-  left: 65%;
-} */
 
 
 @layer utilities {

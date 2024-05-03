@@ -1,0 +1,28 @@
+body {
+  background: none;
+  /* background: radial-gradient(590px at 8.2% 13.8%, rgb(18, 35, 60) 0%, rgb(187, 187, 187) 90%); */
+}
+
+main {
+  padding: 100px;
+}
+
+h1 {
+  text-align: left;
+  /* text-shadow: 1px 1px 2px black; */
+}
+
+.purple-gradient-background {
+  background: linear-gradient(-225deg, #AC32E4 0%, #7918F2 48%, #4801FF 100%);
+}
+
+@media screen and (max-width: 640px) {
+  h1 {
+    text-align: center;
+  }
+
+  main {
+    padding-left: 0;
+    padding-right: 0;
+  }
+} 
