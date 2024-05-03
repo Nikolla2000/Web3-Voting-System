@@ -1,0 +1,23 @@
+body {
+  background: none;
+  /* background: radial-gradient(590px at 8.2% 13.8%, rgb(18, 35, 60) 0%, rgb(187, 187, 187) 90%); */
+}
+
+main {
+  padding: 80px;
+}
+
+h1 {
+  text-align: left;
+}
+
+@media screen and (max-width: 640px) {
+  h1 {
+    text-align: center;
+  }
+
+  main {
+    padding-left: 0;
+    padding-right: 0;
+  }
+} 
