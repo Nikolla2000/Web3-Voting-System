@@ -4,7 +4,7 @@ import styles from "./styles.module.css";
 
 export default function PollsBoard({ pollsData }: { pollsData: Poll[] }) {
   return (
-    <div className="mt-16 grid gap-10 sm:grid-cols-1 md:grid-cols-2 md:gap-20 lg:grid-cols-3 2xl:grid-cols-">
+    <div className="mt-16 grid gap-10 sm:grid-cols-1 md:grid-cols-2 md:gap-20 lg:grid-cols-3 2xl:grid-cols-4">
       {pollsData?.map((poll) => (
         <Card 
           pollData={poll}
@@ -57,7 +57,7 @@ export function Card({ pollData } : { pollData: Poll }) {
   return (
     <Link 
       href={`/votingPolls/${pollData.id}`}
-      className={`${styles.shadow} no-underline rounded-md w-80 mb-10 sm:w-72 mx-auto`}>
+      className={`${styles.shadow} no-underline rounded-md w-80 mb-2 sm:w-72 mx-auto`}>
       <div className={`${styles.hovers} h-full flex flex-col justify-between`}>
         <div>
           <img src={pollData.mainImgURL} alt="poll-image"  className={`rounded-tl-md rounded-tr-md h-56 w-full`}/>
