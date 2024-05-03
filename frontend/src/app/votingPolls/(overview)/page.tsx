@@ -7,7 +7,7 @@ export default async function Page() {
 
   return (
     <main className="">
-      <h1 className="text-blue-700 text-4xl font-bold">POLLS</h1>
+      <h1 className="text-blue-700 text-5xl font-bold">POLLS</h1>
       <PollsBoard pollsData={data}/>
     </main>
   )

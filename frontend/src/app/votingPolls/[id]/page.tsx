@@ -1,14 +1,13 @@
 import { fetchPollById } from "@/app/lib/data";
-import { VoteButton } from "@/app/ui/votingPolls/VoteButton";
 import { notFound } from "next/navigation";
 import styles from "../../ui/votingPolls/styles.module.css";
 import PercentageBar from "./PercentageBar";
 import PollImage from "./PollImage";
-import VoteModal from "./VoteModal";
 import { Button } from "react-bootstrap";
 import Link from "next/link";
 import { ChosenOption } from "@/app/_types/types";
 import HasVoted from "@/app/ui/votingPolls/HasVoted";
+import "./styles.css"
 
 export default async function Page({ params }: { params: {id: string} }) {
     const id = params.id;
