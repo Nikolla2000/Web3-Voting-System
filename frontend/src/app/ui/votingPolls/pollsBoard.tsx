@@ -1,11 +1,13 @@
 import { Poll } from "@/app/_types/types";
 import Link from "next/link";
 import styles from "./styles.module.css";
+import { Suspense } from "react";
+import { CardsSkeleton } from "../skeletons";
 
 export default function PollsBoard({ pollsData }: { pollsData: Poll[] }) {
   return (
     <div className="mt-16 grid gap-10 sm:grid-cols-1 md:grid-cols-2 md:gap-20 lg:grid-cols-3 2xl:grid-cols-4">
-      {pollsData?.map((poll) => (
+      {/* {pollsData?.map((poll) => (
         <Card 
           pollData={poll}
           key={poll.id}/>
@@ -19,7 +21,14 @@ export default function PollsBoard({ pollsData }: { pollsData: Poll[] }) {
         <Card 
           pollData={poll}
           key={poll.id}/>
+      ))} */}
+      <Suspense fallback={<CardsSkeleton/>}>
+      {pollsData?.map((poll) => (
+        <Card 
+          pollData={poll}
+          key={poll.id}/>
       ))}
+      </Suspense>
     </div>
   )
 }
@@ -37,7 +46,7 @@ export function Card({ pollData } : { pollData: Poll }) {
           <h3>{pollData.name}</h3>
           <p>{pollData.description}</p>
         </div>
-        <div className={`${styles.noMargin} bg-blue-500 text-white flex flex-row float-bottom rounded-bl-md rounded-br-md justify-evenly text-center py-2`}>
+        <div className={`${styles.noMargin} bg-blue-500 ${pollData.id % 2 !== 0 ? 'purple-gradient-background': ""} text-white flex flex-row float-bottom rounded-bl-md rounded-br-md justify-evenly text-center py-2`}>
           <div>
             <p>{pollData.votes1}</p>
             <p>{pollData.optionOneName}</p>
