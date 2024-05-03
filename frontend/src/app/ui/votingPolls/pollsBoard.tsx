@@ -24,35 +24,6 @@ export default function PollsBoard({ pollsData }: { pollsData: Poll[] }) {
   )
 }
 
-// export function Card({ pollData }: { pollData: Poll }) {
-//   return (
-//     <div className="cursor-pointer">
-//       <Link href={`/votingPolls/${pollData.id}`} className="no-underline">
-//         <h3 className="text-purple-700 text-center font-bold my-5 no-underline">{pollData.name}</h3>
-//         <div className="w-56 h-56 mx-auto">
-//           <img src={pollData.mainImgURL} alt="poll image" className="w-full h-full rounded-xl"/>
-//         </div>
-//         <div className="bg-gray-500 rounded-bl-lg rounded-br-lg text-white font-bold py-1">
-//           <div className="text-center flex justify-center gap-5 my-4">
-//             <div>
-//               <span className="mr-1">{pollData.votes1}</span>
-//               <span>{pollData.optionOneName}</span>
-//             </div>
-//             <span>vs</span>
-//             <div>
-//               <span>{pollData.optionTwoName}</span>
-//               <span className="ml-1">{pollData.votes2}</span>
-//             </div>
-//           </div>
-//           <div>
-//             <p className="text-center">Total Votes: {pollData.votes1 + pollData.votes2}</p>
-//           </div>
-//         </div>
-//       </Link>
-//     </div>
-//   )
-// }
-
 export function Card({ pollData } : { pollData: Poll }) {
   return (
     <Link 
