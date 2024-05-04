@@ -1,7 +1,5 @@
+import PollsSkeleton from "@/app/ui/skeletons";
+
 export default function Loads() {
-  return (
-    <main>
-      <h1>...loading</h1>
-    </main>
-  )
+  return <PollsSkeleton/>
 }

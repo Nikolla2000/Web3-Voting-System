@@ -3,6 +3,7 @@ import PollsBoard from "@/app/ui/votingPolls/pollsBoard";
 import "./polls.css";
 
 export default async function Page() {
+  await new Promise(resolve => setTimeout(resolve, 5000)); // Delay for 5 seconds
   const data = await fetchPollsData();
 
   return (

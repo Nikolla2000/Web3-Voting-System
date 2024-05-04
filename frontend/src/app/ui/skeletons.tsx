@@ -27,3 +27,12 @@ export function CardsSkeleton() {
     </>
   );
 }
+
+export default function PollsSkeleton() {
+  return (
+    <main className="">
+      <h1 className="text-blue-700 text-5xl font-bold">POLLS</h1>
+      <CardsSkeleton/>
+   </main>
+  )
+}
