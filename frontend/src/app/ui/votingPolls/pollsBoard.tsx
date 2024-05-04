@@ -7,21 +7,6 @@ import { CardsSkeleton } from "../skeletons";
 export default function PollsBoard({ pollsData }: { pollsData: Poll[] }) {
   return (
     <div className="mt-16 grid gap-10 sm:grid-cols-1 md:grid-cols-2 md:gap-20 lg:grid-cols-3 2xl:grid-cols-4">
-      {/* {pollsData?.map((poll) => (
-        <Card 
-          pollData={poll}
-          key={poll.id}/>
-      ))}
-      {pollsData?.map((poll) => (
-        <Card 
-          pollData={poll}
-          key={poll.id}/>
-      ))}
-      {pollsData?.map((poll) => (
-        <Card 
-          pollData={poll}
-          key={poll.id}/>
-      ))} */}
       <Suspense fallback={<CardsSkeleton/>}>
       {pollsData?.map((poll) => (
         <Card 
