@@ -9,7 +9,7 @@ import MetamaskAccount from './ui/metamask/MetamaskAccount';
 
 export default function Home() {
   return (
-    <main className="flex flex-col items-center justify-center lg:h-screen p-15 relative animate__animated animate__fadeIn">
+    <main className="flex flex-col items-center justify-center h-screen p-15 relative animate__animated animate__fadeIn">
       <MetamaskAccount/>
       <div>
       <video className='w-96' muted autoPlay loop>
