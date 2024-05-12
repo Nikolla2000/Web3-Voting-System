@@ -33,12 +33,15 @@ body {
     background-position: center;
 } 
 
-main {
-  margin-bottom: 30px;
-}
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+@media screen and (max-width: 1300px) {
+  main {
+  margin-bottom: 30px;
+}
 }
