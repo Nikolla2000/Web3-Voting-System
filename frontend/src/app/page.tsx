@@ -9,10 +9,13 @@ import MetamaskAccount from './ui/metamask/MetamaskAccount';
 
 export default function Home() {
   return (
-    <main className="flex flex-col items-center justify-center lg:h-screen p-15 relative animate__animated animate__fadeIn">
+    <main className="flex flex-col items-center justify-center h-screen p-15 relative animate__animated animate__fadeIn">
       <MetamaskAccount/>
       <div>
-        <img src="/heading-img2.png" alt="heading image" className='w-72 mb-10' />
+      <video className='w-96' muted autoPlay loop>
+      <source src="/web3-logo-video.webm" type="video/webm" />
+      Sorry, your browser doesn't support videos.
+    </video>
       </div>
       <div>
         <h1 className="text-blue-700 text-5xl font-bold mb-6 text-center">Welcome to Web3</h1>
