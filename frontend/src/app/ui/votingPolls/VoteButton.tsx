@@ -20,12 +20,12 @@ export function VoteButton({ chosenOption, poll } : { chosenOption: ChosenOption
     const handleVote = () => {
         if(!session || !session?.user) {
             router.push('/api/auth/signin')
-        } else if(!connectedAccount) {
-            toast.error("You need to connect to Metamask to vote.")
-            setShowMetamaskBtn(true);
+        // } else if(!connectedAccount) {
+        //     toast.error("You need to connect to Metamask to vote.")
+        //     setShowMetamaskBtn(true);
         }else {
             vote(chosenOption, poll.id, session?.user.id);
-            window.location.reload();
+            // window.location.reload();
         }
     }
     return (
