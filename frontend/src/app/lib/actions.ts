@@ -4,7 +4,7 @@ import toast from "react-hot-toast";
 import { EthWindow } from "../ui/metamask/MetamaskButton";
 import Web3 from "web3";
 
-async function initWeb3() {
+export async function initWeb3() {
     const web3 = new Web3((window as any).ethereum);
     const contractAbi:any = process.env.NEXT_PUBLIC_CONTRACT_ABI;
     const contractAddress = process.env.NEXT_PUBLIC_CONTRACT_ADDRESS;
@@ -25,14 +25,11 @@ export async function vote(chosenOption: ChosenOption, id: number, userId: numbe
     const { web3, contract, account } = await initWeb3();
 
     const option = chosenOption == ChosenOption.First ? 1 : 2;
+    console.log(option)
 
     const gasPrice = await web3.eth.getGasPrice();
-
     const gasEstimate = await contract.methods.vote(id, option).estimateGas({ from: account })
-
-    const gasCost = gasEstimate * gasPrice;
-
-    const amountToSend = web3.utils.toWei('0.1', 'ether');
+    const gasCost = gasEstimate * BigInt(gasPrice);
 
     const balance = await web3.eth.getBalance(account);
 
@@ -44,6 +41,17 @@ export async function vote(chosenOption: ChosenOption, id: number, userId: numbe
         from: account, 
         gas: gasEstimate.toString(), 
         gasPrice: gasPrice.toString() 
+    });
+
+     // Listen VoteSuccess event
+     contract.events.VoteSuccess({
+        filter: { voter: account, pollId: id },
+        fromBlock: receipt.blockNumber
+    })
+    .on('data', event => {
+        console.log(event);
+        const { pollName, option, message } = event.returnValues;
+        toast.success(`Poll: ${pollName}, Option: ${option} - ${message}`);
     });
 
     console.log('Transaction Hash:', receipt.transactionHash);
@@ -69,3 +77,17 @@ export async function connectMetamask(setAccount: (account: string | null) => vo
         toast.error('Please download MetaMask to connect to Ethereum');
     }
 }
+
+
+//FOR LATER
+// export async function createPoll(name, option1Name, option2Name) {
+//     if (window.ethereum) {
+//       const web3 = new Web3(window.ethereum);
+//       const accounts = await web3.eth.getAccounts();
+//       const account = accounts[0];
+  
+//       await votingContract.methods.createPoll(name, option1Name, option2Name).send({ from: account });
+//     } else {
+//       toast.error("Please install MetaMask to create a poll on the blockchain.");
+//     }
+//   }
