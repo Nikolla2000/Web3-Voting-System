@@ -25,7 +25,6 @@ export async function vote(chosenOption: ChosenOption, id: number, userId: numbe
     const { web3, contract, account } = await initWeb3();
 
     const option = chosenOption == ChosenOption.First ? 1 : 2;
-    console.log(option)
 
     const gasPrice = await web3.eth.getGasPrice();
     const gasEstimate = await contract.methods.vote(id, option).estimateGas({ from: account })
@@ -56,6 +55,8 @@ export async function vote(chosenOption: ChosenOption, id: number, userId: numbe
 
     console.log('Transaction Hash:', receipt.transactionHash);
     toast.success(`Vote successful! Transaction Hash: ${receipt.transactionHash}`);
+
+    return receipt.transactionHash;
     
 }
 

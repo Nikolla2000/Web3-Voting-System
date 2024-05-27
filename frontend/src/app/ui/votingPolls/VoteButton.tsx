@@ -17,15 +17,17 @@ export function VoteButton({ chosenOption, poll } : { chosenOption: ChosenOption
     const [showMetamaskBtn, setShowMetamaskBtn] = useState<boolean>(false)
     const router = useRouter();
 
-    const handleVote = () => {
+    const handleVote = async () => {
         if(!session || !session?.user) {
             router.push('/api/auth/signin')
-        // } else if(!connectedAccount) {
-        //     toast.error("You need to connect to Metamask to vote.")
-        //     setShowMetamaskBtn(true);
+        } else if(!connectedAccount) {
+            toast.error("You need to connect to Metamask to vote.")
+            setShowMetamaskBtn(true);
         }else {
-            vote(chosenOption, poll.id, session?.user.id);
-            // window.location.reload();
+            // vote(chosenOption, poll.id, session?.user.id);
+            const transactionHash = await vote(chosenOption, poll.id, session?.user.id);
+            console.log('ima e ' + transactionHash)
+            router.push(`/transaction?hash=${transactionHash}`);
         }
     }
     return (
