@@ -15,6 +15,7 @@ export function VoteButton({ chosenOption, poll } : { chosenOption: ChosenOption
     const { data: session } = useSession();
     const { connectedAccount, setConnectedAccount } = useMetamask();
     const [showMetamaskBtn, setShowMetamaskBtn] = useState<boolean>(false)
+    const chosenOptName = chosenOption == ChosenOption.First ? poll.optionOneName : poll.optionTwoName;
     const router = useRouter();
 
     const handleVote = async () => {
@@ -24,10 +25,8 @@ export function VoteButton({ chosenOption, poll } : { chosenOption: ChosenOption
             toast.error("You need to connect to Metamask to vote.")
             setShowMetamaskBtn(true);
         }else {
-            // vote(chosenOption, poll.id, session?.user.id);
             const transactionHash = await vote(chosenOption, poll.id, session?.user.id);
-            console.log('ima e ' + transactionHash)
-            router.push(`/transaction?hash=${transactionHash}`);
+            router.push(`/transaction?hash=${transactionHash}?pollName=${poll.name}?chosenOpt=${chosenOptName}`);
         }
     }
     return (
