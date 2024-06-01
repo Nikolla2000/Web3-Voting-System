@@ -7,23 +7,31 @@ export default function CongratMessage() {
     const searchParams = useSearchParams();
     const pollName = searchParams.get('pollName');
     const chosenOptName = searchParams.get('chosenOpt');
+    const img = searchParams.get('img');
     const [details, setDetails] = useState({
         pollname: '',
-        chosenOpt: ''
+        chosenOpt: '',
+        image: ''
     })
 
+    console.log(pollName, chosenOptName, img);
+
     useEffect(() => {
-        if(pollName && chosenOptName) {
+        if(pollName && chosenOptName && img) {
             setDetails({
                 pollname: pollName,
-                chosenOpt: chosenOptName
+                chosenOpt: chosenOptName,
+                image: img
             });
         }
     }, [pollName, chosenOptName])
 
     return (
-        <div>
-            <h1>Congratulations, you voted in the {details.pollname} poll for the {details.chosenOpt} option!</h1>
-        </div>
+        <>
+            <h1>Congratulations, you voted for "{details.chosenOpt}" in the "{details.pollname}" poll</h1>
+            <div>
+                <img src={details.image} alt="poll image" />
+            </div>
+        </>
     )
 }

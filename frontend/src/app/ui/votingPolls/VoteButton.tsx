@@ -16,6 +16,7 @@ export function VoteButton({ chosenOption, poll } : { chosenOption: ChosenOption
     const { connectedAccount, setConnectedAccount } = useMetamask();
     const [showMetamaskBtn, setShowMetamaskBtn] = useState<boolean>(false)
     const chosenOptName = chosenOption == ChosenOption.First ? poll.optionOneName : poll.optionTwoName;
+    const image = chosenOption == ChosenOption.First ? poll.img1URL : poll.img2URL;
     const router = useRouter();
 
     const handleVote = async () => {
@@ -26,7 +27,7 @@ export function VoteButton({ chosenOption, poll } : { chosenOption: ChosenOption
             setShowMetamaskBtn(true);
         }else {
             const transactionHash = await vote(chosenOption, poll.id, session?.user.id);
-            router.push(`/transaction?hash=${transactionHash}?pollName=${poll.name}?chosenOpt=${chosenOptName}`);
+            router.push(`/transaction?hash=${transactionHash}&pollName=${poll.name}&chosenOpt=${chosenOptName}&img=${image}`);
         }
     }
     return (
