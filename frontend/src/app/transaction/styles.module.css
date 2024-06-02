@@ -1,0 +1,29 @@
+.title {
+  background: -webkit-linear-gradient(#6182e6, #0d1eb8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+
+.message {
+  background: -webkit-linear-gradient(#8f3bd3, #6c0fab);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.message2 {
+  background: -webkit-linear-gradient(#8f3bd3, #4c097a);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.tesseract{
+}
+
+/* .tesseract::after {
+  position: absolute;
+  content: '';
+  width: 100px;
+  height: 100px;
+  background-color: red;
+} */

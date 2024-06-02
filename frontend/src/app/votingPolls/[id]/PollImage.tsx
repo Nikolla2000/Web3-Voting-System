@@ -19,10 +19,10 @@ export default function PollImage({ poll, chosenOption } : {poll: Poll, chosenOp
 
     useEffect(() => {
         const checkHasVoted = async () => {
-          if(session?.user.id) {
-            const result = await fetchHasUserVoted(session.user.id, poll.id);
-            setHasVoted(result);
-          }
+        //   if(session?.user.id) {
+        //     const result = await fetchHasUserVoted(session.user.id, poll.id);
+        //     setHasVoted(result);
+        //   }
         }
     
         checkHasVoted();;
