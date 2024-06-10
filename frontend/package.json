@@ -24,6 +24,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.51.1",
     "react-hot-toast": "^2.4.1",
+    "react-type-animation": "^3.2.0",
     "web3": "^4.8.0",
     "zod": "^3.22.4"
   },
