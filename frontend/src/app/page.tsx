@@ -5,6 +5,7 @@ import RegisterButton from './ui/login/RegisterButton';
 import MetamaskButton from './ui/metamask/MetamaskButton';
 import ViewPollsButton from './ui/votingPolls/ViewPollsButton';
 import MetamaskAccount from './ui/metamask/MetamaskAccount';
+import TypewriterEffect from './ui/typeWriterEffects/MainPageTpEffect';
 
 
 export default function Home() {
@@ -19,8 +20,9 @@ export default function Home() {
       </div>
       <div>
         <h1 className="text-blue-700 text-5xl font-bold mb-6 text-center">Welcome to Web3</h1>
-        {/* <MetamaskButton/> */}
-        <h3 className='text-purple-700 text-center text-xl'>The Future of the Web</h3>
+        <h3 className='text-purple-700 text-center text-xl h-6'>
+          <TypewriterEffect/>
+        </h3>
       </div>
       <div className='ml-5  mt-4 flex flex-col sm:flex-row items-center gap-3'>
         <div className='inline xs:block'>
