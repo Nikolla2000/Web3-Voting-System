@@ -1,13 +1,17 @@
 import { fetchPollsData } from "@/app/lib/data";
 import PollsBoard from "@/app/ui/votingPolls/pollsBoard";
 import "./polls.css";
+import { TypewriterEffect } from "@/app/ui/typeWriterEffects/MainTypewriterEffect";
+import { pollsPageStrings } from "@/app/ui/typeWriterEffects/typewriterStrings";
 
 export default async function Page() {
   const data = await fetchPollsData();
 
   return (
     <main className="">
-      <h1 className="text-blue-700 text-5xl font-bold">POLLS</h1>
+      <h1 className="text-blue-700 text-5xl font-bold">
+        <TypewriterEffect strings={pollsPageStrings}/>
+      </h1>
       <PollsBoard pollsData={data}/>
     </main>
   )

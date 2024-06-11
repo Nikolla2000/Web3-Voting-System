@@ -27,3 +27,7 @@ export interface Poll {
     First = 'first',
     Second = 'second'
   }
+
+  export interface TypewriterEffectProps {
+    strings: (string | number)[];
+  }

@@ -4,9 +4,10 @@ import RegisterButton from './ui/login/RegisterButton';
 import MetamaskButton from './ui/metamask/MetamaskButton';
 import ViewPollsButton from './ui/votingPolls/ViewPollsButton';
 import MetamaskAccount from './ui/metamask/MetamaskAccount';
-import TypewriterEffect from './ui/typeWriterEffects/MainPageTpEffect';
+import { TypewriterEffect } from './ui/typeWriterEffects/MainTypewriterEffect';
 import { shapesData } from '../../utils/shapesData';
 import "./ui/shapes.css";
+import { mainPageStrings } from './ui/typeWriterEffects/typewriterStrings';
 
 
 export default function Home() {
@@ -24,7 +25,7 @@ export default function Home() {
           Welcome to Web3
         </h1>
         <h3 className='text-purple-700 text-center text-2xl h-6'>
-          <TypewriterEffect/>
+          <TypewriterEffect strings={mainPageStrings}/>
         </h3>
       </div>
       <div className='ml-5  mt-4 flex flex-col sm:flex-row items-center gap-3'>
