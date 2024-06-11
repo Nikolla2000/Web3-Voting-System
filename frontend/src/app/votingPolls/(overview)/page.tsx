@@ -9,7 +9,7 @@ export default async function Page() {
 
   return (
     <main className="">
-      <h1 className="text-blue-700 text-5xl font-bold">
+      <h1 className="text-blue-700 text-5xl font-bold h-16">
         <TypewriterEffect strings={pollsPageStrings}/>
       </h1>
       <PollsBoard pollsData={data}/>
