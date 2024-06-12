@@ -5,6 +5,18 @@
     z-index: 5;
     height: 500px;
 }
+
+/* .chatbot-wrapper .rsc-header {
+    background: linear-gradient(-225deg, #AC32E4 0%, #7918F2 48%, #4801FF 100%);    
+}
+.chatbot-wrapper .rsc-ts-bubble {
+    background: linear-gradient(-225deg, #AC32E4 0%, #7918F2 48%, #4801FF 100%);    
+}
+.chatbot-wrapper .rsc-ts-user .rsc-ts-bubble{
+    background: rgb(29, 78, 216);
+    color:white;
+} */
+
 .close-icon {
     display: inline;
     z-index: 1000;
