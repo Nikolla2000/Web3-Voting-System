@@ -14,13 +14,13 @@ const funFacts = [
   const instructions = [
     {
       id: '1',
-      message: "Hi, I'm your AI Assistant, do you need some help?",
-      trigger: 'ask-help',
+      message: "Hi, I'm your AI Assistant, what is your name?",
+      trigger: 'name',
     },
     {
       id: 'ask-help',
       options: [
-        { value: 'Yes', label: 'Yes', trigger: 'ask-name' },
+        { value: 'Yes', label: 'Yes', trigger: 'yes-follow-up' },
         { value: 'No', label: 'No, thanks', trigger: 'help-no' },
       ],
     },
@@ -32,7 +32,12 @@ const funFacts = [
     {
       id: 'name',
       user: true,
-      trigger: 'yes-response'
+      trigger: 'name-follow-up'
+    },
+    {
+        id: 'name-follow-up',
+        message: 'Nice to meet you {previousValue}! Do you need some help?',
+        trigger: 'ask-help'
     },
     {
       id: 'yes-response',
@@ -51,7 +56,7 @@ const funFacts = [
         { value: 'How does it work', label: 'How does it put votes on the blockchain?', trigger: 'how-work' },
         { value: 'Is vote secure', label: 'Is my vote private and secure?', trigger: 'is-vote-secure' },
         { value: 'Contact', label: 'How can I contact you?', trigger: 'contact' },
-        { value: 'Fact', label: 'Share a fun coding fact', trigger: 'fact' },
+        { value: 'Fact', label: 'Share a fun blockchain fact', trigger: 'fact' },
       ],
     },
     {
