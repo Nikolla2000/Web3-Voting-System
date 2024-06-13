@@ -1,6 +1,8 @@
 const funFacts = [
     "The first blockchain was conceptualized by an anonymous person or group known as Satoshi Nakamoto in 2008 and implemented the following year as a core component of the digital currency Bitcoin.",
     "Blockchain was initially developed to timestamp digital documents to prevent tampering and backdating.",
+    "Web3 refers to a decentralized web where users have more control over their data and identity.",
+    "Web3 is built on blockchain technology, enabling peer-to-peer transactions without intermediaries.",
     "Blockchain can be used for more than just cryptocurrencies; it has applications in supply chain management, healthcare, voting systems, and more.",
     "The first real-world transaction using Bitcoin was in May 2010, when a programmer paid 10,000 bitcoins for two pizzas.",
     "The Ethereum blockchain introduced the concept of smart contracts, which are self-executing contracts with the terms of the agreement directly written into code.",
@@ -56,7 +58,7 @@ const funFacts = [
         { value: 'How does it work', label: 'How does it put votes on the blockchain?', trigger: 'how-work' },
         { value: 'Is vote secure', label: 'Is my vote private and secure?', trigger: 'is-vote-secure' },
         { value: 'Contact', label: 'How can I contact you?', trigger: 'contact' },
-        { value: 'Fact', label: 'Share a fun blockchain fact', trigger: 'fact' },
+        { value: 'Fact', label: 'Share some fun web3/blockchain fact', trigger: 'fact' },
       ],
     },
     {
@@ -81,7 +83,7 @@ const funFacts = [
     },
     {
       id: 'contact',
-      message: 'You can reach out to me through email at nikolla.uzunov@gmail.com or at my phone number - 089 947 0320',
+      message: 'You can reach out to me through email at nikolla.uzunov@gmail. com or at my phone number - 089 947 0320',
       trigger: 'anything-else'
     },
     {
