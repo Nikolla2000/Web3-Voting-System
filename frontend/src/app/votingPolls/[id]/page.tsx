@@ -2,12 +2,11 @@ import { fetchPollById } from "@/app/lib/data";
 import { notFound } from "next/navigation";
 import styles from "../../ui/votingPolls/styles.module.css";
 import PercentageBar from "./PercentageBar";
-import PollImage from "./PollImage";
-import { Button } from "react-bootstrap";
-import Link from "next/link";
+import PollImage from "./PollImage";;
 import { ChosenOption } from "@/app/_types/types";
 import HasVoted from "@/app/ui/votingPolls/HasVoted";
 import "./styles.css"
+import StatisicsButton from "@/app/ui/votingPolls/StatisticsButton";
 
 export default async function Page({ params }: { params: {id: string} }) {
     const id = params.id;
@@ -47,17 +46,7 @@ export default async function Page({ params }: { params: {id: string} }) {
                     <p className="text-center font-bold text-2xl w-3/4 mx-auto">{poll.description}</p>
                 </div>
                 <PercentageBar percentages={percentages}/>
-                <div>
-                    <div className="text-center mb-5">
-                        <Button variant="success">
-                            <Link 
-                                href={`/votingPolls/${id}/statistics`}
-                                className="text-white no-underline ">
-                                View Statistics
-                            </Link>
-                        </Button>
-                    </div>
-                </div>
+                <StatisicsButton>View Statistics</StatisicsButton>
             </div>
         </div>
     )

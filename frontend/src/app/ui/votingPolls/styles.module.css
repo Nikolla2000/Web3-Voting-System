@@ -172,6 +172,24 @@
 .hovers {
     position: relative;
   }
+
+.hovers:hover {
+    -webkit-box-shadow: 0px 0px 20px 2px rgba(115,143,255,1);
+-moz-box-shadow: 0px 0px 20px 2px rgba(115,143,255,1);
+box-shadow: 0px 0px 20px 2px rgba(115,143,255,1);
+transition: 0.3s ease-in;
+}
+
+.hovers:hover .shadow {
+    display:none;
+}
+/* .pollCardBg {
+    background: url('/frontend/public/pollCardBg2.jpg') !important;
+
+}
+.hovers:hover .pollCardBg {
+    background-image: url('/frontend/public/pollCardBg2.jpg') !important;
+} */
   
   .hovers::before {
     content: "";

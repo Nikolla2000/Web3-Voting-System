@@ -27,7 +27,7 @@ export function Card({ pollData } : { pollData: Poll }) {
         <div>
           <img src={pollData.mainImgURL} alt="poll-image"  className={`rounded-tl-md rounded-tr-md h-56 w-full`}/>
         </div>
-        <div className="text-black text-center flex flex-col items-center py-3">
+        <div className={`${styles.pollCardBg} text-black text-center flex flex-col items-center py-3`}>
           <h3>{pollData.name}</h3>
           <p>{pollData.description}</p>
         </div>

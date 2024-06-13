@@ -1,0 +1,51 @@
+@keyframes rotate {
+    0% {
+        transform: rotate(0);
+    }
+    100% {
+        transform: rotate(1turn);
+    }
+}
+
+.shape {
+    position: absolute;
+    animation-name: rotate;
+    animation-duration: 20s;
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+}
+
+.shape1 {
+    left: -10%;
+    animation-name: rotate;
+    bottom: 15%;
+    opacity: 0.3;
+}
+
+.shape2 {
+    /* right: -10%; */
+    bottom: 15%;
+    opacity: 0.3;
+    left:90%;
+    display:none;
+}
+
+.shape3 {
+    right: auto;
+    bottom: 10%;
+    left: 10%;
+    right: 10%;
+}
+
+.shape4 {
+    left: 25%;
+    bottom: 40%;
+}
+.shape5 {
+    right: 5%;
+    bottom: 10%;
+}
+.shape6 {
+    right: 15%;
+    top: 80%;
+}

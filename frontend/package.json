@@ -12,7 +12,8 @@
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@hookform/resolvers": "^3.3.4",
-    "@mui/material": "^5.15.16",
+    "@mui/icons-material": "^5.15.19",
+    "@mui/material": "^5.15.19",
     "@types/react-bootstrap": "^0.32.36",
     "animate.css": "^4.1.1",
     "axios": "^1.6.8",
@@ -24,6 +25,7 @@
     "react-dom": "^18",
     "react-hook-form": "^7.51.1",
     "react-hot-toast": "^2.4.1",
+    "react-simple-chatbot": "^0.6.1",
     "react-type-animation": "^3.2.0",
     "web3": "^4.8.0",
     "zod": "^3.22.4"
