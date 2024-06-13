@@ -8,6 +8,7 @@ import { TypewriterEffect } from './ui/typeWriterEffects/MainTypewriterEffect';
 import { shapesData } from '../../utils/shapesData';
 import "./ui/shapes.css";
 import { mainPageStrings } from './ui/typeWriterEffects/typewriterStrings';
+import OpenChatButton from './ui/chatbot/OpenChatButton';
 
 
 export default function Home() {
@@ -50,6 +51,7 @@ export default function Home() {
             </div>
         ))}
       </div> */}
+      <OpenChatButton/>
     </main>
   );
 }
