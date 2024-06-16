@@ -1,0 +1,41 @@
+.link {
+  display: inline-block;
+  text-decoration: none;
+  width:100px;
+}
+
+.goBackButtonWrapper {
+
+}
+
+.icon {
+  /* display: inline-block; */
+  width: 30px;
+  background-color: purple;
+  float: right;
+  transition: width 0.3s ease;
+  border-radius: 50px;
+}
+
+.icon svg {
+  color: white;
+  /* left:7px; */
+}
+
+.text {
+  font-weight: bold;
+  color:blue;
+  position: absolute;
+  transition: color 0.3s ease-in-out;
+}
+
+.link:hover .icon{
+  width:100%;
+}
+.link:hover .text{
+  color:#fff;
+}
+.link:hover .icon svg{
+  display: hidden;
+  float: right;
+}

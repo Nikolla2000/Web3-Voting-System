@@ -1,3 +1,5 @@
+import GoBackButton from "../ui/goBackButton/GoBackButton";
+
 export default function ReadmePage() {
   return (
     <div className="px-4 py-6 max-w-3xl mx-auto">
@@ -20,7 +22,7 @@ export default function ReadmePage() {
       </p>
       <ol className="list-decimal list-inside mb-4">
         <li>Open your web browser and go to Google.</li>
-        <li>Search for "Sepolia faucet" or use <a href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia">This link</a> directly.</li>
+        <li>Search for "Sepolia faucet" or use <a href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia" target="_blank">This link</a> directly.</li>
         <li>Choose a faucet from the search results and follow the instructions to receive free test ether daily.</li>
         <li>Make sure to send the test ether to the wallet address you are using for this app.</li>
       </ol>
@@ -31,6 +33,7 @@ export default function ReadmePage() {
       <p>
         If you have any questions or run into issues, feel free to reach out for support. Happy voting!
       </p>
+      <GoBackButton path='/'>Go Back</GoBackButton>
     </div>
   );
 }
