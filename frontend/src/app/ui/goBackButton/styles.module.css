@@ -14,10 +14,14 @@
   /* display: inline-block; */
   width: 30px;
   height: 100%;
-  background-color: purple;
   float: right;
   transition: width 0.3s ease;
   border-radius: 50px;
+
+  background: linear-gradient(-225deg, #AC32E4 0%, #7918F2 48%, #4801FF 100%);    
+  -webkit-box-shadow: 3px 3px 7px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: 3px 3px 7px 0px rgba(0,0,0,0.75);
+  box-shadow: 3px 3px 7px 0px rgba(0,0,0,0.75);
 }
 
 .icon svg {
@@ -29,7 +33,7 @@
 
 .text {
   font-weight: bold;
-  color:blue;
+  color:#000;
   position: absolute;
   left: 10%;
   top:8%;
