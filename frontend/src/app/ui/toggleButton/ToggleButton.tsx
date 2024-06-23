@@ -24,6 +24,11 @@ export default function ToggleBtn({ toggleOptions } : { toggleOptions: String[] 
       sx={{
         position: 'absolute',
         right: '20%',
+        '@media (max-width: 620px)': { 
+          top: '4%',
+          right: '0',
+          left:'30%',
+        },
         '& .MuiToggleButton-root': { 
           bgcolor: '#555555', // default background color
           color: 'white', // default text color
