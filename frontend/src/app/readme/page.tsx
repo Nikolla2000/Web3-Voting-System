@@ -1,8 +1,10 @@
 import GoBackButton from "../ui/goBackButton/GoBackButton";
+import ToggleBtn from "../ui/toggleButton/ToggleButton";
 
 export default function ReadmePage() {
   return (
-    <div className="px-4 py-6 max-w-3xl mx-auto">
+    <div className="px-4 py-16 max-w-3xl mx-auto">
+      <ToggleBtn toggleOptions={['english', 'български']}></ToggleBtn>
       <h1 className="text-3xl font-bold mb-4">Important Information</h1>
       <p className="mb-4">
         Hello and Welcome to my Web3 Voting App. This application allows users to vote on different polls, and the votes are securely stored on the Sepolia test network on the Ethereum blockchain.
