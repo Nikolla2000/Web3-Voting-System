@@ -9,6 +9,7 @@ import { shapesData } from '../../utils/shapesData';
 import "./ui/shapes.css";
 import { mainPageStrings } from './ui/typeWriterEffects/typewriterStrings';
 import OpenChatButton from './ui/chatbot/OpenChatButton';
+import ViewReadmeBtn from './ui/viewReadmePageBtn/ViewReadmeBtn';
 
 
 export default function Home() {
@@ -51,6 +52,7 @@ export default function Home() {
             </div>
         ))}
       </div> */}
+      <ViewReadmeBtn>Read Me</ViewReadmeBtn>
       <OpenChatButton/>
     </main>
   );

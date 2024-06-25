@@ -1,0 +1,58 @@
+.link {
+  display: inline-block;
+  text-decoration: none;
+  width:110px;
+  height: 30px;
+  position: relative;
+}
+
+.goBackButtonWrapper {
+
+}
+
+.icon {
+  /* display: inline-block; */
+  width: 30px;
+  height: 100%;
+  float: right;
+  transition: width 0.3s ease;
+  border-radius: 50px;
+
+  background: linear-gradient(-225deg, #AC32E4 0%, #7918F2 48%, #4801FF 100%);    
+  -webkit-box-shadow: 3px 3px 7px 0px rgba(0,0,0,0.75);
+  -moz-box-shadow: 3px 3px 7px 0px rgba(0,0,0,0.75);
+  box-shadow: 3px 3px 7px 0px rgba(0,0,0,0.75);
+}
+
+.icon svg {
+  color: white;
+  position: relative;
+  left:7px;
+  transition: transform 0.3s ease-in-out;
+}
+
+.text {
+  font-weight: bold;
+  color:#000;
+  position: absolute;
+  left: 10%;
+  top:8%;
+  transition: color 0.3s ease-in-out;
+}
+
+.link:hover .icon{
+  width:100%;
+}
+.link:hover .text{
+  color:#fff;
+}
+.link:hover .icon svg{
+  position: relative;
+  left: -10px;
+  top:2px;
+  /* right: 100px; */
+  transform: rotate(180deg);
+  display: hidden;
+  /* color: purple; */
+  float: right;
+}
