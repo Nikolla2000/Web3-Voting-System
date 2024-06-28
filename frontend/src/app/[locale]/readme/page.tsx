@@ -9,35 +9,25 @@ export default async function ReadmePage({ params: { locale }}) {
     <div className="px-4 py-16 max-w-3xl mx-auto">
       <ToggleBtn toggleOptions={['english', 'български']}></ToggleBtn>
       <h1 className="text-3xl font-bold mb-4">{t("importantInformation.title")}</h1>
-      <p className="mb-4">
-        Hello and Welcome to my Web3 Voting App. This application allows users to vote on different polls, and the votes are securely stored on the Sepolia test network on the Ethereum blockchain.
-      </p>
-      <h2 className="text-2xl font-bold mb-2">Getting Started</h2>
-      <p className="mb-4">
-        To participate in the voting process, you will need some test ether. Here’s what you need to know:
-      </p>
+      <p className="mb-4">{t("importantInformation.content.0")}</p>
+      <h2 className="text-2xl font-bold mb-2">{t("gettingStarted.title")}</h2>
+      <p className="mb-4">{t("gettingStarted.content.0")}</p>
       <ul className="list-disc list-inside mb-4">
-        <li>You will need a MetaMask wallet or another Ethereum-compatible wallet to interact with the blockchain.</li>
-        <li>The votes are recorded on the Sepolia test network, which is a test version of the Ethereum blockchain.</li>
-        <li>Using the Sepolia test network requires test ether, which can be obtained for free from a faucet.</li>
+        <li>{t("steps.metaMaskWallet")}</li>
+        <li>{t("steps.sepoliaNetwork")}</li>
+        <li>{t("steps.testEther")}</li>
       </ul>
-      <h2 className="text-2xl font-bold mb-2">How to Get Test Ether</h2>
-      <p className="mb-4">
-        Since I cannot cover the cost of all transactions, you will need to obtain test ether yourself. Follow these steps to get some test ether:
-      </p>
+      <h2 className="text-2xl font-bold mb-2">{t("howToGetTestEther.title")}</h2>
+      <p className="mb-4">{t("howToGetTestEther.content.0")}</p>
       <ol className="list-decimal list-inside mb-4">
-        <li>Open your web browser and go to Google.</li>
-        <li>Search for "Google Free Sepolia faucet" or use <a href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia" target="_blank">This link</a> directly.</li>
-        <li>Choose a faucet from the search results and follow the instructions to receive free test ether daily.</li>
-        <li>Make sure to send the test ether to the wallet address you are using for this app.</li>
+        <li>{t("howToGetTestEther.steps.0")}</li>
+        <li>{t("howToGetTestEther.steps.1")}</li>
+        <li>{t("howToGetTestEther.steps.2")}</li>
+        <li>{t("howToGetTestEther.steps.3")}</li>
       </ol>
-      <p className="mb-4">
-        Once you have test ether in your wallet, you can participate in the polls and cast your votes.
-      </p>
-      <h2 className="text-2xl font-bold mb-2">Need Help?</h2>
-      <p>
-        If you have any questions or run into issues, feel free to reach out for support. Happy voting!
-      </p>
+      <p className="mb-4">{t("participate.content.0")}</p>
+      <h2 className="text-2xl font-bold mb-2">{t("needHelp.title")}</h2>
+      <p>{t("needHelp.content.0")}</p>
       <GoBackButton path='/'>Go Back</GoBackButton>
     </div>
   );
