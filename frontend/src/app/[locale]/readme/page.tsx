@@ -21,7 +21,10 @@ export default async function ReadmePage({ params: { locale }}) {
       <p className="mb-4">{t("howToGetTestEther.content.0")}</p>
       <ol className="list-decimal list-inside mb-4">
         <li>{t("howToGetTestEther.steps.0")}</li>
-        <li>{t("howToGetTestEther.steps.1")}</li>
+        <li>
+          {t("howToGetTestEther.steps.1.0")}
+          <a href="https://cloud.google.com/application/web3/faucet/ethereum/sepolia\" target="_blank">
+          {t("howToGetTestEther.steps.1.1")}</a>{t("howToGetTestEther.steps.1.2")}</li>
         <li>{t("howToGetTestEther.steps.2")}</li>
         <li>{t("howToGetTestEther.steps.3")}</li>
       </ol>

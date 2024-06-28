@@ -23,8 +23,8 @@
       ],
       "steps": [
         "Open your web browser and go to Google.",
-        "Search for \"Google Free Sepolia faucet\" or use <a href=\"https://cloud.google.com/application/web3/faucet/ethereum/sepolia\" target=\"_blank\">This link</a> directly.",
-        "Choose a faucet from the search results and follow the instructions to receive free test ether daily.",
+        ["Search for \"Google Free Sepolia faucet\" or use ", "This Link ", "directly."],
+        "Choose the faucet from the search results and follow the instructions to receive free test ether daily.",
         "Make sure to send the test ether to the wallet address you are using for this app."
       ]
     },
