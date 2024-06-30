@@ -2,7 +2,9 @@
     "importantInformation": {
       "title": "Important Information",
       "content": [
-        "Hello and Welcome to my Web3 Voting App. This application allows users to vote on different polls, and the votes are securely stored on the Sepolia test network on the Ethereum blockchain."
+        "Hello and Welcome to my ",
+        "Web3 Decentralized Blockchain Voting App. ",
+        "This application allows users to vote on different polls, and the votes are securely stored on the Sepolia test network on the Ethereum blockchain."
       ]
     },
     "gettingStarted": {
@@ -30,7 +32,7 @@
     },
     "participate": {
       "content": [
-        "Once you have test ether in your wallet, you can participate in the polls and cast your votes."
+        "Once you have ether in your wallet, you can participate in the polls and cast your votes."
       ]
     },
     "needHelp": {

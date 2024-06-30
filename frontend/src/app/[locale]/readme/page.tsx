@@ -16,7 +16,11 @@ export default async function ReadmePage({ params: { locale }}) {
       {/* <ToggleBtn toggleOptions={['english', 'български']}></ToggleBtn> */}
       <LanguageDropdown/>
       <h1 className="text-3xl font-bold mb-4">{t("importantInformation.title")}</h1>
-      <p className="mb-4">{t("importantInformation.content.0")}</p>
+      <p className="mb-4">
+        {t("importantInformation.content.0")}
+        <span className="font-bold text-purple-700">{t("importantInformation.content.1")}</span>
+        {t("importantInformation.content.2")}
+      </p>
       <h2 className="text-2xl font-bold mb-2">{t("gettingStarted.title")}</h2>
       <p className="mb-4">{t("gettingStarted.content.0")}</p>
       <ul className="list-disc list-inside mb-4">
