@@ -1,13 +1,20 @@
 import GoBackButton from "../../ui/goBackButton/GoBackButton";
-import ToggleBtn from "../../ui/toggleButton/ToggleButton";
+// import ToggleBtn from "../../ui/toggleButton/ToggleButton";
 import initTranslations from '../../i18n';
+import TranslationsProvider from "@/app/TranslationsProvider";
+import LanguageDropdown from "@/app/ui/languageDropdown/LanguageDropdown";
 
 export default async function ReadmePage({ params: { locale }}) {
-  const { t } = await initTranslations(locale, ['readme']);
+  const { t, resources } = await initTranslations(locale, ['readme']);
 
   return (
+    <TranslationsProvider
+      namespaces={['readme']}
+      locale={locale}
+      resources={resources}>
     <div className="px-4 py-16 max-w-3xl mx-auto">
-      <ToggleBtn toggleOptions={['english', 'български']}></ToggleBtn>
+      {/* <ToggleBtn toggleOptions={['english', 'български']}></ToggleBtn> */}
+      <LanguageDropdown/>
       <h1 className="text-3xl font-bold mb-4">{t("importantInformation.title")}</h1>
       <p className="mb-4">{t("importantInformation.content.0")}</p>
       <h2 className="text-2xl font-bold mb-2">{t("gettingStarted.title")}</h2>
@@ -33,5 +40,6 @@ export default async function ReadmePage({ params: { locale }}) {
       <p>{t("needHelp.content.0")}</p>
       <GoBackButton path='/'>Go Back</GoBackButton>
     </div>
+    </TranslationsProvider>
   );
 }
