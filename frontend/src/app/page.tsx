@@ -19,7 +19,7 @@ export default function Home() {
       <div>
       <video className='w-96' muted autoPlay loop>
       <source src="/web3-logo-video.webm" type="video/webm" />
-      Sorry, your browser doesn't support videos.
+      {/* Sorry, your browser doesn't support videos. */}
     </video>
       </div>
       <div>
