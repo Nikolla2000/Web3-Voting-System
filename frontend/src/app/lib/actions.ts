@@ -3,6 +3,8 @@ import api from "../../../axios.config";
 import toast from "react-hot-toast";
 import { EthWindow } from "../ui/metamask/MetamaskButton";
 import Web3 from "web3";
+import Credentials from "next-auth/providers/credentials";
+import { NextAuthOptions } from "next-auth";
 
 export async function initWeb3() {
     const web3 = new Web3((window as any).ethereum);
@@ -76,6 +78,54 @@ export async function connectMetamask(setAccount: (account: string | null) => vo
         }
     } else {
         toast.error('Please download MetaMask to connect to Ethereum');
+    }
+}
+
+
+export const authOptions: NextAuthOptions = {
+    providers: [
+        Credentials({
+            name: 'Credentials',
+            credentials: {
+                email: {
+                    label: 'Email',
+                    type: 'text',
+                    placeholder: 'joendoe@gmail.com',
+                },
+                password: { label: 'Password', type: 'password' },
+            },
+            async authorize(credentials, req) {
+                if (!credentials?.email || !credentials?.password) return null;
+                const { email, password } = credentials;
+                try {
+                    const res = await api.post('/auth/login', {
+                        email,
+                        password
+                    });
+                    const user = res.data;
+                    return user;
+
+                } catch (error) {
+                    console.error("Login failed: ", error);
+                }
+            }
+        })
+    ],
+
+    callbacks: {
+        async jwt({ token, user }) {
+            console.log({ token, user });
+            if (user) return {...token, ...user};
+
+            return token;
+        },
+
+        async session({ token, session }) {
+            session.user = token.user;
+            session.backendTokens = token.backendTokens;
+
+            return session;
+        }
     }
 }
 
