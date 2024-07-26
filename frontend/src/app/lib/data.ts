@@ -33,7 +33,7 @@ export async function fetchRegisterUser(data: Inputs) {
   const { confirmPass, ...registerData } = data;
 
   try {
-    const response = await axios.post("http://localhost:5000/auth/register", registerData);
+    const response = await axios.post("https://web3-voting-system.onrender.com/auth/register", registerData);
     console.log(data, response);
     toast.success("Account created successfully!");
 

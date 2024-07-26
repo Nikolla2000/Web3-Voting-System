@@ -22,7 +22,7 @@ export function Card({ pollData } : { pollData: Poll }) {
   return (
     <Link 
       href={`/votingPolls/${pollData.id}`}
-      className={`${styles.shadow} no-underline rounded-md w-80 mb-2 sm:w-72 mx-auto`}>
+      className={`${styles.shadow} no-underline rounded-md w-80 mb-2 sm:w-72 mx-auto bg-white`}>
       <div className={`${styles.hovers} h-full flex flex-col justify-between`}>
         <div>
           <img src={pollData.mainImgURL} alt="poll-image"  className={`rounded-tl-md rounded-tr-md h-56 w-full`}/>

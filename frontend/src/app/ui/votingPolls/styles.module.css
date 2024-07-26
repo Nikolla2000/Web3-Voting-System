@@ -183,14 +183,15 @@ transition: 0.3s ease-in;
 .hovers:hover .shadow {
     display:none;
 }
-/* .pollCardBg {
-    background: url('/frontend/public/pollCardBg2.jpg') !important;
+ .pollCardBg {
+    /* background: url('/frontend/public/pollCardBg2.jpg') !important; */
+    background: white;
 
 }
 .hovers:hover .pollCardBg {
     background-image: url('/frontend/public/pollCardBg2.jpg') !important;
-} */
-  
+} 
+
   .hovers::before {
     content: "";
     position: absolute;
