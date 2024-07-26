@@ -31,3 +31,9 @@ export interface Poll {
   export interface TypewriterEffectProps {
     strings: (string | number)[];
   }
+
+  export interface ReadmePageParams {
+    params: {
+      locale: string;
+    };
+  };

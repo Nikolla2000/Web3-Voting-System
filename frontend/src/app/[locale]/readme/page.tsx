@@ -3,8 +3,9 @@ import GoBackButton from "../../ui/goBackButton/GoBackButton";
 import initTranslations from '../../i18n';
 import TranslationsProvider from "@/app/TranslationsProvider";
 import LanguageDropdown from "@/app/ui/languageDropdown/LanguageDropdown";
+import { ReadmePageParams } from "@/app/_types/types";
 
-export default async function ReadmePage({ params: { locale }}) {
+export default async function ReadmePage({ params: { locale } }: ReadmePageParams) {
   const { t, resources } = await initTranslations(locale, ['readme']);
 
   return (
