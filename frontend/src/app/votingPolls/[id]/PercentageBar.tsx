@@ -29,10 +29,14 @@ export default function PercentageBar({ percentages }: {percentages: Percentages
     
         return () => clearInterval(percentInterval); // Clean up the interval on component unmount
     }, [percentageNum, percentages]);
-    
+
+    const style = {
+        "--left-percentage": percentages["--left-percentage"],
+        "--right-percentage": percentages["--right-percentage"]
+      } as React.CSSProperties;
 
     return (
-        <div className={styles.percentBarWrapper} style={percentages}>
+        <div className={styles.percentBarWrapper} style={style}>
             <div className={`${styles.percentBar} ${styles.boxShadow}`}>
                 <div className={styles.leftPercentBar}>
                     <div className={`${styles.leftPercentage} relative`} >
