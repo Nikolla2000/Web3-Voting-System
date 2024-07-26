@@ -25,7 +25,7 @@ export default function HasVoted(pollId: any) {
 
   return hasVoted ? (
     <div className="text-red-500 text-center font-bold mb-2 text-lg">
-      You've already voted for this poll
+      You&apos;ve already voted for this poll
     </div>
   ) : null;
 }

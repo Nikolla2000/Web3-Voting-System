@@ -20,7 +20,7 @@ export default function LoginForm() {
                         You don't have an account? Click here to register!
                     </p>
                 </Link> */}
-                <p className="text-blue-700 text-center mt-2 text-md transition-all duration-200">You don't have an account?
+                <p className="text-blue-700 text-center mt-2 text-md transition-all duration-200">You don&apos;t have an account?
                 <Link
                     href='/register'
                     className="mt-2 ml-2 font-bold hover:underline">
