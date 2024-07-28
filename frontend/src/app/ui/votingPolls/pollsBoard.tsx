@@ -8,9 +8,10 @@ export default function PollsBoard({ pollsData }: { pollsData: Poll[] }) {
   return (
     <div className="mt-16 grid gap-10 sm:grid-cols-1 md:grid-cols-2 md:gap-20 lg:grid-cols-3 2xl:grid-cols-4">
       <Suspense fallback={<CardsSkeleton/>}>
-      {pollsData?.map((poll) => (
+      {pollsData?.map((poll, i) => (
         <Card 
           pollData={poll}
+          index={i + 1}
           key={poll.id}/>
       ))}
       </Suspense>
@@ -18,7 +19,7 @@ export default function PollsBoard({ pollsData }: { pollsData: Poll[] }) {
   )
 }
 
-export function Card({ pollData } : { pollData: Poll }) {
+export function Card({ pollData, index } : { pollData: Poll, index: number }) {
   return (
     <Link 
       href={`/votingPolls/${pollData.id}`}
@@ -31,7 +32,7 @@ export function Card({ pollData } : { pollData: Poll }) {
           <h3>{pollData.name}</h3>
           <p>{pollData.description}</p>
         </div>
-        <div className={`${styles.noMargin} bg-blue-500 ${pollData.id % 2 !== 0 ? 'purple-gradient-background': ""} text-white flex flex-row float-bottom rounded-bl-md rounded-br-md justify-evenly text-center py-2`}>
+        <div className={`${styles.noMargin} bg-blue-500 ${index % 2 !== 0 ? 'purple-gradient-background': ""} text-white flex flex-row float-bottom rounded-bl-md rounded-br-md justify-evenly text-center py-2`}>
           <div>
             <p>{pollData.votes1}</p>
             <p>{pollData.optionOneName}</p>
