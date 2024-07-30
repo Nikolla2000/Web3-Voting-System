@@ -158,6 +158,11 @@
 .pollName {
     font-size: 1.7em;
     font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.pollDescription {
+    margin-bottom: 16px;
 }
 
 .noMargin p {

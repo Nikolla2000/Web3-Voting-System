@@ -30,7 +30,7 @@ export function Card({ pollData, index } : { pollData: Poll, index: number }) {
         </div>
         <div className={`${styles.pollCardBg} text-black text-center flex flex-col items-center py-3`}>
           <h3 className={styles.pollName}>{pollData.name}</h3>
-          <p>{pollData.description}</p>
+          <p className={styles.pollDescription}>{pollData.description}</p>
         </div>
         <div className={`${styles.noMargin} bg-blue-500 ${index % 2 !== 0 ? 'purple-gradient-background': ""} text-white flex flex-row float-bottom rounded-bl-md rounded-br-md justify-evenly text-center py-2`}>
           <div>
