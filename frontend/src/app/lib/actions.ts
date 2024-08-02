@@ -1,4 +1,4 @@
-import { ChosenOption } from "../_types/types";
+import { ChosenOption, Poll } from "../_types/types";
 import api from "../../../axios.config";
 import toast from "react-hot-toast";
 import { EthWindow } from "../ui/metamask/MetamaskButton";
@@ -127,6 +127,15 @@ export const authOptions: NextAuthOptions = {
             return session;
         }
     }
+}
+
+
+export function divideData(data: Poll[], divider: number): Poll[][] {
+    const dividedArr: Poll[][] = [];
+    for(let i = 0; i <= data.length; i += divider) {
+        dividedArr.push(data.slice(i, i + divider))
+    }
+    return dividedArr;
 }
 
 

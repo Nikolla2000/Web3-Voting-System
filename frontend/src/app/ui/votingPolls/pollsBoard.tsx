@@ -3,20 +3,32 @@ import Link from "next/link";
 import styles from "./styles.module.css";
 import { Suspense } from "react";
 import { CardsSkeleton } from "../skeletons";
+import { divideData } from "@/app/lib/actions";
+import { Carousel, CarouselItem } from "react-bootstrap";
 
-export default function PollsBoard({ pollsData }: { pollsData: Poll[] }) {
+export default function PollsBoard({ pollsData, chunkSize }: { pollsData: Poll[], chunkSize: number }) {
+  const dividedData = divideData(pollsData, chunkSize);
   return (
-    <div className="mt-16 grid gap-10 sm:grid-cols-1 md:grid-cols-2 md:gap-20 lg:grid-cols-3 2xl:grid-cols-4">
-      <Suspense fallback={<CardsSkeleton/>}>
-      {pollsData?.map((poll, i) => (
-        <Card 
-          pollData={poll}
-          index={i + 1}
-          key={poll.id}/>
-      ))}
+    <div className="mt-16">
+      <Suspense fallback={<CardsSkeleton />}>
+        <Carousel>
+          {dividedData?.map((polls, i) => (
+            <CarouselItem key={i}>
+              <div className="flex flex-row gap-10">
+              {polls.map((poll, j) => (
+                <Card 
+                  pollData={poll}
+                  index={j + 1}
+                  key={poll.id}
+                />
+              ))}
+              </div>
+            </CarouselItem>
+          ))}
+        </Carousel>
       </Suspense>
     </div>
-  )
+  );
 }
 
 export function Card({ pollData, index } : { pollData: Poll, index: number }) {
