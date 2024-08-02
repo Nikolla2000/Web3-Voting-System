@@ -6,7 +6,7 @@ import { VoteButton } from '@/app/ui/votingPolls/VoteButton';
 
 export default function VoteModal({show, setShow, poll, chosenOption} 
   : {show: boolean, setShow: any, poll: Poll, chosenOption: ChosenOption}) {
-  console.log(poll)
+  // console.log(poll)
   
   const handleClose = () => {
     setShow(false);

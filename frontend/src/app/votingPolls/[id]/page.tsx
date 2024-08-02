@@ -21,8 +21,8 @@ export default async function Page({ params }: { params: {id: string} }) {
         '--right-percentage': `${poll.votes2 / (poll.votes1 + poll.votes2) * 100}%`
     }
 
-    console.log(percentages['--right-percentage'])
-    console.log(poll);
+    // console.log(percentages['--right-percentage'])
+    // console.log(poll);
 
     return (
         <div className="flex justify-center align-center min-h-screen">
