@@ -9,8 +9,8 @@ async function bootstrap() {
   const port = process.env.PORT;
   
   app.enableCors({
-    // origin: 'http://localhost:3000/', //local origin
-    origin: 'https://web3-voting-system-mu.vercel.app/', //production url origin
+    origin: 'http://localhost:3000/', //local origin
+    // origin: 'https://web3-voting-system-mu.vercel.app/', //production url origin
   });
   
   await app.listen(port, () => {
