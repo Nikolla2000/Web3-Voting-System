@@ -8,7 +8,7 @@ export default registerAs('app', () => ({
 }));
 
 export const envValidationSchema = Joi.object({
-  NODE_ENV: Joi.string().valid('development', 'production').required(),
+  NODE_ENV: Joi.string().valid('development', 'production').default('development'),
   PORT: Joi.number().port().default(3000),
   FRONTEND_URL: Joi.string().required(),
   // DB_HOST: Joi.string().required(),
