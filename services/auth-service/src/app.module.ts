@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { PrismaModule } from 'prisma/prisma.module';
 
 @Module({
   imports: [
@@ -10,8 +11,8 @@ import { ThrottlerModule } from '@nestjs/throttler';
     ThrottlerModule.forRoot([{
       ttl: 60000,
       limit: 100,
-    }])
-
-],
+    }]),
+    PrismaModule,
+  ],
 })
 export class AppModule {}
