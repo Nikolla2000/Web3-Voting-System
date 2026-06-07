@@ -133,7 +133,7 @@ export class AuthService {
         }
     }
 
-    async GoogleAuth(profile: GoogleProfile): Promise<AuthResponse> {
+    async googleAuth(profile: GoogleProfile): Promise<AuthResponse> {
         let user: User | SafeUser = await this.usersService.findByEmail(profile.email);
 
         if (!user) {
