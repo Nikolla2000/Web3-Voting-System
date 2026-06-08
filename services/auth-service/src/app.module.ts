@@ -6,6 +6,8 @@ import appConfig from './config/app.config';
 import jwtConfig from './config/jwt.config';
 import googleConfig from './config/google.config';
 import { envValidationSchema } from './config/env.validation';
+import { AuthModule } from './auth/auth.module';
+import { UsersModule } from './users/users.module';
 
 @Module({
   imports: [
@@ -19,6 +21,8 @@ import { envValidationSchema } from './config/env.validation';
       limit: 100,
     }]),
     PrismaModule,
+    AuthModule,
+    UsersModule,
   ],
 })
 export class AppModule {}
