@@ -1,29 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import cookieParser = require('cookie-parser');
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-
-const logger = new Logger('Bootstrap');
-
-// for setup outside of gloal prefix api/v1
-function setupSwagger(app: INestApplication): void {
-  const config = new DocumentBuilder()
-    .setTitle('Auth Service API')
-    .setDescription('Authentication & Authorization')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('docs', app, document, {
-    useGlobalPrefix: false, 
-  });
-}
+import { GlobalExceptionFilter, LoggingInterceptor, TransformInterceptor } from './common';
 
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
+
   try {
     const app = await NestFactory.create(AppModule);
     const configService = app.get(ConfigService);
@@ -31,11 +17,20 @@ async function bootstrap() {
     app.use(cookieParser())
     app.enableShutdownHooks();
     app.setGlobalPrefix('api/v1');
+    app.useGlobalFilters(new GlobalExceptionFilter());
+
+    app.useGlobalInterceptors(
+      new LoggingInterceptor(),
+      new TransformInterceptor()
+    )
 
     app.useGlobalPipes(new ValidationPipe({
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
+      transformOptions: {
+        enableImplicitConversion: true
+      }
     }));
 
     app.enableCors({
@@ -46,7 +41,15 @@ async function bootstrap() {
     const port = configService.get<number>('app.port');
     
     if (configService.get<string>('app.nodeEnv') !== 'production') {
-      setupSwagger(app);
+      const config = new DocumentBuilder()
+        .setTitle('Auth Service API')
+        .setDescription('Authentication & Authorization')
+        .setVersion('1.0')
+        .addBearerAuth()
+        .build();
+
+      const document = SwaggerModule.createDocument(app, config);
+      SwaggerModule.setup('docs', app, document);
       logger.log(`Swagger docs available at http://localhost:${port}/docs`);
     }
 
