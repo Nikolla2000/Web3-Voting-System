@@ -4,7 +4,7 @@ import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import cookieParser = require('cookie-parser');
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { GlobalExceptionFilter, LoggingInterceptor, TransformInterceptor } from './common';
+import { GlobalExceptionFilter, LoggingInterceptor } from './common';
 
 
 async function bootstrap() {
@@ -17,11 +17,12 @@ async function bootstrap() {
     app.use(cookieParser())
     app.enableShutdownHooks();
     app.setGlobalPrefix('api/v1');
+
     app.useGlobalFilters(new GlobalExceptionFilter());
 
     app.useGlobalInterceptors(
       new LoggingInterceptor(),
-      new TransformInterceptor()
+      // new TransformInterceptor()
     )
 
     app.useGlobalPipes(new ValidationPipe({
