@@ -1,5 +1,7 @@
 import { registerAs } from "@nestjs/config";
 import * as Joi from 'joi';
+import { jwtEnvValidation } from "./jwt.config";
+import { servicesEnvValidation } from "./services.config";
 
 export default registerAs('app', () => ({
   isDevelopment: process.env.NODE_ENV === 'development',
@@ -11,4 +13,6 @@ export const envValidationSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'production').default('development'),
   PORT: Joi.number().port().default(3000),
   FRONTEND_URL: Joi.string().required(),
+  ...jwtEnvValidation,
+  ...servicesEnvValidation,
 })
