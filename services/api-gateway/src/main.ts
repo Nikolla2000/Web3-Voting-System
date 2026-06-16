@@ -1,18 +1,24 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { setupSwagger } from './swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-
   const configService = app.get(ConfigService);
+  const port = configService.get<number>('app.port') ?? 3000;
+  const logger = new Logger('Bootstrap');
 
   app.setGlobalPrefix('api');
 
   app.useGlobalPipes(new ValidationPipe({
     whitelist: true,
+    forbidNonWhitelisted: true,
     transform: true,
+    transformOptions: {
+      enableImplicitConversion: true,
+    }
   }));
 
   const frontendUrl = configService.get<string>('app.frontendUrl');
@@ -21,7 +27,18 @@ async function bootstrap() {
     credentials: true,
   })
 
-  const port = configService.get<number>('app.port') ?? 3000;
+  app.enableCors({
+    origin: configService.get<string>('app.frontendUrl'),
+    credentials: true,
+  });
+
+  if (configService.get<string>('app.nodeEnv') !== 'production') {
+    setupSwagger(app);
+    logger.log(`Swagger docs available at http://localhost:${port}/docs`);
+  }
+
+  app.enableShutdownHooks();
+
   await app.listen(port);
   console.log(`API Gateway running on port ${port}`);
 }
