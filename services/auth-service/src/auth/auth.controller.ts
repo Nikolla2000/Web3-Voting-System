@@ -41,11 +41,12 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const { user, tokens } = await this.authService.register(dto);
-    this.setRefreshTokenCookie(res, tokens.refreshToken);
+    // this.setRefreshTokenCookie(res, tokens.refreshToken);
 
     return {
       user,
-      accessToken: tokens.accessToken
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken
     }
   }
 
@@ -60,11 +61,12 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const { user, tokens } = await this.authService.login(dto);
-    this.setRefreshTokenCookie(res, tokens.refreshToken);
+    // this.setRefreshTokenCookie(res, tokens.refreshToken);
 
     return {
       user,
-      accessToken: tokens.accessToken
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken
     }
   }
 
@@ -102,10 +104,11 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response
   ) {
     const tokens = await this.authService.refresh(user.sub, user.refreshToken);
-    this.setRefreshTokenCookie(res, tokens.refreshToken);
+    // this.setRefreshTokenCookie(res, tokens.refreshToken);
 
     return {
       accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken
     }
   }
 

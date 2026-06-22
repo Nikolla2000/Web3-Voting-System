@@ -40,6 +40,6 @@ async function bootstrap() {
   app.enableShutdownHooks();
 
   await app.listen(port);
-  console.log(`API Gateway running on port ${port}`);
+  logger.log(`API Gateway running on port ${port}`);
 }
 bootstrap();

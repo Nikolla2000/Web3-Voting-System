@@ -1,10 +1,11 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import cookieParser = require('cookie-parser');
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { GlobalExceptionFilter, LoggingInterceptor } from './common';
+import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 
 
 async function bootstrap() {
@@ -17,6 +18,9 @@ async function bootstrap() {
     app.use(cookieParser())
     app.enableShutdownHooks();
     app.setGlobalPrefix('api/v1');
+
+    const reflector = app.get(Reflector);
+    app.useGlobalGuards(new JwtAuthGuard(reflector));
 
     app.useGlobalFilters(new GlobalExceptionFilter());
 
@@ -34,10 +38,10 @@ async function bootstrap() {
       }
     }));
 
-    app.enableCors({
-      origin: configService.get<string>('app.frontendUrl'),
-      credentials: true,
-    });
+    // app.enableCors({
+    //   origin: configService.get<string>('app.frontendUrl'),
+    //   credentials: true,
+    // });
 
     const port = configService.get<number>('app.port');
     
