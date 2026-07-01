@@ -7,19 +7,19 @@ import { AxiosRequestConfig } from "axios";
 
 @Injectable()
 export class AuthProxyService {
-    private readonly authUrl: string;
+    private readonly identityUrl: string;
 
     constructor(
         private readonly httpService: HttpService,
         private readonly configService: ConfigService,
     ) {
-        this.authUrl = this.configService.get<string>('services.authUrl');
+        this.identityUrl = this.configService.get<string>('services.identityUrl');
     }
 
     async forward(req: Request, path: string, method: string) {
         const config: AxiosRequestConfig = {
             method,
-            url: `${this.authUrl}${path}`,
+            url: `${this.identityUrl}${path}`,
             data: req.body,
             headers: this.buildHeaders(req)
         }

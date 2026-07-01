@@ -4,10 +4,12 @@ import { IdentityService } from './identity.service';
 import { ConfigModule } from '@nestjs/config';
 import appConfig, { envValidationSchema } from './config/app.config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { PrismaModule } from '../prisma/prisma.module'; 
 
 @Module({
   imports: [
     ConfigModule.forRoot({
+      envFilePath: 'apps/identity/.env',
       isGlobal: true,
       load: [appConfig],
       validationSchema: envValidationSchema,
@@ -16,6 +18,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         abortEarly: true,
       }
     }),
+    PrismaModule
   ],
   controllers: [],
   providers: [],
