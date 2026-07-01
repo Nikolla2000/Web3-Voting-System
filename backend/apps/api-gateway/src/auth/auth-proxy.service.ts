@@ -13,7 +13,7 @@ export class AuthProxyService {
         private readonly httpService: HttpService,
         private readonly configService: ConfigService,
     ) {
-        this.identityUrl = this.configService.get<string>('services.identityUrl');
+        this.identityUrl = this.configService.get<string>('services.identityUrl')!;
     }
 
     async forward(req: Request, path: string, method: string) {

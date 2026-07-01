@@ -3,7 +3,7 @@ import { ConfigService } from "@nestjs/config";
 import { AuthProxyService } from "./auth-proxy.service";
 import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Public } from "./decorators/public.decorator";
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 
 @ApiTags('Auth')
 @Controller()
