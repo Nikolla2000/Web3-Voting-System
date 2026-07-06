@@ -1,16 +1,19 @@
-import { Controller, Get, HttpCode, HttpStatus, Param, Patch, Post, Req, Res } from "@nestjs/common";
+import { Controller, Get, HttpCode, HttpStatus, Inject, Param, Patch, Post, Req, Res } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AuthProxyService } from "./auth-proxy.service";
 import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Public } from "./decorators/public.decorator";
 import type { Request, Response } from 'express';
+import { firstValueFrom, timeout } from "rxjs";
+import { ClientProxy } from "@nestjs/microservices";
 
 @ApiTags('Auth')
 @Controller()
 export class AuthProxyController {
     constructor(
         private readonly configService: ConfigService,
-        private readonly authProxyService: AuthProxyService
+        private readonly authProxyService: AuthProxyService,
+        @Inject('IDENTITY_SERVICE') private readonly authClient: ClientProxy,
     ) {}
 
     @Public()
@@ -93,6 +96,21 @@ export class AuthProxyController {
     @ApiOperation({ summary: 'Update current user profile' })
     async updateMe(@Req() req: Request) {
         return this.authProxyService.forward(req, '/api/users/me', 'PATCH');
+    }
+
+
+    @Public()
+    @Get('auth/test')
+    async test() {
+      return this.send('auth.test', {});
+    }
+
+    private async send<T>(pattern: string, payload: unknown): Promise<T> {
+      return firstValueFrom(
+      this.authClient
+          .send<T>({ cmd: pattern }, payload)
+          .pipe(timeout(10000)),
+      );
     }
 
 

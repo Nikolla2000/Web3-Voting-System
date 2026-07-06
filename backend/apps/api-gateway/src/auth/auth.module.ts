@@ -6,6 +6,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthProxyController } from './auth-proxy.controller';
 import { AuthProxyService } from './auth-proxy.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
@@ -26,6 +27,16 @@ import { JwtStrategy } from './strategies/jwt.strategy';
         timeout: 10000,
       }),
     }),
+    ClientsModule.register([
+      {
+        name: 'IDENTITY_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: '127.0.0.1',
+          port: 3001
+        }
+      }
+    ]),
   ],
   controllers: [AuthProxyController],
   providers: [AuthProxyService, JwtStrategy],

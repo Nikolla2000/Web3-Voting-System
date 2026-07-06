@@ -10,6 +10,7 @@ import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { ClientsModule, Transport } from '@nestjs/microservices';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
@@ -27,16 +28,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
       ttl: 60000,
       limit: 100,
     }]),
-    ClientsModule.register([
-      {
-        name: 'IDENTITY_SERVICE',
-        transport: Transport.TCP,
-        options: {
-          host: '127.0.0.1',
-          port: 3001
-        }
-      }
-    ])
+    AuthModule
   ],
   controllers: [],
   providers: [
