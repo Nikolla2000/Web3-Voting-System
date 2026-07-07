@@ -3,7 +3,7 @@ import * as Joi from 'joi';
 
 export default registerAs('jwt', () => ({
     accessSecret: process.env.JWT_ACCESS_SECRET,
-    refreshSecret: process.env.JWT_REFRESH_SECRET, 
+    refreshSecret: process.env.JWT_REFRESH_SECRET,
 }));
 
 export const jwtEnvValidation  = {

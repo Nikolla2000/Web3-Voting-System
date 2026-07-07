@@ -7,49 +7,49 @@ import { AxiosRequestConfig } from "axios";
 
 @Injectable()
 export class AuthProxyService {
-    private readonly identityUrl: string;
+//     private readonly identityUrl: string;
 
-    constructor(
-        private readonly httpService: HttpService,
-        private readonly configService: ConfigService,
-    ) {
-        this.identityUrl = this.configService.get<string>('services.identityUrl')!;
-    }
+//     constructor(
+//         private readonly httpService: HttpService,
+//         private readonly configService: ConfigService,
+//     ) {
+//         this.identityUrl = this.configService.get<string>('services.identityUrl')!;
+//     }
 
-    async forward(req: Request, path: string, method: string) {
-        const config: AxiosRequestConfig = {
-            method,
-            url: `${this.identityUrl}${path}`,
-            data: req.body,
-            headers: this.buildHeaders(req)
-        }
+//     async forward(req: Request, path: string, method: string) {
+//         const config: AxiosRequestConfig = {
+//             method,
+//             url: `${this.identityUrl}${path}`,
+//             data: req.body,
+//             headers: this.buildHeaders(req)
+//         }
 
-        const response = await firstValueFrom(
-            this.httpService.request(config),
+//         const response = await firstValueFrom(
+//             this.httpService.request(config),
 
-        )
+//         )
 
-        return response.data;
-    }
+//         return response.data;
+//     }
 
-    /**
-   * Forward only safe headers,not internal headers.
-   * Authorization is forwarded so auth-service guards work
-   * Cookie is forwarded for refresh token.
-   */
-    private buildHeaders(req: Request): Record<string, string> {
-        const headers: Record<string, string> = {
-            'Content-Type': 'application/json',
-        };
+//     /**
+//    * Forward only safe headers,not internal headers.
+//    * Authorization is forwarded so auth-service guards work
+//    * Cookie is forwarded for refresh token.
+//    */
+//     private buildHeaders(req: Request): Record<string, string> {
+//         const headers: Record<string, string> = {
+//             'Content-Type': 'application/json',
+//         };
     
-        if (req.headers.authorization) {
-            headers['Authorization'] = req.headers.authorization;
-        }
+//         if (req.headers.authorization) {
+//             headers['Authorization'] = req.headers.authorization;
+//         }
     
-        if (req.headers.cookie) {
-            headers['Cookie'] = req.headers.cookie;
-        }
+//         if (req.headers.cookie) {
+//             headers['Cookie'] = req.headers.cookie;
+//         }
     
-        return headers;
-    }
+//         return headers;
+//     }
 }

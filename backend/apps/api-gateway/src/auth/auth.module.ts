@@ -19,14 +19,14 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         signOptions: { expiresIn: '15m' },
       }),
     }),
-    HttpModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        baseURL: configService.get<string>('services.authUrl'),
-        timeout: 10000,
-      }),
-    }),
+    // HttpModule.registerAsync({
+    //   imports: [ConfigModule],
+    //   inject: [ConfigService],
+    //   useFactory: (configService: ConfigService) => ({
+    //     baseURL: configService.get<string>('services.identityUrl'),
+    //     timeout: 10000,
+    //   }),
+    // }),
     ClientsModule.register([
       {
         name: 'IDENTITY_SERVICE',
