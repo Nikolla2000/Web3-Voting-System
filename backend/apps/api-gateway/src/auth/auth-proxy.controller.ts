@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, HttpStatus, Inject, Param, Patch, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, Patch, Post, Req, Res } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AuthProxyService } from "./auth-proxy.service";
 import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
@@ -6,6 +6,7 @@ import { Public } from "./decorators/public.decorator";
 import type { Request, Response } from 'express';
 import { firstValueFrom, timeout } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
+import { AuthResponse } from "@app/shared";
 
 @ApiTags('Auth')
 @Controller()
@@ -16,15 +17,15 @@ export class AuthProxyController {
         @Inject('IDENTITY_SERVICE') private readonly authClient: ClientProxy,
     ) {}
 
-    @Public()
-    @Post('auth/register')
-    @HttpCode(HttpStatus.CREATED)
-    @ApiOperation({ summary: 'Register a new user' })
-    async register(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-       const data = await this.authProxyService.forward(req, '/api/auth/register', 'POST');
-       this.forwardCookie(res, data);
-       return data;
-    }
+    // @Public()
+    // @Post('auth/register')
+    // @HttpCode(HttpStatus.CREATED)
+    // @ApiOperation({ summary: 'Register a new user' })
+    // async register(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    //    const data = await this.authProxyService.forward(req, '/api/auth/register', 'POST');
+    //    this.forwardCookie(res, data);
+    //    return data;
+    // }
 
     @Public()
     @Post('auth/login')
@@ -99,12 +100,34 @@ export class AuthProxyController {
     }
 
 
+    // OT TUK POCHVAT NOVITE ROUTERS
+    // TEST ROUTE
     @Public()
     @Get('auth/test')
     async test() {
       return this.send('auth.test', {});
     }
 
+    @Public()
+    @Post('auth/register')
+    @HttpCode(HttpStatus.CREATED)
+    @ApiOperation({ summary: 'Register a new user' })
+    async register(
+      @Body() dto: any,
+      @Res({ passthrough: true }) res: Response
+    ) {
+      const data = await this.send<AuthResponse>('auth.register', dto);
+      this.setRefreshCookie(res, data.tokens.refreshToken)
+      return { user: data.user, accessToken: data.tokens.accessToken }
+    }
+
+
+    /**
+     * ClientProxy.send() wrapper
+     * @param firstValueFrom converts Observable to Promise 
+     * @param timeout - 10 secs, to save from hanging requests if identity service doesn't respond 
+     * @returns 
+     */
     private async send<T>(pattern: string, payload: unknown): Promise<T> {
       return firstValueFrom(
       this.authClient
@@ -113,7 +136,7 @@ export class AuthProxyController {
       );
     }
 
-
+    // DO TUK
     private forwardCookie(res: Response, data: any): void {
         if (data?.refreshToken) {
             const isProd = this.configService.get<boolean>('app.isDevelopment') === false;
@@ -124,6 +147,15 @@ export class AuthProxyController {
                 maxAge: 7 * 24 * 60 * 60 * 1000,
             })
         }
-    }
+    }  // TO REMOVE LATER THIS FUNC
 
+    private setRefreshCookie(res: Response, refreshToken: string): void {
+      const isProd = this.configService.get<string>('app.nodeEnv') === 'production';
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
+    }
 }

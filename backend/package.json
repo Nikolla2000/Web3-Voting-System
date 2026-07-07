@@ -89,8 +89,12 @@
     "coverageDirectory": "./coverage",
     "testEnvironment": "node",
     "roots": [
-      "<rootDir>/apps/"
-    ]
+      "<rootDir>/apps/",
+      "<rootDir>/libs/"
+    ],
+    "moduleNameMapper": {
+      "^@app/shared(|/.*)$": "<rootDir>/libs/shared/src/$1"
+    }
   },
   "overrides": {
     "js-yaml": "^4.1.1",
