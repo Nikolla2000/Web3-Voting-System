@@ -5,7 +5,7 @@ import { JwtService } from "@nestjs/jwt";
 // import { Role } from "src/generated/prisma/enums";
 // import { UsersService } from "src/users/users.service";
 import { UsersService } from "../users/users.service";
-import { AuthResponse, AuthTokens, GoogleProfile, JwtPayload } from "./auth.types";
+import { AuthTokens, GoogleProfile, JwtPayload } from "./auth.types";
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from "./dto/register.dto";
 import { LoginDto } from "./dto/login.dto";
@@ -15,6 +15,7 @@ import { SafeUser } from "../users/users.types";
 import { PrismaService } from "apps/identity/prisma/prisma.service";
 import { Role } from "../generated/prisma/enums";
 import { RefreshToken, User } from "../generated/prisma/client";
+import { AuthResponse } from "@app/shared";
 
 @Injectable()
 export class AuthService {

@@ -4,7 +4,7 @@ import { Controller } from "@nestjs/common";
 import { MessagePattern, Payload } from "@nestjs/microservices";
 import { RegisterDto } from "./dto/register.dto";
 import { AuthService } from "./auth.service";
-import { AuthResponse } from "@app/shared";
+import { AUTH_PATTERNS, AuthResponse } from "@app/shared";
 
 @Controller()
   export class AuthController {
@@ -17,7 +17,7 @@ import { AuthResponse } from "@app/shared";
       return 'test';
     }
 
-    @MessagePattern({ cmd: 'auth.register' })
+    @MessagePattern({ cmd: AUTH_PATTERNS.REGISTER })
     async register(@Payload() dto: RegisterDto): Promise<AuthResponse> {
       const { user, tokens } = await this.authService.register(dto);
 

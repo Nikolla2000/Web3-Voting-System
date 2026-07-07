@@ -6,7 +6,7 @@ import { Public } from "./decorators/public.decorator";
 import type { Request, Response } from 'express';
 import { firstValueFrom, timeout } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
-import { AuthResponse } from "@app/shared";
+import { AUTH_PATTERNS, AuthResponse } from "@app/shared";
 
 @ApiTags('Auth')
 @Controller()
@@ -116,7 +116,7 @@ export class AuthProxyController {
       @Body() dto: any,
       @Res({ passthrough: true }) res: Response
     ) {
-      const data = await this.send<AuthResponse>('auth.register', dto);
+      const data = await this.send<AuthResponse>(AUTH_PATTERNS.REGISTER, dto);
       this.setRefreshCookie(res, data.tokens.refreshToken)
       return { user: data.user, accessToken: data.tokens.accessToken }
     }
