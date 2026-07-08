@@ -6,7 +6,7 @@ import { Public } from "./decorators/public.decorator";
 import type { Request, Response } from 'express';
 import { firstValueFrom, timeout } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
-import { AUTH_PATTERNS, AuthResponse } from "@app/shared";
+import { AUTH_PATTERNS, AuthResponse, LoginDto, RegisterDto } from "@app/shared";
 
 @ApiTags('Auth')
 @Controller()
@@ -27,15 +27,15 @@ export class AuthProxyController {
     //    return data;
     // }
 
-    @Public()
-    @Post('auth/login')
-    @HttpCode(HttpStatus.OK)
-    @ApiOperation({ summary: 'Login user with email and password' })
-    async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-        const data = await this.authProxyService.forward(req, '/api/auth/login', 'POST');
-        this.forwardCookie(res, data);
-        return data;   
-    }
+    // @Public()
+    // @Post('auth/login')
+    // @HttpCode(HttpStatus.OK)
+    // @ApiOperation({ summary: 'Login user with email and password' })
+    // async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    //     const data = await this.authProxyService.forward(req, '/api/auth/login', 'POST');
+    //     this.forwardCookie(res, data);
+    //     return data;   
+    // }
 
     @Public()
     @Post('auth/refresh')
@@ -113,12 +113,25 @@ export class AuthProxyController {
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ summary: 'Register a new user' })
     async register(
-      @Body() dto: any,
+      @Body() dto: RegisterDto,
       @Res({ passthrough: true }) res: Response
     ) {
       const data = await this.send<AuthResponse>(AUTH_PATTERNS.REGISTER, dto);
       this.setRefreshCookie(res, data.tokens.refreshToken)
       return { user: data.user, accessToken: data.tokens.accessToken }
+    }
+
+    @Public()
+    @Post('auth/login')
+    @HttpCode(HttpStatus.OK)
+    @ApiOperation({ summary: 'Login user with email and password' })
+    async login(
+      @Body() dto: LoginDto,
+      @Res({ passthrough: true }) res: Response
+    ) {
+      const data = await this.send<AuthResponse>(AUTH_PATTERNS.LOGIN, dto);
+      this.setRefreshCookie(res, data.tokens.refreshToken);
+      return { user: data.user, accessToken: data.tokens.accessToken };
     }
 
 
