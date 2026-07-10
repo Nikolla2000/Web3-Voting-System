@@ -6,7 +6,7 @@ import { Public } from "./decorators/public.decorator";
 import type { Request, Response } from 'express';
 import { firstValueFrom, timeout } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
-import { AUTH_PATTERNS, AuthResponse, LoginDto, RegisterDto } from "@app/shared";
+import { AUTH_PATTERNS, AuthResponse, AuthTokens, LoginDto, RegisterDto } from "@app/shared";
 
 @ApiTags('Auth')
 @Controller()
@@ -37,16 +37,16 @@ export class AuthProxyController {
     //     return data;   
     // }
 
-    @Public()
-    @Post('auth/refresh')
-    @HttpCode(HttpStatus.OK)
-    @ApiCookieAuth()
-    @ApiOperation({ summary: 'Refresh access token' })
-    async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-        const data = await this.authProxyService.forward(req, '/api/auth/refresh', 'POST');
-        this.forwardCookie(res, data);
-        return data;
-    }
+    // @Public()
+    // @Post('auth/refresh')
+    // @HttpCode(HttpStatus.OK)
+    // @ApiCookieAuth()
+    // @ApiOperation({ summary: 'Refresh access token' })
+    // async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    //     const data = await this.authProxyService.forward(req, '/api/auth/refresh', 'POST');
+    //     this.forwardCookie(res, data);
+    //     return data;
+    // }
 
     @Public()
     @Get('auth/google')
@@ -132,6 +132,21 @@ export class AuthProxyController {
       const data = await this.send<AuthResponse>(AUTH_PATTERNS.LOGIN, dto);
       this.setRefreshCookie(res, data.tokens.refreshToken);
       return { user: data.user, accessToken: data.tokens.accessToken };
+    }
+
+    @Public()
+    @Post('auth/refresh')
+    @HttpCode(HttpStatus.OK)
+    @ApiCookieAuth()
+    @ApiOperation({ summary: 'Refresh access token' })
+    async refresh(
+      @Req() req: Request,
+      @Res({ passthrough: true }) res: Response
+    ) {
+      const refreshToken = req.cookies?.refreshToken;
+      const data = await this.send<AuthTokens>(AUTH_PATTERNS.REFRESH, { refreshToken });
+      this.setRefreshCookie(res, data.refreshToken);
+      return { accessToken: data.accessToken };
     }
 
 

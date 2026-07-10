@@ -13,16 +13,6 @@ export interface JwtRefreshPayload extends JwtPayload {
     refreshToken: string;
 }
 
-export interface AuthTokens {
-    accessToken: string;
-    refreshToken: string;
-}
-
-export interface AuthResponse {
-    user: UserPayload;
-    tokens: AuthTokens;
-}
-
 export interface GoogleProfile {
     id: string;
     email: string;
