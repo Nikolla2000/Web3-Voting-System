@@ -9,12 +9,7 @@ import { AUTH_PATTERNS, AuthResponse, RegisterDto, LoginDto } from "@app/shared"
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-  ) { }
-
-  @MessagePattern({ cmd: 'auth.test' })
-  async test() {
-    return 'test';
-  }
+  ) {}
 
   @MessagePattern({ cmd: AUTH_PATTERNS.REGISTER })
   async register(@Payload() dto: RegisterDto): Promise<AuthResponse> {
@@ -51,4 +46,9 @@ export class AuthController {
     }
   }
 
+  @MessagePattern({ cmd: AUTH_PATTERNS.LOGOUT })
+  async logout(@Payload() payload: { userId: string, refreshToken: string }) {
+    await this.authService.logout(payload.userId, payload.refreshToken);
+    return { message: 'Logged out successfully' };
+  }
 }

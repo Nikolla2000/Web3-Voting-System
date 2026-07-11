@@ -8,6 +8,8 @@ import { firstValueFrom, timeout } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
 import { AUTH_PATTERNS, AuthResponse, AuthTokens, LoginDto, RegisterDto } from "@app/shared";
 import { JwtService } from "@nestjs/jwt";
+import { CurrentUser } from "./decorators/current-user.decorator";
+import type { JwtPayload } from "./strategies/jwt.strategy";
 
 @ApiTags('Auth')
 @Controller()
@@ -58,15 +60,15 @@ export class AuthProxyController {
         return res.redirect(`${authUrl}/api/auth/google`);
     }
 
-    @Post('auth/logout')
-    @HttpCode(HttpStatus.OK)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Logout current session' })
-    async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-        const data = await this.authProxyService.forward(req, '/api/auth/logout', 'POST');
-        res.clearCookie('refreshToken');
-        return data;
-    }
+    // @Post('auth/logout')
+    // @HttpCode(HttpStatus.OK)
+    // @ApiBearerAuth()
+    // @ApiOperation({ summary: 'Logout current session' })
+    // async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    //     const data = await this.authProxyService.forward(req, '/api/auth/logout', 'POST');
+    //     res.clearCookie('refreshToken');
+    //     return data;
+    // }
 
     @Post('auth/logout-all')
     @HttpCode(HttpStatus.OK)
@@ -104,12 +106,6 @@ export class AuthProxyController {
 
     // OT TUK POCHVAT NOVITE ROUTERS
     // TEST ROUTE
-    @Public()
-    @Get('auth/test')
-    async test() {
-      return this.send('auth.test', {});
-    }
-
     @Public()
     @Post('auth/register')
     @HttpCode(HttpStatus.CREATED)
@@ -154,6 +150,21 @@ export class AuthProxyController {
       });
       this.setRefreshCookie(res, data.refreshToken);
       return { accessToken: data.accessToken };
+    }
+
+    @Post('auth/logout')
+    @HttpCode(HttpStatus.OK)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Logout current session' })
+    async logout(
+      @CurrentUser() user: JwtPayload,
+      @Req() req: Request,
+      @Res({ passthrough: true }) res: Response
+    ) {
+      const refreshToken = req.cookies?.refreshToken;
+      const data = await this.send(AUTH_PATTERNS.LOGOUT, { userId: user.sub, refreshToken });
+      res.clearCookie('refreshToken');
+      return data;
     }
 
 
