@@ -3,6 +3,7 @@ import { ApiGatewayModule } from './api-gateway.module';
 import { ConfigService } from '@nestjs/config';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { setupSwagger } from './config/swagger';
+import cookieParser = require('cookie-parser');
 
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);
@@ -21,6 +22,8 @@ async function bootstrap() {
       enableImplicitConversion: true,
     }
   }));
+
+  app.use(cookieParser());
 
   const frontendUrl = configService.get<string>('app.frontendUrl');
   app.enableCors({

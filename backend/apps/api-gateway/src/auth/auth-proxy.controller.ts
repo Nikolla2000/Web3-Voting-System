@@ -7,6 +7,7 @@ import type { Request, Response } from 'express';
 import { firstValueFrom, timeout } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
 import { AUTH_PATTERNS, AuthResponse, AuthTokens, LoginDto, RegisterDto } from "@app/shared";
+import { JwtService } from "@nestjs/jwt";
 
 @ApiTags('Auth')
 @Controller()
@@ -14,6 +15,7 @@ export class AuthProxyController {
     constructor(
         private readonly configService: ConfigService,
         private readonly authProxyService: AuthProxyService,
+        private readonly jwtService: JwtService,
         @Inject('IDENTITY_SERVICE') private readonly authClient: ClientProxy,
     ) {}
 
@@ -144,7 +146,12 @@ export class AuthProxyController {
       @Res({ passthrough: true }) res: Response
     ) {
       const refreshToken = req.cookies?.refreshToken;
-      const data = await this.send<AuthTokens>(AUTH_PATTERNS.REFRESH, { refreshToken });
+      const decoded = this.jwtService.decode(refreshToken) as { sub: string }
+
+      const data = await this.send<AuthTokens>(AUTH_PATTERNS.REFRESH, {
+        userId: decoded.sub,
+        refreshToken
+      });
       this.setRefreshCookie(res, data.refreshToken);
       return { accessToken: data.accessToken };
     }
