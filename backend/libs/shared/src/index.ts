@@ -2,6 +2,7 @@ export * from './shared.module';
 export * from './shared.service';
 
 export * from './users/interfaces/user.interface';
+export * from './users/users.patterns';
 
 export * from './auth/interfaces/auth.interface';
 export * from './auth/dto/register.dto'

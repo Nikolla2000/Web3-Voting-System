@@ -6,7 +6,7 @@ import { Public } from "./decorators/public.decorator";
 import type { Request, Response } from 'express';
 import { firstValueFrom, timeout } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
-import { AUTH_PATTERNS, AuthResponse, AuthTokens, LoginDto, RegisterDto } from "@app/shared";
+import { AUTH_PATTERNS, AuthResponse, AuthTokens, LoginDto, RegisterDto, USERS_PATTERNS } from "@app/shared";
 import { JwtService } from "@nestjs/jwt";
 import { CurrentUser } from "./decorators/current-user.decorator";
 import type { JwtPayload } from "./strategies/jwt.strategy";
@@ -21,91 +21,6 @@ export class AuthProxyController {
         @Inject('IDENTITY_SERVICE') private readonly authClient: ClientProxy,
     ) {}
 
-    // @Public()
-    // @Post('auth/register')
-    // @HttpCode(HttpStatus.CREATED)
-    // @ApiOperation({ summary: 'Register a new user' })
-    // async register(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    //    const data = await this.authProxyService.forward(req, '/api/auth/register', 'POST');
-    //    this.forwardCookie(res, data);
-    //    return data;
-    // }
-
-    // @Public()
-    // @Post('auth/login')
-    // @HttpCode(HttpStatus.OK)
-    // @ApiOperation({ summary: 'Login user with email and password' })
-    // async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    //     const data = await this.authProxyService.forward(req, '/api/auth/login', 'POST');
-    //     this.forwardCookie(res, data);
-    //     return data;   
-    // }
-
-    // @Public()
-    // @Post('auth/refresh')
-    // @HttpCode(HttpStatus.OK)
-    // @ApiCookieAuth()
-    // @ApiOperation({ summary: 'Refresh access token' })
-    // async refresh(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    //     const data = await this.authProxyService.forward(req, '/api/auth/refresh', 'POST');
-    //     this.forwardCookie(res, data);
-    //     return data;
-    // }
-
-    @Public()
-    @Get('auth/google')
-    @ApiOperation({ summary: 'Initiate Google OAuth' })
-    googleAuth(@Res() res: Response) {
-        const authUrl = this.configService.get<string>('services.authUrl');
-        return res.redirect(`${authUrl}/api/auth/google`);
-    }
-
-    // @Post('auth/logout')
-    // @HttpCode(HttpStatus.OK)
-    // @ApiBearerAuth()
-    // @ApiOperation({ summary: 'Logout current session' })
-    // async logout(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-    //     const data = await this.authProxyService.forward(req, '/api/auth/logout', 'POST');
-    //     res.clearCookie('refreshToken');
-    //     return data;
-    // }
-
-    @Post('auth/logout-all')
-    @HttpCode(HttpStatus.OK)
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Logout from all devices' })
-    async logoutAll(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
-        const data = await this.authProxyService.forward(req, '/api/auth/logout-all', 'POST');
-        res.clearCookie('refreshToken');
-        return data;
-    }
-
-
-    //
-    @Get('users/me')
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Get current authenticated user' })
-    async getMe(@Req() req: Request) {
-        return this.authProxyService.forward(req, '/api/users/me', 'GET');
-    }
-    
-    @Get('users/:id')
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Get user by ID' })
-    async findOne(@Req() req: Request, @Param('id') _id: string) {
-        return this.authProxyService.forward(req, `/api/users/${_id}`, 'GET');
-    }
-    
-    @Patch('users/me')
-    @ApiBearerAuth()
-    @ApiOperation({ summary: 'Update current user profile' })
-    async updateMe(@Req() req: Request) {
-        return this.authProxyService.forward(req, '/api/users/me', 'PATCH');
-    }
-
-
-    // OT TUK POCHVAT NOVITE ROUTERS
-    // TEST ROUTE
     @Public()
     @Post('auth/register')
     @HttpCode(HttpStatus.CREATED)
@@ -165,6 +80,43 @@ export class AuthProxyController {
       const data = await this.send(AUTH_PATTERNS.LOGOUT, { userId: user.sub, refreshToken });
       res.clearCookie('refreshToken');
       return data;
+    }
+
+    @Post('auth/logout-all')
+    @HttpCode(HttpStatus.OK)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Logout from all devices' })
+    async logoutAll(
+      @CurrentUser() user: JwtPayload,
+      @Res({ passthrough: true }) res: Response
+    ) {
+      const data = await this.send(AUTH_PATTERNS.LOGOUT_ALL, { userId: user.sub });
+      res.clearCookie('refreshToken');
+      return data;
+    }
+
+    @Get('users/me')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get current authenticated user' })
+    async getMe(@CurrentUser() user: JwtPayload) {
+      return this.send('users.me', { userId: user.sub });
+    }
+    
+    @Get('users/:id')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get user by ID' })
+    async findOne(@Param('id') id: string) {
+      return this.send('users.find-by-id', { userId: id });
+    }
+  
+    @Patch('users/me')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Update current user profile' })
+    async updateMe(
+      @CurrentUser() user: JwtPayload,
+      @Body() dto: any,
+    ) {
+      return this.send('users.update-me', { userId: user.sub, dto });
     }
 
 

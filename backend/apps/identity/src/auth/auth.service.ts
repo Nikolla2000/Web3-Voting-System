@@ -5,7 +5,7 @@ import { JwtService } from "@nestjs/jwt";
 // import { Role } from "src/generated/prisma/enums";
 // import { UsersService } from "src/users/users.service";
 import { UsersService } from "../users/users.service";
-import { GoogleProfile, JwtPayload } from "./auth.types";
+import { GoogleProfile, JwtPayload, UserRegisteredPayload } from "./auth.types";
 import { AuthTokens } from "@app/shared";
 import * as bcrypt from 'bcrypt';
 import { RegisterDto, LoginDto } from "@app/shared";
@@ -16,6 +16,8 @@ import { PrismaService } from "apps/identity/prisma/prisma.service";
 import { Role } from "../generated/prisma/enums";
 import { RefreshToken, User } from "../generated/prisma/client";
 import { AuthResponse } from "@app/shared";
+import { ROUTING_KEYS } from "../rabbitmq/rabbitmq.constants";
+import { RabbitMQService } from "../rabbitmq/rabbitmq.service";
 
 @Injectable()
 export class AuthService {
@@ -24,6 +26,7 @@ export class AuthService {
         private readonly usersService: UsersService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
+        private readonly rabbitMQService: RabbitMQService,
     ) {}
 
    /**
@@ -86,6 +89,13 @@ export class AuthService {
         )
 
         await this.storeRefreshToken(user.id, tokens.refreshToken);
+
+        this.rabbitMQService.publish<UserRegisteredPayload>(ROUTING_KEYS.USER_REGISTERED, {
+            userId: user.id,
+            email: user.email,
+            username: user.username,
+            registeredViaGoogle: false,
+        });
 
         return {
             user: {

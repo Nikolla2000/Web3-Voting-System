@@ -8,6 +8,8 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import jwtConfig from './config/jwt.config';
 import rabbitmqConfig from './config/rabbitmq.config';
+import { UsersModule } from './users/users.module';
+import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import rabbitmqConfig from './config/rabbitmq.config';
     }),
     PrismaModule,
     AuthModule,
+    UsersModule,
+    RabbitMQModule,
   ],
   controllers: [],
   providers: [],
