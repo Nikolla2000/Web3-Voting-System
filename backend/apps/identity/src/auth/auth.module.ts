@@ -11,7 +11,7 @@ import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 // import { UsersModule } from 'src/users/users.module';
 import { UsersModule } from '../users/users.module';
-// import { RabbitMQModule } from 'src/rabbitmq/rabbitmq.module';
+import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
@@ -28,7 +28,7 @@ import { UsersModule } from '../users/users.module';
       }),
     }),
     UsersModule,
-    // RabbitMQModule,
+    RabbitMQModule,
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
