@@ -7,13 +7,14 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { PrismaModule } from '../prisma/prisma.module'; 
 import { AuthModule } from './auth/auth.module';
 import jwtConfig from './config/jwt.config';
+import rabbitmqConfig from './config/rabbitmq.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: 'apps/identity/.env',
       isGlobal: true,
-      load: [appConfig, jwtConfig],
+      load: [appConfig, jwtConfig, rabbitmqConfig],
       validationSchema: envValidationSchema,
       validationOptions: {
         allowUnknown: true,
