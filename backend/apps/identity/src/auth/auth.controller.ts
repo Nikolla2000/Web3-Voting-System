@@ -1,6 +1,4 @@
 import { Controller } from "@nestjs/common";
-// import { AuthService } from "./auth.service";
-// import { UsersService } from "../users/users.service";
 import { MessagePattern, Payload } from "@nestjs/microservices";
 import { AuthService } from "./auth.service";
 import { AUTH_PATTERNS, AuthResponse, RegisterDto, LoginDto } from "@app/shared";
@@ -59,20 +57,5 @@ export class AuthController {
   async logoutAll(@Payload() payload: { userId: string }) {
     await this.authService.logoutAll(payload.userId);
     return { message: 'Logged out from all devices' };
-  }
-
-  @MessagePattern({ cmd: 'users.me' })
-  async getMe(@Payload() payload: { userId: string }) {
-    return this.usersService.findById(payload.userId);
-  }
-
-  @MessagePattern({ cmd: 'users.find-by-id' })
-  async findById(@Payload() payload: { userId: string }) {
-    return this.usersService.findById(payload.userId);
-  }
- 
-  @MessagePattern({ cmd: 'users.update-me' })
-  async updateMe(@Payload() payload: { userId: string; dto: UpdateUserDto }) {
-    return this.usersService.update(payload.userId, payload.dto);
   }
 }

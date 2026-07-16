@@ -3,20 +3,13 @@
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { PassportModule } from '@nestjs/passport';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
-import { JwtStrategy } from './strategies/jwt.strategy';
-import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
-import { GoogleStrategy } from './strategies/google.strategy';
-// import { UsersModule } from 'src/users/users.module';
 import { UsersModule } from '../users/users.module';
 import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
 
 @Module({
   imports: [
-    PassportModule,
-    // ConfigModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -31,6 +24,6 @@ import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
     RabbitMQModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, JwtRefreshStrategy],
+  providers: [AuthService],
 })
 export class AuthModule {}

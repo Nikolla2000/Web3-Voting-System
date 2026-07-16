@@ -98,15 +98,15 @@ export class AuthProxyController {
     @Get('users/me')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get current authenticated user' })
-    async getMe(@CurrentUser() user: JwtPayload) {
-      return this.send('users.me', { userId: user.sub });
+    async getMe(@CurrentUser() user: JwtPayload) {  
+      return this.send(USERS_PATTERNS.GET_ME, { userId: user.sub });
     }
     
     @Get('users/:id')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Get user by ID' })
     async findOne(@Param('id') id: string) {
-      return this.send('users.find-by-id', { userId: id });
+      return this.send(USERS_PATTERNS.FIND_BY_ID, { userId: id });
     }
   
     @Patch('users/me')
@@ -116,7 +116,7 @@ export class AuthProxyController {
       @CurrentUser() user: JwtPayload,
       @Body() dto: any,
     ) {
-      return this.send('users.update-me', { userId: user.sub, dto });
+      return this.send(USERS_PATTERNS.UPDATE_ME, { userId: user.sub, dto });
     }
 
 
@@ -133,19 +133,6 @@ export class AuthProxyController {
           .pipe(timeout(10000)),
       );
     }
-
-    // DO TUK
-    private forwardCookie(res: Response, data: any): void {
-        if (data?.refreshToken) {
-            const isProd = this.configService.get<boolean>('app.isDevelopment') === false;
-            res.cookie('refreshToken', data.refreshToken, {
-                httpOnly: true,
-                secure: isProd,
-                sameSite: 'strict',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            })
-        }
-    }  // TO REMOVE LATER THIS FUNC
 
     private setRefreshCookie(res: Response, refreshToken: string): void {
       const isProd = this.configService.get<string>('app.nodeEnv') === 'production';
