@@ -16,7 +16,7 @@ import { PrismaService } from "apps/identity/prisma/prisma.service";
 import { Role } from "../generated/prisma/enums";
 import { RefreshToken, User } from "../generated/prisma/client";
 import { AuthResponse } from "@app/shared";
-import { ROUTING_KEYS } from "../rabbitmq/rabbitmq.constants";
+import { ROUTING_KEYS } from "@app/shared";
 import { RabbitMQService } from "../rabbitmq/rabbitmq.service";
 
 @Injectable()

@@ -5,7 +5,6 @@ import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     IdentityModule,
     {
