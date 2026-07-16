@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as amqp from 'amqplib';
-import { RABBITMQ_EXCHANGE, RoutingKey } from './rabbitmq.constants';
+import { RABBITMQ_EXCHANGE, RoutingKey } from '@app/shared';
 
 @Injectable()
 export class RabbitMQService implements OnModuleInit, OnModuleDestroy {
