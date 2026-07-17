@@ -10,3 +10,4 @@ export * from './auth/dto/login.dto'
 export * from './auth/auth.patterns';
 
 export * from './rabbitmq/rabbitmq.constants';
+export * from './rabbitmq/rabbitmq-connection.service';

@@ -17,7 +17,7 @@ import { Role } from "../generated/prisma/enums";
 import { RefreshToken, User } from "../generated/prisma/client";
 import { AuthResponse } from "@app/shared";
 import { ROUTING_KEYS } from "@app/shared";
-import { RabbitMQService } from "../rabbitmq/rabbitmq.service";
+import { RabbitMQPublisherService } from "../rabbitmq/rabbitmq.service";
 
 @Injectable()
 export class AuthService {
@@ -26,7 +26,7 @@ export class AuthService {
         private readonly usersService: UsersService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
-        private readonly rabbitMQService: RabbitMQService,
+        private readonly rabbitMQService: RabbitMQPublisherService,
     ) {}
 
    /**
