@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { usePathname } from 'next/navigation';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../../node_modules/react-i18next';
 import { i18nConfig } from '../../../../i18nConfig';
 
 export default function LanguageDropdown() {

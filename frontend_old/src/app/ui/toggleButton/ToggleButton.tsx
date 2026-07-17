@@ -4,7 +4,7 @@ import ToggleButton from '@mui/material/ToggleButton';
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup';
 import { useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
-import { useTranslation } from 'react-i18next';
+import { useTranslation } from '../../../../node_modules/react-i18next';
 import { i18nConfig } from '../../../../i18nConfig';
 
 export default function ToggleBtn({ toggleOptions } : { toggleOptions: String[] }) {
