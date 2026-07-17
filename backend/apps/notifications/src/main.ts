@@ -3,10 +3,10 @@ import { NotificationsModule } from './notifications.module';
 import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
-  const app = await NestFactory.create(NotificationsModule);
-  await app.listen(process.env.port ?? 3002);
-
+  const app = await NestFactory.createApplicationContext(
+    NotificationsModule
+  );
    app.enableShutdownHooks();
-   Logger.log('Notification service is listening on port 3002', 'Bootstrap');
+   Logger.log('Notification service is running', 'Bootstrap');
 }
 bootstrap();

@@ -28,10 +28,3 @@ export interface ErrorResponse {
   message: string | string[];
   error: string;
 }
-
-export interface UserRegisteredPayload {
-  userId: string;
-  email: string;
-  username: string;
-  registeredViaGoogle: boolean;
-}

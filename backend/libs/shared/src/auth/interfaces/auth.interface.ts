@@ -9,3 +9,10 @@ export interface AuthResponse {
     user: UserPayload;
     tokens: AuthTokens;
 }
+
+export interface UserRegisteredPayload {
+  userId: string;
+  email: string;
+  username: string;
+  registeredViaGoogle: boolean;
+}
