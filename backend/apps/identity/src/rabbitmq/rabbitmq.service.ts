@@ -12,7 +12,7 @@ export class RabbitMQPublisherService {
     const channel = this.connectionService.getChannel();
 
     if (!channel) {
-      this.logger.warn(`Cannot publish '${routingKey}' — channel not ready`);
+      this.logger.warn(`Cannot publish '${routingKey}' - channel not ready`);
       return;
     }
 

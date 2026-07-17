@@ -35,8 +35,8 @@ export class EmailService {
     }
   }
 
-  private buildWelcomeTemplate(firstName?: string): string {
-    const greeting = firstName ? `Hello, ${firstName}!` : 'Hello!';
+  private buildWelcomeTemplate(username?: string): string {
+    const greeting = username ? `Hello, ${username}!` : 'Hello!';
     return `
       <div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2>${greeting}</h2>

@@ -9,13 +9,13 @@ export class NotificationsService {
   constructor(private readonly emailService: EmailService) {}
 
   async handleUserRegistered(payload: UserRegisteredPayload): Promise<void> {
-    const { email, userId } = payload;
+    const { email, userId, username } = payload;
 
     if (!email) {
-      this.logger.warn(`user.registered за userId=${userId} без email — skip`);
+      this.logger.warn(`user.registered for userId=${userId} without email - skip`);
       return;
     }
 
-    await this.emailService.sendWelcomeEmail(email);
+    await this.emailService.sendWelcomeEmail(email, username);
   }
 }
