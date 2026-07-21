@@ -1,7 +1,13 @@
+import { Navbar } from '@/components/layout/Navbar';
+import { Hero } from '@/components/home/Hero';
+import { HexGrid } from '@/components/home/HexGrid';
+
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      Test
-    </div>
+    <main className="relative min-h-screen overflow-hidden bg-gradient-to-b from-white via-[#f8f9ff] to-[#f2f3fd]">
+      <HexGrid />
+      <Navbar />
+      <Hero />
+    </main>
   );
 }
