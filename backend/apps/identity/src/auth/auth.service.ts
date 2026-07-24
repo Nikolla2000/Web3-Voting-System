@@ -117,7 +117,7 @@ export class AuthService {
         }
 
         if (!user.isActive) {
-            throw new ForbiddenException('Acocunt is deactivated');
+            throw new ForbiddenException('Account is deactivated');
         }
 
         if (!user.password) {

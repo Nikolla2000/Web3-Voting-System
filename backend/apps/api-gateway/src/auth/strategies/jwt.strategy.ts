@@ -22,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   /**
    * Called only if the token signature and expiry are valid.
-   * Return value is attached to request.user — no DB lookup needed.
+   * Return value is attached to request.user, no DB lookup needed.
    */
   validate(payload: JwtPayload): JwtPayload {
     return payload;

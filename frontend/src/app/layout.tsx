@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google';
+import { AuthBootstrap } from '@/components/auth/AuthBootstrap';
 import './globals.css';
 
 const spaceGrotesk = Space_Grotesk({
@@ -20,7 +21,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'VoteChain — Web3 Voting System',
+  title: 'VoteChain - Web3 Voting System',
   description:
     'A decentralized voting platform where every ballot is cast, counted and verified on-chain.',
 };
@@ -35,6 +36,7 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
+        <AuthBootstrap />
         {children}
       </body>
     </html>
