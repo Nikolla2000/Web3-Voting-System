@@ -1,13 +1,20 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
+import { useAuthStore } from '@/lib/store/auth-store';
 
 export function Navbar() {
+  const user = useAuthStore((state) => state.user);
+  const status = useAuthStore((state) => state.status);
+  const logout = useAuthStore((state) => state.logout);
+
   return (
     <header className="relative z-20 w-full">
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2.5">
-          <Image src="/logo-static.png" alt="VoteChain logo" width={40} height={30} priority />
+          <Image src="/logo-static.png" alt="VoteChain logo" width={30} height={30} priority />
           <span className="text-[15px] font-semibold tracking-tight text-slate-900">
             VoteChain
           </span>
@@ -29,12 +36,23 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          <Button href="/sign-in" variant="ghost" className="hidden sm:inline-flex">
-            Sign in
-          </Button>
-          <Button href="/register" variant="primary" className="!px-5 !py-2.5 text-[13px]">
-            Register
-          </Button>
+          {status === 'authenticated' && user ? (
+            <>
+              <span className="hidden text-sm text-slate-600 sm:inline">{user.username}</span>
+              <Button variant="ghost" onClick={() => logout()}>
+                Log out
+              </Button>
+            </>
+          ) : (
+            <>
+              <Button href="/sign-in" variant="ghost" className="hidden sm:inline-flex">
+                Sign in
+              </Button>
+              <Button href="/register" variant="primary" className="!px-5 !py-2.5 text-[13px]">
+                Register
+              </Button>
+            </>
+          )}
         </div>
       </nav>
     </header>

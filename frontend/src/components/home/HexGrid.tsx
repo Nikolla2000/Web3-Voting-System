@@ -8,7 +8,7 @@ export function HexGrid() {
         className="absolute inset-0 opacity-[0.35]"
         style={{
           backgroundImage:
-            'linear-gradient(to right, rgba(79,70,229,0.08) 1px, transparent 1px), linear-gradient(to bottom, rgba(79,70,229,0.08) 1px, transparent 1px)',
+            'linear-gradient(to right, rgba(79,70,229,0.2) 1px, transparent 1px), linear-gradient(to bottom, rgba(79,70,229,0.2) 1px, transparent 1px)',
           backgroundSize: '56px 56px',
           maskImage:
             'radial-gradient(ellipse 60% 50% at 50% 35%, black 20%, transparent 75%)',
