@@ -23,7 +23,6 @@ type RegisterPayload = Omit<RegisterFormValues, 'confirmPassword'>;
 
 export async function loginRequest(payload: LoginFormValues): Promise<AuthUser> {
   const { data } = await apiClient.post<ApiResponse<AuthResponseData>>('/auth/login', payload);
-  console.log(data);
   return data.data.user;
 }
 
@@ -32,6 +31,13 @@ export async function registerRequest(payload: RegisterPayload): Promise<AuthUse
   return data;
 }
 
+// Uses httpOnly cookie
+export async function refreshRequest(): Promise<string> {
+  const { data } = await apiClient.post<ApiResponse<{ accessToken: string }>>('/auth/refresh');
+  console.log(data);
+  return data.data.accessToken; 
+}
+ 
 export async function logoutRequest(): Promise<void> {
   await apiClient.post('/auth/logout');
 }
