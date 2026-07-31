@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google';
 import { AuthBootstrap } from '@/components/auth/AuthBootstrap';
 import './globals.css';
+import { Providers } from './providers';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -36,8 +37,10 @@ export default function RootLayout({
       <body
         className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} font-sans antialiased`}
       >
-        <AuthBootstrap />
-        {children}
+        <Providers>
+          <AuthBootstrap />
+          {children}
+        </Providers>
       </body>
     </html>
   );

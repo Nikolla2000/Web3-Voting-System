@@ -4,11 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { UserMenu } from './UserMenu';
 
 export function Navbar() {
   const user = useAuthStore((state) => state.user);
   const status = useAuthStore((state) => state.status);
-  const logout = useAuthStore((state) => state.logout);
 
   return (
     <header className="relative z-20 w-full">
@@ -37,12 +37,7 @@ export function Navbar() {
 
         <div className="flex items-center gap-3">
           {status === 'authenticated' && user ? (
-            <>
-              <span className="hidden text-sm text-slate-600 sm:inline">{user.username}</span>
-              <Button variant="ghost" onClick={() => logout()}>
-                Log out
-              </Button>
-            </>
+            <UserMenu user={user} />
           ) : (
             <>
               <Button href="/sign-in" variant="ghost" className="hidden sm:inline-flex">

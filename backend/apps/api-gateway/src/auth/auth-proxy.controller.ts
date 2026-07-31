@@ -78,7 +78,14 @@ export class AuthProxyController {
     ) {
       const refreshToken = req.cookies?.refreshToken;
       const data = await this.send(AUTH_PATTERNS.LOGOUT, { userId: user.sub, refreshToken });
-      res.clearCookie('refreshToken');
+      const isProd = this.configService.get<string>('app.nodeEnv') === 'production';
+  
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'strict' : 'lax' as const,
+        path: '/'
+      });
       return data;
     }
 
@@ -91,7 +98,14 @@ export class AuthProxyController {
       @Res({ passthrough: true }) res: Response
     ) {
       const data = await this.send(AUTH_PATTERNS.LOGOUT_ALL, { userId: user.sub });
-      res.clearCookie('refreshToken');
+      const isProd = this.configService.get<string>('app.nodeEnv') === 'production';
+  
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'strict' : 'lax' as const,
+        path: '/'
+      });
       return data;
     }
 
@@ -139,9 +153,9 @@ export class AuthProxyController {
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: isProd,
-        sameSite: 'strict',
+        sameSite: isProd ? 'strict' : 'lax' as const,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        path: '/api/auth/refresh'
+        // path: '/api/auth/refresh'
       });
     }
 }

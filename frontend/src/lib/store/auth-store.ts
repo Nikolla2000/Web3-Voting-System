@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import {
-  fetchSession,
+  fetchMe,
   loginRequest,
   logoutRequest,
   refreshRequest,
@@ -32,7 +32,7 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const accessToken = await refreshRequest();
       set({ accessToken });
-      const user = await fetchSession();
+      const user = await fetchMe();
       set({ user, status: 'authenticated' });
     } catch {
       set({ user: null, accessToken: null, status: 'unauthenticated' });
@@ -51,7 +51,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   logout: async () => {
     await logoutRequest();
-    set({ user: null, status: 'unauthenticated' });
+    set({ user: null, status: 'unauthenticated', accessToken: null });
   },
 
   // Called by the axios interceptor when a refresh attempt fails

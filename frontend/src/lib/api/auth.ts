@@ -42,10 +42,10 @@ export async function logoutRequest(): Promise<void> {
   await apiClient.post('/auth/logout');
 }
 
-export async function fetchSession(): Promise<AuthUser | null> {
+export async function fetchMe(): Promise<AuthUser | null> {
   try {
-    const { data } = await apiClient.get<AuthUser>('/users/me');
-    return data;
+    const res = await apiClient.get<ApiResponse<AuthUser>>('/users/me');
+    return res.data.data;
   } catch {
     return null;
   }

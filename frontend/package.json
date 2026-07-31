@@ -14,6 +14,9 @@
     "@hookform/resolvers": "^5.4.0",
     "@rainbow-me/rainbowkit": "^2.2.11",
     "@tanstack/react-query": "^5.101.2",
+    "@x402/core": "^2.20.0",
+    "@x402/evm": "^2.20.0",
+    "@x402/svm": "^2.20.0",
     "axios": "^1.18.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
@@ -49,5 +52,8 @@
       "eslint --fix",
       "prettier --write"
     ]
+  },
+  "overrides": {
+    "qr": "0.6.0"
   }
 }
