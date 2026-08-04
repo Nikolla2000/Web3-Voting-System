@@ -2,8 +2,9 @@
 
 import Link from 'next/link';
 import { Menu } from '@base-ui/react/menu';
+import { useAccount, useDisconnect } from 'wagmi';
+import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useAuthStore } from '@/lib/store/auth-store';
-import { useWallet, METAMASK_INSTALL_URL } from '@/lib/web3/use-wallet';
 import type { AuthUser } from '@/lib/api/auth';
 
 function truncateAddress(address: string) {
@@ -19,11 +20,15 @@ interface UserMenuProps {
 
 export function UserMenu({ user }: UserMenuProps) {
   const logout = useAuthStore((state) => state.logout);
-  const { address, isConnected, disconnect, connectWallet, hasInjectedProvider } = useWallet();
+  const { address, isConnected } = useAccount();
+  const { disconnect } = useDisconnect();
+  const { openConnectModal } = useConnectModal();
+
+  console.log(user)
 
   return (
     <Menu.Root>
-      <Menu.Trigger className="flex items-center gap-2.5 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-3.5 text-sm font-medium text-slate-700 shadow-[0_2px_10px_-4px_rgba(15,23,42,0.08)] transition-colors hover:border-indigo-200">
+      <Menu.Trigger className="flex items-center gap-2.5 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-3.5 text-sm font-medium text-slate-700 shadow-[0_2px_10px_-4px_rgba(15,23,42,0.08)] transition-colors hover:border-indigo-200 cursor-pointer">
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-xs font-semibold text-white">
           {user.username.slice(0, 2).toUpperCase()}
         </span>
@@ -46,27 +51,21 @@ export function UserMenu({ user }: UserMenuProps) {
                 </span>
                 <span className="text-xs text-red-500">Disconnect</span>
               </Menu.Item>
-            ) : hasInjectedProvider ? (
+            ) : (
               <Menu.Item
-                onClick={connectWallet}
+                onClick={() => openConnectModal?.()}
                 className={`${menuItemClass} text-indigo-600 data-[highlighted]:bg-indigo-50`}
               >
                 Connect wallet
-              </Menu.Item>
-            ) : (
-              <Menu.Item
-                render={
-                  <a href={METAMASK_INSTALL_URL} target="_blank" rel="noopener noreferrer" />
-                }
-                className={`${menuItemClass} text-indigo-600 data-[highlighted]:bg-indigo-50`}
-              >
-                Install MetaMask
               </Menu.Item>
             )}
 
             <Menu.Separator className="my-1 h-px bg-slate-100" />
 
-            <Menu.Item onClick={() => logout()} className={`${menuItemClass} text-slate-500`}>
+            <Menu.Item
+              onClick={() => logout()}
+              className={`${menuItemClass} text-slate-500`}
+            >
               Log out
             </Menu.Item>
           </Menu.Popup>

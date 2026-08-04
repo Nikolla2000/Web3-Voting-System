@@ -1,5 +1,3 @@
-// PATH: api-gateway/src/auth/decorators/current-user.decorator.ts
-
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { JwtPayload } from '../strategies/jwt.strategy';
 
