@@ -57,10 +57,13 @@ export class AuthProxyController {
       @Res({ passthrough: true }) res: Response
     ) {
       const refreshToken = req.cookies?.refreshToken;
-      const decoded = this.jwtService.decode(refreshToken) as { sub: string }
+      // const decoded = this.jwtService.decode(refreshToken) as { sub: string }
+      const payload = await this.jwtService.verifyAsync(refreshToken, {
+        secret: this.configService.get<string>('jwt.refreshSecret'),
+      })
 
       const data = await this.send<AuthTokens>(AUTH_PATTERNS.REFRESH, {
-        userId: decoded.sub,
+        userId: payload.sub,
         refreshToken
       });
       this.setRefreshCookie(res, data.refreshToken);
