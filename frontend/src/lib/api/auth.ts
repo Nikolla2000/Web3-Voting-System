@@ -21,9 +21,9 @@ export interface AuthResponseData {
 
 type RegisterPayload = Omit<RegisterFormValues, 'confirmPassword'>;
 
-export async function loginRequest(payload: LoginFormValues): Promise<AuthUser> {
-  const { data } = await apiClient.post<ApiResponse<AuthResponseData>>('/auth/login', payload);
-  return data.data.user;
+export async function loginRequest(payload: LoginFormValues): Promise<AuthResponseData> {
+  const res = await apiClient.post<ApiResponse<AuthResponseData>>('/auth/login', payload);
+  return res.data.data;
 }
 
 export async function registerRequest(payload: RegisterPayload): Promise<AuthUser> {
