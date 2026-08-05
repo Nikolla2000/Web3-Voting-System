@@ -5,10 +5,16 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/Button';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { UserMenu } from './UserMenu';
+import { NavbarAuthSkeleton } from './NavbarAuthSkeleton';
+import { useShallow } from 'zustand/react/shallow';
 
 export function Navbar() {
-  const user = useAuthStore((state) => state.user);
-  const status = useAuthStore((state) => state.status);
+  const { user, status } = useAuthStore(
+    useShallow((state) => ({
+      user: state.user,
+      status: state.status,
+    }))
+  );
 
   return (
     <header className="relative z-20 w-full">
@@ -36,14 +42,21 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-3">
-          {status === 'authenticated' && user ? (
+          {status === 'loading' || status === 'idle' ? (
+            <NavbarAuthSkeleton />
+          ) : status === 'authenticated' && user ? (
             <UserMenu user={user} />
           ) : (
             <>
               <Button href="/sign-in" variant="ghost" className="hidden sm:inline-flex">
                 Sign in
               </Button>
-              <Button href="/register" variant="primary" className="!px-5 !py-2.5 text-[13px]">
+
+              <Button
+                href="/register"
+                variant="primary"
+                className="!px-5 !py-2.5 text-[13px]"
+              >
                 Register
               </Button>
             </>
