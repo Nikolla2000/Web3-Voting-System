@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, Patch, Post, Req, Res } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, Patch, Post, Req, Res, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AuthProxyService } from "./auth-proxy.service";
 import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
@@ -10,6 +10,7 @@ import { AUTH_PATTERNS, AuthResponse, AuthTokens, LoginDto, RegisterDto, USERS_P
 import { JwtService } from "@nestjs/jwt";
 import { CurrentUser } from "./decorators/current-user.decorator";
 import type { JwtPayload } from "./strategies/jwt.strategy";
+import { UpdateUserDto } from "@app/shared/users/dto/update-user.dto";
 
 @ApiTags('Auth')
 @Controller()
@@ -57,10 +58,19 @@ export class AuthProxyController {
       @Res({ passthrough: true }) res: Response
     ) {
       const refreshToken = req.cookies?.refreshToken;
-      // const decoded = this.jwtService.decode(refreshToken) as { sub: string }
-      const payload = await this.jwtService.verifyAsync(refreshToken, {
-        secret: this.configService.get<string>('jwt.refreshSecret'),
-      })
+
+      if (!refreshToken) {
+        throw new UnauthorizedException('Refresh token is missing');
+      }
+
+      let payload: JwtPayload;
+      try {
+        payload = await this.jwtService.verifyAsync(refreshToken, {
+          secret: this.configService.get<string>('jwt.refreshSecret'),
+        });
+      } catch (error) {
+        throw new UnauthorizedException('Refresh token is invalid or expired');
+      }
 
       const data = await this.send<AuthTokens>(AUTH_PATTERNS.REFRESH, {
         userId: payload.sub,
@@ -131,7 +141,7 @@ export class AuthProxyController {
     @ApiOperation({ summary: 'Update current user profile' })
     async updateMe(
       @CurrentUser() user: JwtPayload,
-      @Body() dto: any,
+      @Body() dto: UpdateUserDto,
     ) {
       return this.send(USERS_PATTERNS.UPDATE_ME, { userId: user.sub, dto });
     }
