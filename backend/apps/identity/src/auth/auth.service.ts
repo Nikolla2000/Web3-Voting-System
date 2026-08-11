@@ -19,6 +19,7 @@ import { RefreshToken, User } from "../generated/prisma/client";
 import { AuthResponse } from "@app/shared";
 import { ROUTING_KEYS } from "@app/shared";
 import { RabbitMQPublisherService } from "../rabbitmq/rabbitmq.service";
+import { RpcException } from "@nestjs/microservices";
 
 @Injectable()
 export class AuthService {
@@ -113,21 +114,21 @@ export class AuthService {
         const user = await this.usersService.findByEmail(dto.email);
 
         if (!user) {
-            throw new UnauthorizedException('Invalid credentials');
+            throw new RpcException({ statusCode: 401, message: 'Invalid credentials' });
         }
 
         if (!user.isActive) {
-            throw new ForbiddenException('Account is deactivated');
+            throw new RpcException({ statusCode: 403, message: 'Account is deactivated' });
         }
 
         if (!user.password) {
-            throw new UnauthorizedException('This accound uses Google sign-in. Please login with Google.');
+            throw new RpcException({ statusCode: 401, message: 'This account uses Google sign-in. Please login with Google.' });
         }
 
         const passwordMatch = await bcrypt.compare(dto.password, user.password);
 
         if (!passwordMatch) {
-            throw new UnauthorizedException('Invalid credentials');
+            throw new RpcException({ statusCode: 401, message: 'Invalid credentials' });
         }
 
         const tokens = await this.generateTokens(
@@ -206,7 +207,7 @@ export class AuthService {
         }
 
         if (!matchedToken) {
-            throw new UnauthorizedException('Invalid refresh token');
+            throw new RpcException({ statusCode: 401, message: 'Invalid refresh token' });
         }
 
         await this.prisma.refreshToken.delete({

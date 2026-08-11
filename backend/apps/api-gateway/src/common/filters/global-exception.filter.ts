@@ -18,88 +18,91 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   }
 
   private extractErrorDetails(
-    exception: unknown,
-    request: Request
-  ): { status: number, body: ErrorResponse } {
+  exception: unknown,
+  request: Request
+): { status: number, body: ErrorResponse } {
 
-    if (typeof exception === 'object' && exception !== null) {
-      const errorObj = exception as Record<string, any>;
+  // CHECKING HTTP ERRORS FIRST
+  if (exception instanceof HttpException) {
+    const status = exception.getStatus();
+    const exceptionResponse = exception.getResponse();
 
-      const parseStatus = (val: any): number | null => {
-        const parsed = parseInt(val, 10);
-        return isNaN(parsed) ? null : parsed;
+    if (this.isUpstreamError(exceptionResponse)) {
+      return {
+        status,
+        body: exceptionResponse as ErrorResponse,
       };
-
-      const innerResponse = errorObj.response;
-      if (innerResponse && typeof innerResponse === 'object') {
-        const status = parseStatus(innerResponse.statusCode) ?? parseStatus(innerResponse.status) ?? HttpStatus.INTERNAL_SERVER_ERROR;
-        return {
-          status,
-          body: this.buildBody(
-            status,
-            innerResponse.message ?? 'Microservice error',
-            innerResponse.error ?? 'MicroserviceError',
-            request
-          )
-        };
-      }
-
-      if ('message' in errorObj) {
-        const status = parseStatus(errorObj.statusCode) ?? parseStatus(errorObj.status) ?? HttpStatus.INTERNAL_SERVER_ERROR;
-        return {
-          status,
-          body: this.buildBody(
-            status,
-            errorObj.message,
-            errorObj.error ?? 'MicroserviceError',
-            request
-          )
-        };
-      }
     }
 
-    if (exception instanceof HttpException) {
-      const status = exception.getStatus();
-      const exceptionResponse = exception.getResponse();
-
-      if (this.isUpstreamError(exceptionResponse)) {
-        return {
-          status,
-          body: exceptionResponse as ErrorResponse,
-        };
-      }
-
-      if (typeof exceptionResponse === 'string') {
-        return {
-          status,
-          body: this.buildBody(status, exceptionResponse, exception.name, request)
-        };
-      }
-
-      if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
-        const resp = exceptionResponse as Record<string, unknown>;
-        return {
-          status,
-          body: this.buildBody(
-            status,
-            (resp.message as string | string[]) ?? exception.message,
-            (resp.error as string) ?? exception.name,
-            request,
-          ),
-        };
-      }
+    if (typeof exceptionResponse === 'string') {
+      return {
+        status,
+        body: this.buildBody(status, exceptionResponse, exception.name, request)
+      };
     }
 
-    return {
-      status: HttpStatus.INTERNAL_SERVER_ERROR,
-      body: this.buildBody(
-        HttpStatus.INTERNAL_SERVER_ERROR,
-        exception instanceof Error ? exception.message : 'Internal server error',
-        'InternalServerError',
-        request
-      )
-    };
+    if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
+      const resp = exceptionResponse as Record<string, unknown>;
+      return {
+        status,
+        body: this.buildBody(
+          status,
+          (resp.message as string | string[]) ?? exception.message,
+          (resp.error as string) ?? exception.name,
+          request,
+        ),
+      };
+    }
   }
+
+  // CHECKING RAW OBJECTS ERRORS (Microservices, Rpc)
+  if (typeof exception === 'object' && exception !== null) {
+    const errorObj = exception as Record<string, any>;
+
+    const parseStatus = (val: any): number | null => {
+      const parsed = parseInt(val, 10);
+      return isNaN(parsed) ? null : parsed;
+    };
+
+    const innerResponse = errorObj.response;
+    if (innerResponse && typeof innerResponse === 'object') {
+      const status = parseStatus(innerResponse.statusCode) ?? parseStatus(innerResponse.status) ?? HttpStatus.INTERNAL_SERVER_ERROR;
+      return {
+        status,
+        body: this.buildBody(
+          status,
+          innerResponse.message ?? 'Microservice error',
+          innerResponse.error ?? 'MicroserviceError',
+          request
+        )
+      };
+    }
+
+    if ('message' in errorObj) {
+      const status = parseStatus(errorObj.statusCode) ?? parseStatus(errorObj.status) ?? HttpStatus.INTERNAL_SERVER_ERROR;
+      return {
+        status,
+        body: this.buildBody(
+          status,
+          errorObj.message,
+          errorObj.error ?? 'MicroserviceError',
+          request
+        )
+      };
+    }
+  }
+
+  // Fall to 500 for everything else (crashes, code errors, etc)
+  return {
+    status: HttpStatus.INTERNAL_SERVER_ERROR,
+    body: this.buildBody(
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      exception instanceof Error ? exception.message : 'Internal server error',
+      'InternalServerError',
+      request
+    )
+  };
+}
 
   private isUpstreamError(resp: unknown): boolean {
     return (
@@ -134,7 +137,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const meta = `${request.method} ${request.url} → ${status}`;
 
     if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
-      // Проверяваме дали има стек trace, ако не - сериализираме обекта, за да го прочетем
       const errorDetail = exception instanceof Error
         ? exception.stack
         : (typeof exception === 'object' ? JSON.stringify(exception, null, 2) : String(exception));
