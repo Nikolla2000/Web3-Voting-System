@@ -17,3 +17,9 @@ export class RpcBadRequestException extends RpcException {
     super({ statusCode: 400, message });
   }
 }
+
+export class RpcConflictException extends RpcException {
+  constructor(message: string = 'Conflict') {
+    super({ statusCode: 409, message });
+  }
+}
