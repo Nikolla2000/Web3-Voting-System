@@ -58,8 +58,8 @@ apiClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const { data } = await apiClient.post<{ accessToken: string }>('/auth/refresh');
-      useAuthStore.setState({ accessToken: data.accessToken });
+      const { data } = await apiClient.post<{ data: { accessToken: string }}>('/auth/refresh');
+      useAuthStore.setState({ accessToken: data.data.accessToken });
       isRefreshing = false;
       flushQueue(null);
       return apiClient(originalRequest);
