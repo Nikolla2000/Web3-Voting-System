@@ -11,3 +11,5 @@ export * from './auth/auth.patterns';
 
 export * from './rabbitmq/rabbitmq.constants';
 export * from './rabbitmq/rabbitmq-connection.service';
+
+export * from './exceptions/rpc-exceptions';

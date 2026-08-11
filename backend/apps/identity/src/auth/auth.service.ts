@@ -6,7 +6,7 @@ import { JwtService } from "@nestjs/jwt";
 // import { UsersService } from "src/users/users.service";
 import { UsersService } from "../users/users.service";
 import { GoogleProfile, JwtPayload } from "./auth.types";
-import { UserRegisteredPayload } from "@app/shared";
+import { RpcForbiddenException, RpcUnauthorizedException, UserRegisteredPayload } from "@app/shared";
 import { AuthTokens } from "@app/shared";
 import * as bcrypt from 'bcrypt';
 import { RegisterDto, LoginDto } from "@app/shared";
@@ -19,7 +19,6 @@ import { RefreshToken, User } from "../generated/prisma/client";
 import { AuthResponse } from "@app/shared";
 import { ROUTING_KEYS } from "@app/shared";
 import { RabbitMQPublisherService } from "../rabbitmq/rabbitmq.service";
-import { RpcException } from "@nestjs/microservices";
 
 @Injectable()
 export class AuthService {
@@ -114,21 +113,21 @@ export class AuthService {
         const user = await this.usersService.findByEmail(dto.email);
 
         if (!user) {
-            throw new RpcException({ statusCode: 401, message: 'Invalid credentials' });
+            throw new RpcUnauthorizedException('Invalid credentials');
         }
 
         if (!user.isActive) {
-            throw new RpcException({ statusCode: 403, message: 'Account is deactivated' });
+            throw new RpcForbiddenException('Account is deactivated');
         }
 
         if (!user.password) {
-            throw new RpcException({ statusCode: 401, message: 'This account uses Google sign-in. Please login with Google.' });
+            throw new RpcUnauthorizedException('This account uses Google sign-in. Please login with Google.');
         }
 
         const passwordMatch = await bcrypt.compare(dto.password, user.password);
 
         if (!passwordMatch) {
-            throw new RpcException({ statusCode: 401, message: 'Invalid credentials' });
+            throw new RpcUnauthorizedException('Invalid credentials');
         }
 
         const tokens = await this.generateTokens(
@@ -207,7 +206,7 @@ export class AuthService {
         }
 
         if (!matchedToken) {
-            throw new RpcException({ statusCode: 401, message: 'Invalid refresh token' });
+            throw new RpcUnauthorizedException('Invalid refresh token');
         }
 
         await this.prisma.refreshToken.delete({
