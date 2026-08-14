@@ -47,6 +47,15 @@
         "tsConfigPath": "apps/notifications/tsconfig.app.json"
       }
     },
+    "polls": {
+      "type": "application",
+      "root": "apps/polls",
+      "entryFile": "main",
+      "sourceRoot": "apps/polls/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/polls/tsconfig.app.json"
+      }
+    },
     "shared": {
       "type": "library",
       "root": "libs/shared",
