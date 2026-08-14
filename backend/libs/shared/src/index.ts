@@ -14,3 +14,7 @@ export * from './rabbitmq/rabbitmq.constants';
 export * from './rabbitmq/rabbitmq-connection.service';
 
 export * from './exceptions/rpc-exceptions';
+
+export * from './polls/dto/create-poll.dto';
+export * from './polls/dto/poll-query.dto';
+export * from './polls/polls.events';

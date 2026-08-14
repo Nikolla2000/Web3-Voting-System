@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package polls;
+
+service PollsService {
+  rpc CreatePoll (CreatePollRequest) returns (PollResponse);
+  rpc GetPolls (GetPollsRequest) returns (PollsListResponse);
+  rpc GetPollById (GetPollByIdRequest) returns (PollResponse);
+}
+
+message CreatePollRequest {
+  string creatorId = 1;
+  string title = 2;
+  string description = 3;
+  string imageUrl = 4;
+  string category = 5;
+  string startsAt = 6;
+  string endsAt = 7;
+  repeated string options = 8;
+}
+
+message GetPollsRequest {
+  string search = 1;
+  string status = 2;
+  string sortBy = 3;
+  int32 page = 4;
+  int32 limit = 5;
+}
+
+message GetPollByIdRequest {
+  string id = 1;
+}
+
+message PollOptionMessage {
+  string id = 1;
+  string label = 2;
+  int32 votes = 3;
+}
+
+message PollResponse {
+  string id = 1;
+  string title = 2;
+  string description = 3;
+  string imageUrl = 4;
+  string category = 5;
+  string startsAt = 6;
+  string endsAt = 7;
+  string contractAddress = 8;
+  string creatorId = 9;
+  int32 totalVotes = 10;
+  repeated PollOptionMessage options = 11;
+}
+
+message PollsListResponse {
+  repeated PollResponse items = 1;
+  int32 total = 2;
+  int32 page = 3;
+  int32 limit = 4;
+}
