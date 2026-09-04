@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { HttpModule } from '@nestjs/axios';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -19,14 +18,6 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         signOptions: { expiresIn: '15m' },
       }),
     }),
-    // HttpModule.registerAsync({
-    //   imports: [ConfigModule],
-    //   inject: [ConfigService],
-    //   useFactory: (configService: ConfigService) => ({
-    //     baseURL: configService.get<string>('services.identityUrl'),
-    //     timeout: 10000,
-    //   }),
-    // }),
     ClientsModule.register([
       {
         name: 'IDENTITY_SERVICE',
