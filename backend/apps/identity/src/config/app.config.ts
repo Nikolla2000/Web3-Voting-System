@@ -11,6 +11,7 @@ export default registerAs('app', () => ({
 export const envValidationSchema = Joi.object({
   NODE_ENV: Joi.string().valid('development', 'production').default('development'),
   IDENTITY_SERVICE_PORT: Joi.number().port().default(3001),
+  DATABASE_URL: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }).required(),
   ...jwtEnvValidation,
   ...rabbitmqEnvValidation
 })

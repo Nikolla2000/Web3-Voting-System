@@ -1,15 +1,15 @@
 import { Module } from '@nestjs/common';
-import { PollsController } from './polls.controller';
-import { PollsService } from './polls.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ConfigModule } from '@nestjs/config';
+import appConfig, { envValidationSchema } from './config/app.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: 'apps/polls/.env',
       isGlobal: true,
-      load: [],
+      load: [appConfig],
+      validationSchema: envValidationSchema,
       validationOptions: {
         allowUnknown: true,
         abortEarly: true
@@ -17,7 +17,7 @@ import { ConfigModule } from '@nestjs/config';
     }),
     PrismaModule
   ],
-  controllers: [PollsController],
-  providers: [PollsService],
+  controllers: [],
+  providers: [],
 })
 export class PollsModule {}
