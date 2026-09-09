@@ -13,6 +13,7 @@ export * from './auth/auth.patterns';
 export * from './rabbitmq/rabbitmq.constants';
 export * from './rabbitmq/rabbitmq-connection.service';
 export * from './rabbitmq/rabbitmq-publisher.service';
+export * from './rabbitmq/rabbitmq-consumer.service';
 export * from './rabbitmq/rabbitmq-shared.module';
 
 export * from './exceptions/rpc-exceptions';

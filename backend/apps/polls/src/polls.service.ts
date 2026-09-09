@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from './generated/prisma';
 // import { RabbitMQPublisherService } from './rabbitmq/rabbitmq.service';
-import { RabbitMQPublisherService } from '@app/shared';
+import { RabbitMQPublisherService, ROUTING_KEYS } from '@app/shared';
 import { POLLS_EVENTS } from '@app/shared';
 import { RpcException } from '@nestjs/microservices';
 import { status as grpcStatus } from '@grpc/grpc-js';
@@ -48,7 +48,7 @@ export class PollsService {
       include: { options: true }
     });
 
-    await this.publisher.publish(POLLS_EVENTS.POLL_CREATED, {
+    await this.publisher.publish(ROUTING_KEYS.POLL_CREATED, {
       pollId: poll.id,
       title: poll.title,
       creatorId: poll.creatorId,
