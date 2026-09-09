@@ -1,8 +1,5 @@
-// PATH: backend/apps/polls/src/events/vote-sync.consumer.ts
-
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { RabbitMQConsumerService } from '@app/shared';
-import { POLLS_EVENTS } from '@app/shared/polls/polls.events';
+import { RabbitMQConsumerService, ROUTING_KEYS } from '@app/shared';
 import { PrismaService } from '../..//prisma/prisma.service';
 
 interface VoteCastEvent {
@@ -27,8 +24,10 @@ export class VoteSyncConsumer implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    await this.consumer.consume('polls.vote-sync', POLLS_EVENTS.VOTE_CAST, (event: VoteCastEvent) => this.handleVoteCast(event), {
-      onReconnect: () => this.logger.log('Vote-sync queue binding re-established'),
+    await this.consumer.registerConsumer<VoteCastEvent>({
+      queue: 'polls.vote-sync',
+      routingKey: ROUTING_KEYS.VOTE_CAST,
+      onMessage: (event) => this.handleVoteCast(event),
     });
   }
 
