@@ -1,9 +1,9 @@
 // PATH: backend/apps/polls/src/events/vote-sync.consumer.ts
 
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { RabbitMQConsumerService } from '@app/shared/rabbitmq/rabbitmq-consumer.service';
+import { RabbitMQConsumerService } from '@app/shared';
 import { POLLS_EVENTS } from '@app/shared/polls/polls.events';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from '../..//prisma/prisma.service';
 
 interface VoteCastEvent {
   pollId: string;
