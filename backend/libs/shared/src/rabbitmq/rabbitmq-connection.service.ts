@@ -57,6 +57,20 @@ export class RabbitMQConnectionService
       this.connection = await amqp.connect(url);
       this.channel = await this.connection.createChannel();
 
+      this.channel.on('close', () => {
+        this.channel = null;
+        this.logger.warn('RabbitMQ channel closed');
+        
+        if (!this.isShuttingDown && this.connection) {
+          this.logger.log('Triggering reconnect due to channel closure...');
+          this.connect();
+        }
+      });
+
+      this.channel.on('error', (err) => {
+        this.logger.error(`RabbitMQ channel error: ${err.message}`);
+      });
+
       await this.channel.assertExchange(RABBITMQ_EXCHANGE, 'topic', {
         durable: true,
       });

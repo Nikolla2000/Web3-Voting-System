@@ -26,9 +26,9 @@ export async function loginRequest(payload: LoginFormValues): Promise<AuthRespon
   return res.data.data;
 }
 
-export async function registerRequest(payload: RegisterPayload): Promise<AuthUser> {
-  const { data } = await apiClient.post<AuthUser>('/auth/register', payload);
-  return data;
+export async function registerRequest(payload: RegisterPayload): Promise<AuthResponseData> {
+  const res = await apiClient.post<ApiResponse<AuthResponseData>>('/auth/register', payload);
+  return res.data.data;
 }
 
 // Uses httpOnly cookie
