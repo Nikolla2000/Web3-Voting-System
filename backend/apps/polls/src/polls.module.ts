@@ -6,6 +6,7 @@ import { PollsController } from './polls.controller';
 import { PollsService } from './polls.service';
 import rabbitmqConfig from './config/rabbitmq.config';
 import { RabbitMQSharedModule } from '@app/shared';
+import { VoteSyncConsumer } from './events/vote-sync.consumer';
 
 @Module({
   imports: [
@@ -23,6 +24,6 @@ import { RabbitMQSharedModule } from '@app/shared';
     RabbitMQSharedModule,
   ],
   controllers: [PollsController],
-  providers: [PollsService],
+  providers: [PollsService, VoteSyncConsumer],
 })
 export class PollsModule {}

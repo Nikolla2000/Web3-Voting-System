@@ -1,5 +1,3 @@
-// PATH: backend/libs/shared/src/rabbitmq/rabbitmq-consumer.service.ts
-
 import { Injectable, Logger } from '@nestjs/common';
 import * as amqp from 'amqplib';
 import { RABBITMQ_EXCHANGE, RoutingKey } from './rabbitmq.constants';
