@@ -20,4 +20,3 @@ export * from './exceptions/rpc-exceptions';
 
 export * from './polls/dto/create-poll.dto';
 export * from './polls/dto/poll-query.dto';
-export * from './polls/polls.events';

@@ -3,7 +3,6 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from './generated/prisma';
 // import { RabbitMQPublisherService } from './rabbitmq/rabbitmq.service';
 import { RabbitMQPublisherService, ROUTING_KEYS } from '@app/shared';
-import { POLLS_EVENTS } from '@app/shared';
 import { RpcException } from '@nestjs/microservices';
 import { status as grpcStatus } from '@grpc/grpc-js';
 
