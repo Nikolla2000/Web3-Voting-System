@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createPollSchema, type CreatePollFormValues } from '@/lib/validation/poll-schemas';
+import { createPollSchema, MIN_POLL_END_LEAD_HOURS, type CreatePollFormValues } from '@/lib/validation/poll-schemas';
 import { createPoll, type CreatePollPayload } from '@/lib/api/polls';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { POLL_CATEGORY_LABELS } from '@/lib/polls/utils';
@@ -18,10 +18,19 @@ import { PollOptionsField } from '@/components/polls/PollOptionsField';
 
 const CATEGORY_OPTIONS = Object.entries(POLL_CATEGORY_LABELS).map(([value, label]) => ({ value, label }));
 
+function toDatetimeLocalValue(date: Date): string {
+  const pad = (value: number) => String(value).padStart(2, '0');
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export function CreatePollForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const [minEndsAt] = useState(() =>
+    toDatetimeLocalValue(new Date(Date.now() + MIN_POLL_END_LEAD_HOURS * 60 * 60 * 1000)),
+  );
 
   const {
     register,
@@ -100,7 +109,13 @@ export function CreatePollForm() {
           error={errors.startsAt?.message}
           {...register('startsAt')}
         />
-        <Input label="Ends at" type="datetime-local" error={errors.endsAt?.message} {...register('endsAt')} />
+        <Input
+          label="Ends at"
+          type="datetime-local"
+          min={minEndsAt}
+          error={errors.endsAt?.message}
+          {...register('endsAt')}
+        />
       </div>
 
       <PollOptionsField control={control} errors={errors} register={register} />

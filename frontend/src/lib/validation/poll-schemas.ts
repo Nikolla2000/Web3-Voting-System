@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 export const POLL_CATEGORY_VALUES = ['governance', 'treasury', 'technical', 'community'] as const;
 
+export const MIN_POLL_END_LEAD_HOURS = 24;
+
 export const createPollSchema = z
   .object({
     title: z
@@ -22,6 +24,10 @@ export const createPollSchema = z
   })
   .refine((data) => new Date(data.endsAt).getTime() > new Date(data.startsAt).getTime(), {
     message: 'End date must be after the start date',
+    path: ['endsAt'],
+  })
+  .refine((data) => new Date(data.endsAt).getTime() >= Date.now() + MIN_POLL_END_LEAD_HOURS * 60 * 60 * 1000, {
+    message: 'End date must be at least a day from now',
     path: ['endsAt'],
   });
 

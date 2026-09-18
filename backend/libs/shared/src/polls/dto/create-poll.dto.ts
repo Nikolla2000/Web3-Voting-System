@@ -1,4 +1,16 @@
-import { ArrayMinSize, IsArray, IsDateString, IsEnum, IsString, IsUrl, MaxLength, MinLength } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsDateString,
+  IsEnum,
+  IsString,
+  IsUrl,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
+import { IsAtLeastHoursFromNow } from '../validators/is-at-least-hours-from-now.validator';
+
+export const MIN_POLL_END_LEAD_HOURS = 24;
 
 export enum PollCategoryDto {
   GOVERNANCE = 'governance',
@@ -28,6 +40,9 @@ export class CreatePollDto {
   startsAt: string;
 
   @IsDateString()
+  @IsAtLeastHoursFromNow(MIN_POLL_END_LEAD_HOURS, {
+    message: `endsAt must be at least ${MIN_POLL_END_LEAD_HOURS} hours from now`,
+  })
   endsAt: string;
 
   @IsArray()
