@@ -34,6 +34,8 @@ toward one uniform protocol.
 
 - Frontend: always componentized, never a monolithic JSX blob — every
   UI element is its own file.
+- Frontend Design: Follow the clean light/blue/purple color theme of the website. The design should feel modern and futuristic, yet professional and minimal.
+- UI & Code Style: Avoid the typical "AI-generated" look. Do not spam icons or emojis everywhere. Use icons sparingly and only where they add genuine functional value, keeping the layout clean and human-designed.
 - Reusable backend logic goes in `libs/shared/`, never duplicated
   per-service.
 - Constants (routing keys, exchange names, etc.) live in one
