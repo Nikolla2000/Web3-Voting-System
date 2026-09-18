@@ -119,7 +119,7 @@ No test runner is configured. Husky + lint-staged run eslint/prettier on staged 
   `polls` (consumer already exists and waits for this)
 - Google OAuth (`GoogleButton` is currently a stub)
 - Redis — planned, not implemented
-- Some kind of AI service, which will use vector databases, RAG and other AI things to show knowledge
+- Some kind of AI service, which will use vector databases, RAG and other AI things to show knowledge, possibly written in python
 - Unit tests
 
 ## Current focus
