@@ -66,6 +66,16 @@ export function formatVoteCount(count: number): string {
   return compactNumber.format(count);
 }
 
+const dateTimeFormat = new Intl.DateTimeFormat('en', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+});
+
+/** "Jan 5, 2026, 3:00 PM" */
+export function formatDateTime(iso: string): string {
+  return dateTimeFormat.format(new Date(iso));
+}
+
 export function sortPolls(polls: Poll[], sortBy: PollSortOption): Poll[] {
   const sorted = [...polls];
 
