@@ -10,6 +10,7 @@ interface ButtonProps {
   variant?: ButtonVariant;
   type?: 'button' | 'submit';
   className?: string;
+  disabled?: boolean;
 }
 
 const variantStyles: Record<ButtonVariant, string> = {
@@ -27,8 +28,9 @@ export function Button({
   variant = 'primary',
   type = 'button',
   className = '',
+  disabled = false,
 }: ButtonProps) {
-  const classes = `inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium tracking-wide transition-all duration-200 ${variantStyles[variant]} ${className}`;
+  const classes = `inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-medium tracking-wide transition-all duration-200 disabled:pointer-events-none disabled:opacity-60 ${variantStyles[variant]} ${className}`;
 
   if (href) {
     return (
@@ -39,7 +41,7 @@ export function Button({
   }
 
   return (
-    <button type={type} onClick={onClick} className={classes}>
+    <button type={type} onClick={onClick} disabled={disabled} className={classes}>
       {children}
     </button>
   );

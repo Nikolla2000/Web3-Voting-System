@@ -67,3 +67,18 @@ export async function fetchPollById(id: string): Promise<Poll> {
   const res = await apiClient.get<ApiResponse<PollResponse>>(`/polls/${id}`);
   return mapPollResponse(res.data.data);
 }
+
+export interface CreatePollPayload {
+  title: string;
+  description: string;
+  imageUrl: string;
+  category: PollCategory;
+  startsAt: string;
+  endsAt: string;
+  options: string[];
+}
+
+export async function createPoll(payload: CreatePollPayload): Promise<Poll> {
+  const res = await apiClient.post<ApiResponse<PollResponse>>('/polls', payload);
+  return mapPollResponse(res.data.data);
+}
