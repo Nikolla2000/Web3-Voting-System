@@ -47,7 +47,7 @@ function mapPollResponse(raw: PollResponse): Poll {
     startsAt: raw.startsAt,
     endsAt: raw.endsAt,
     contractAddress: raw.contractAddress ?? '',
-    options: raw.options.map((option) => ({
+    options: (raw.options ?? []).map((option) => ({
       id: option.id,
       label: option.label,
       votes: option.votes,
@@ -58,7 +58,7 @@ function mapPollResponse(raw: PollResponse): Poll {
 export async function fetchPolls(params: PollsQueryParams = {}): Promise<{ items: Poll[]; total: number }> {
   const res = await apiClient.get<ApiResponse<PollsListResponse>>('/polls', { params });
   return {
-    items: res.data.data.items.map(mapPollResponse),
+    items: (res.data.data.items ?? []).map(mapPollResponse),
     total: res.data.data.total,
   };
 }

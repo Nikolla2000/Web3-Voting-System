@@ -34,6 +34,8 @@ export function PollsExplorer() {
     return sortPolls(filtered, sortBy);
   }, [data, query, status, sortBy]);
 
+  const hasActiveFilters = query.trim().length > 0 || status !== 'all';
+
   return (
     <div className="flex flex-col gap-6">
       <PollsToolbar
@@ -49,7 +51,7 @@ export function PollsExplorer() {
       ) : isError ? (
         <PollsErrorState message={getApiErrorMessage(error)} onRetry={() => refetch()} />
       ) : (
-        <PollsGrid polls={visiblePolls} />
+        <PollsGrid polls={visiblePolls} hasActiveFilters={hasActiveFilters} />
       )}
     </div>
   );

@@ -4,11 +4,12 @@ import { PollsEmptyState } from '@/components/polls/PollsEmptyState';
 
 interface PollsGridProps {
   polls: Poll[];
+  hasActiveFilters: boolean;
 }
 
-export function PollsGrid({ polls }: PollsGridProps) {
+export function PollsGrid({ polls, hasActiveFilters }: PollsGridProps) {
   if (polls.length === 0) {
-    return <PollsEmptyState />;
+    return <PollsEmptyState hasActiveFilters={hasActiveFilters} />;
   }
 
   return (
