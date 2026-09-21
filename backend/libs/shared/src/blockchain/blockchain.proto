@@ -6,32 +6,24 @@ package blockchain;
 // api-gateway (proxying browser requests) and by polls (server-to-server,
 // e.g. to resolve group state without round-tripping through the gateway).
 //
-// Methods are stubbed at the controller level for now — implementations land
-// with Semaphore group/proof logic (step 2) and the on-chain client (step 3).
+// GetMerkleProof/JoinGroup are implemented (Semaphore group management).
+// VerifyVoteProof's message shape matches @semaphore-protocol/proof's
+// SemaphoreProof type field-for-field; its implementation lands with the
+// on-chain client in step 3.
 service BlockchainService {
-  // Returns the Merkle proof (path + siblings) the client needs to build a
-  // Semaphore proof for this poll's group, given the voter's identity
-  // commitment. Assumes the commitment was already added to the group.
-  rpc GetMerkleProof (MerkleProofRequest) returns (MerkleProofResponse);
-
   // Registers an identity commitment as a member of a poll's Semaphore
   // group (off-chain group state, mirrored on-chain by the contract layer).
+  // Idempotent: rejoining with the same commitment returns its existing root/index.
   rpc JoinGroup (JoinGroupRequest) returns (JoinGroupResponse);
+
+  // Returns the Merkle proof (path + siblings) the client needs to build a
+  // Semaphore proof for this poll's group, given the voter's identity
+  // commitment. Assumes the commitment was already added via JoinGroup.
+  rpc GetMerkleProof (MerkleProofRequest) returns (MerkleProofResponse);
 
   // Verifies a submitted Semaphore proof off-chain before it's relayed
   // on-chain, so invalid submissions fail fast without spending gas.
   rpc VerifyVoteProof (VerifyVoteProofRequest) returns (VerifyVoteProofResponse);
-}
-
-message MerkleProofRequest {
-  string pollId = 1;
-  string identityCommitment = 2;
-}
-
-message MerkleProofResponse {
-  repeated string siblings = 1;
-  repeated int32 pathIndices = 2;
-  string root = 3;
 }
 
 message JoinGroupRequest {
@@ -44,13 +36,26 @@ message JoinGroupResponse {
   int32 index = 2;
 }
 
+message MerkleProofRequest {
+  string pollId = 1;
+  string identityCommitment = 2;
+}
+
+message MerkleProofResponse {
+  string root = 1;
+  int32 index = 2;
+  repeated string siblings = 3;
+}
+
 message VerifyVoteProofRequest {
   string pollId = 1;
   string optionId = 2;
-  string merkleTreeRoot = 3;
-  string nullifierHash = 4;
-  string signal = 5;
-  string proof = 6;
+  int32 merkleTreeDepth = 3;
+  string merkleTreeRoot = 4;
+  string nullifier = 5;
+  string message = 6;
+  string scope = 7;
+  repeated string points = 8;
 }
 
 message VerifyVoteProofResponse {

@@ -1,6 +1,7 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 import { SemaphoreService } from './semaphore/semaphore.service';
+import type { VerifyVoteProofInput } from './semaphore/semaphore.service';
 
 @Controller()
 export class BlockchainController {
@@ -23,14 +24,7 @@ export class BlockchainController {
   }
 
   @GrpcMethod('BlockchainService', 'VerifyVoteProof')
-  async verifyVoteProof(data: {
-    pollId: string;
-    optionId: string;
-    merkleTreeRoot: string;
-    nullifierHash: string;
-    signal: string;
-    proof: string;
-  }) {
+  async verifyVoteProof(data: VerifyVoteProofInput) {
     const valid = await this.semaphoreService.verifyProof(data);
     return { valid };
   }

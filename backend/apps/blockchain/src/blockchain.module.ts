@@ -6,6 +6,7 @@ import rabbitmqConfig from './config/rabbitmq.config';
 import { SemaphoreModule } from './semaphore/semaphore.module';
 import { ContractModule } from './contract/contract.module';
 import { EventsModule } from './events/events.module';
+import { PrismaModule } from '../prisma/prisma.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { EventsModule } from './events/events.module';
         abortEarly: true,
       },
     }),
+    PrismaModule,
     SemaphoreModule,
     ContractModule,
     EventsModule,

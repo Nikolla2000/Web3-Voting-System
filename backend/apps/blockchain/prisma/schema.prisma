@@ -1,0 +1,25 @@
+generator client {
+  provider            = "prisma-client-js"
+  output              = "../src/generated/prisma"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// Off-chain mirror of a poll's Semaphore group membership. The Merkle tree
+/// itself (a Group from @semaphore-protocol/group) is rebuilt in memory from
+/// these rows on demand — `index` fixes insertion order so the rebuilt tree
+/// always matches the one members generated their Merkle proofs against.
+model GroupMember {
+  id                 String   @id @default(uuid())
+  pollId             String
+  identityCommitment String
+  index              Int
+  createdAt          DateTime @default(now())
+
+  @@unique([pollId, identityCommitment])
+  @@unique([pollId, index])
+  @@index([pollId])
+}

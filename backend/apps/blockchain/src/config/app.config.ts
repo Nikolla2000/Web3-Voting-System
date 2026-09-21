@@ -12,6 +12,9 @@ export const envValidationSchema = Joi.object({
     .valid('development', 'production')
     .default('development'),
   BLOCKCHAIN_SERVICE_PORT: Joi.number().port().default(3003),
+  BLOCKCHAIN_SERVICE_DATABASE_URL: Joi.string()
+    .uri({ scheme: ['postgres', 'postgresql'] })
+    .required(),
   // Sepolia RPC endpoint for the viem client (step 3).
   RPC_URL: Joi.string().uri().required(),
   ...rabbitmqEnvValidation,
