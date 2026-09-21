@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package blockchain;
+
+// Contract surface for the blockchain/ZKP microservice. Consumed by
+// api-gateway (proxying browser requests) and by polls (server-to-server,
+// e.g. to resolve group state without round-tripping through the gateway).
+//
+// Methods are stubbed at the controller level for now — implementations land
+// with Semaphore group/proof logic (step 2) and the on-chain client (step 3).
+service BlockchainService {
+  // Returns the Merkle proof (path + siblings) the client needs to build a
+  // Semaphore proof for this poll's group, given the voter's identity
+  // commitment. Assumes the commitment was already added to the group.
+  rpc GetMerkleProof (MerkleProofRequest) returns (MerkleProofResponse);
+
+  // Registers an identity commitment as a member of a poll's Semaphore
+  // group (off-chain group state, mirrored on-chain by the contract layer).
+  rpc JoinGroup (JoinGroupRequest) returns (JoinGroupResponse);
+
+  // Verifies a submitted Semaphore proof off-chain before it's relayed
+  // on-chain, so invalid submissions fail fast without spending gas.
+  rpc VerifyVoteProof (VerifyVoteProofRequest) returns (VerifyVoteProofResponse);
+}
+
+message MerkleProofRequest {
+  string pollId = 1;
+  string identityCommitment = 2;
+}
+
+message MerkleProofResponse {
+  repeated string siblings = 1;
+  repeated int32 pathIndices = 2;
+  string root = 3;
+}
+
+message JoinGroupRequest {
+  string pollId = 1;
+  string identityCommitment = 2;
+}
+
+message JoinGroupResponse {
+  string root = 1;
+  int32 index = 2;
+}
+
+message VerifyVoteProofRequest {
+  string pollId = 1;
+  string optionId = 2;
+  string merkleTreeRoot = 3;
+  string nullifierHash = 4;
+  string signal = 5;
+  string proof = 6;
+}
+
+message VerifyVoteProofResponse {
+  bool valid = 1;
+}
