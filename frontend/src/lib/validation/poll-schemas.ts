@@ -1,6 +1,17 @@
 import { z } from 'zod';
 
-export const POLL_CATEGORY_VALUES = ['governance', 'treasury', 'technical', 'community'] as const;
+export const POLL_CATEGORY_VALUES = [
+  'sports',
+  'travel',
+  'entertainment',
+  'lifestyle',
+  'tech_science',
+  'society',
+  'finance',
+  'politics',
+  'education',
+  'other'
+] as const;
 
 export const MIN_POLL_END_LEAD_HOURS = 24;
 
@@ -27,7 +38,8 @@ export const createPollSchema = z
     path: ['endsAt'],
   })
   .refine((data) => new Date(data.endsAt).getTime() >= Date.now() + MIN_POLL_END_LEAD_HOURS * 60 * 60 * 1000, {
-    message: 'End date must be at least a day from now',
+  // .refine((data) => new Date(data.endsAt).getTime() >= Date.now(), {
+    message: 'End date must be at least 24 hours from now',
     path: ['endsAt'],
   });
 

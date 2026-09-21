@@ -9,10 +9,16 @@ datasource db {
 }
 
 enum PollCategory {
-  GOVERNANCE
-  TREASURY
-  TECHNICAL
-  COMMUNITY
+  SPORTS
+  TRAVEL
+  ENTERTAINMENT
+  LIFESTYLE
+  TECH_SCIENCE
+  SOCIETY
+  FINANCE
+  POLITICS
+  EDUCATION
+  OTHER
 }
 
 model Poll {

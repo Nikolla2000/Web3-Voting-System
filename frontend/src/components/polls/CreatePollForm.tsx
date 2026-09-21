@@ -28,6 +28,8 @@ export function CreatePollForm() {
   const queryClient = useQueryClient();
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const [minStartsAt] = useState(() => toDatetimeLocalValue(new Date(Date.now())));
+
   const [minEndsAt] = useState(() =>
     toDatetimeLocalValue(new Date(Date.now() + MIN_POLL_END_LEAD_HOURS * 60 * 60 * 1000)),
   );
@@ -40,7 +42,7 @@ export function CreatePollForm() {
   } = useForm<CreatePollFormValues>({
     resolver: zodResolver(createPollSchema),
     defaultValues: {
-      category: 'governance',
+      category: 'lifestyle',
       options: [{ value: '' }, { value: '' }],
     },
   });
@@ -106,6 +108,7 @@ export function CreatePollForm() {
         <Input
           label="Starts at"
           type="datetime-local"
+          min={minStartsAt}
           error={errors.startsAt?.message}
           {...register('startsAt')}
         />

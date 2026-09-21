@@ -1,10 +1,16 @@
 import type { Poll, PollCategory, PollOption, PollSortOption, PollStatus } from '@/types/poll';
 
 export const POLL_CATEGORY_LABELS: Record<PollCategory, string> = {
-  governance: 'Governance',
-  treasury: 'Treasury',
-  technical: 'Technical',
-  community: 'Community',
+  sports: 'Sports',
+  travel: 'Travel',
+  entertainment: 'Entertainment',
+  lifestyle: 'Lifestyle',
+  tech_science: 'Tech & Science',
+  society: 'Society',
+  finance: 'Finance',
+  politics: 'Politics',
+  education: 'Education',
+  other: 'Other',
 };
 
 /**

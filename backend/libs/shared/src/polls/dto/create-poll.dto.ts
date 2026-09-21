@@ -13,10 +13,16 @@ import { IsAtLeastHoursFromNow } from '../validators/is-at-least-hours-from-now.
 export const MIN_POLL_END_LEAD_HOURS = 24;
 
 export enum PollCategoryDto {
-  GOVERNANCE = 'governance',
-  TREASURY = 'treasury',
-  TECHNICAL = 'technical',
-  COMMUNITY = 'community',
+  SPORTS = 'sports',
+  TRAVEL = 'travel',
+  ENTERTAINMENT = 'entertainment',
+  LIFESTYLE = 'lifestyle',
+  TECH_SCIENCE = 'tech_science',
+  SOCIETY = 'society',
+  FINANCE = 'finance',
+  POLITICS = 'politics',
+  EDUCATION = 'education',
+  OTHER = 'other'
 }
 
 export class CreatePollDto {
