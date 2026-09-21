@@ -20,7 +20,10 @@ export function PollsPageHeader() {
         stored on the Blockchain.
       </p>
       {status === 'authenticated' && (
-        <Button href="/polls/create" variant="secondary" className="mt-6">
+        <Button 
+          href="/polls/create" 
+          className="mt-6 bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-md transition-all"
+        >
           Create Poll
         </Button>
       )}
