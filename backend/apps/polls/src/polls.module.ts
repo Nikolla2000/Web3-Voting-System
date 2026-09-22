@@ -7,6 +7,7 @@ import { PollsService } from './polls.service';
 import rabbitmqConfig from './config/rabbitmq.config';
 import { RabbitMQSharedModule } from '@app/shared';
 import { VoteSyncConsumer } from './events/vote-sync.consumer';
+import { PollContractDeployedConsumer } from './events/poll-contract-deployed.consumer';
 
 @Module({
   imports: [
@@ -17,13 +18,13 @@ import { VoteSyncConsumer } from './events/vote-sync.consumer';
       validationSchema: envValidationSchema,
       validationOptions: {
         allowUnknown: true,
-        abortEarly: true
-      }
+        abortEarly: true,
+      },
     }),
     PrismaModule,
     RabbitMQSharedModule,
   ],
   controllers: [PollsController],
-  providers: [PollsService, VoteSyncConsumer],
+  providers: [PollsService, VoteSyncConsumer, PollContractDeployedConsumer],
 })
 export class PollsModule {}

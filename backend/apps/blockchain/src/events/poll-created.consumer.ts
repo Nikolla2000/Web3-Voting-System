@@ -14,9 +14,8 @@ interface PollCreatedEvent {
  * Consumes poll.created (published by polls on poll creation) and provisions
  * the on-chain Semaphore group + contract for that poll. The resulting
  * contractAddress is published as poll.contract_deployed rather than
- * written directly to polls' database — polls owns that row and doesn't
- * yet consume this event, so wiring a consumer for it there is the
- * remaining step to actually persist it.
+ * written directly to polls' database — polls owns that row (see
+ * polls/src/events/poll-contract-deployed.consumer.ts, which persists it).
  */
 @Injectable()
 export class PollCreatedConsumer implements OnModuleInit {
