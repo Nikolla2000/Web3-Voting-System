@@ -6,10 +6,9 @@ package blockchain;
 // api-gateway (proxying browser requests) and by polls (server-to-server,
 // e.g. to resolve group state without round-tripping through the gateway).
 //
-// GetMerkleProof/JoinGroup are implemented (Semaphore group management).
-// VerifyVoteProof's message shape matches @semaphore-protocol/proof's
-// SemaphoreProof type field-for-field; its implementation lands with the
-// on-chain client in step 3.
+// GetMerkleProof/JoinGroup/VerifyVoteProof/SubmitVote are all implemented.
+// VerifyVoteProof/SubmitVote's request shape matches @semaphore-protocol/proof's
+// SemaphoreProof type field-for-field.
 service BlockchainService {
   // Registers an identity commitment as a member of a poll's Semaphore
   // group (off-chain group state, mirrored on-chain by the contract layer).
@@ -21,9 +20,17 @@ service BlockchainService {
   // commitment. Assumes the commitment was already added via JoinGroup.
   rpc GetMerkleProof (MerkleProofRequest) returns (MerkleProofResponse);
 
-  // Verifies a submitted Semaphore proof off-chain before it's relayed
-  // on-chain, so invalid submissions fail fast without spending gas.
+  // Verifies a submitted Semaphore proof off-chain, with no on-chain side
+  // effect — lets the caller give instant feedback before spending relayer
+  // gas on SubmitVote.
   rpc VerifyVoteProof (VerifyVoteProofRequest) returns (VerifyVoteProofResponse);
+
+  // Verifies the same proof and, if valid, relays it on-chain to the poll's
+  // contract from the service's own relayer account (never the voter's
+  // wallet — anonymity depends on every vote sharing one sender). The actual
+  // vote tally only updates once the chain listener observes the resulting
+  // VoteCast log and republishes it as vote.cast.
+  rpc SubmitVote (VerifyVoteProofRequest) returns (SubmitVoteResponse);
 }
 
 message JoinGroupRequest {
@@ -60,4 +67,8 @@ message VerifyVoteProofRequest {
 
 message VerifyVoteProofResponse {
   bool valid = 1;
+}
+
+message SubmitVoteResponse {
+  string transactionHash = 1;
 }

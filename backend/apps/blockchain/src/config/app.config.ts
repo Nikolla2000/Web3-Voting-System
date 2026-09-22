@@ -15,7 +15,17 @@ export const envValidationSchema = Joi.object({
   BLOCKCHAIN_SERVICE_DATABASE_URL: Joi.string()
     .uri({ scheme: ['postgres', 'postgresql'] })
     .required(),
-  // Sepolia RPC endpoint for the viem client (step 3).
+  // Sepolia RPC endpoint for the viem client.
   RPC_URL: Joi.string().uri().required(),
+  // Server-held signer that relays every on-chain tx — never the voter's own
+  // wallet, so anonymity doesn't leak through "who paid the gas".
+  RELAYER_PRIVATE_KEY: Joi.string()
+    .pattern(/^0x[0-9a-fA-F]{64}$/)
+    .required(),
+  // Placeholder: contracts/ isn't written yet (see roadmap). Point this at
+  // the real deployed factory once it exists.
+  VOTING_FACTORY_ADDRESS: Joi.string()
+    .pattern(/^0x[0-9a-fA-F]{40}$/)
+    .required(),
   ...rabbitmqEnvValidation,
 });

@@ -1,4 +1,6 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
+import { RpcException } from '@nestjs/microservices';
+import { status as grpcStatus } from '@grpc/grpc-js';
 import { Group } from '@semaphore-protocol/group';
 import { verifyProof } from '@semaphore-protocol/proof';
 import type { PackedGroth16Proof } from '@zk-kit/utils';
@@ -105,9 +107,13 @@ export class SemaphoreService {
 
     const index = group.indexOf(commitment);
     if (index === -1) {
-      throw new NotFoundException(
-        `${identityCommitment} has not joined poll ${pollId}'s group`,
-      );
+      // gRPC transport: RpcException + a @grpc/grpc-js status, matching
+      // polls.service.ts's convention — @nestjs/common's HTTP exceptions
+      // don't map to a sensible gRPC status from inside a @GrpcMethod.
+      throw new RpcException({
+        code: grpcStatus.NOT_FOUND,
+        message: `${identityCommitment} has not joined poll ${pollId}'s group`,
+      });
     }
 
     const proof = group.generateMerkleProof(index);
