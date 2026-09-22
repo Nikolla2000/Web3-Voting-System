@@ -6,8 +6,8 @@ export * from './users/users.patterns';
 export * from './users/dto/link-wallet.dto';
 
 export * from './auth/interfaces/auth.interface';
-export * from './auth/dto/register.dto'
-export * from './auth/dto/login.dto'
+export * from './auth/dto/register.dto';
+export * from './auth/dto/login.dto';
 export * from './auth/auth.patterns';
 
 export * from './rabbitmq/rabbitmq.constants';
@@ -22,3 +22,5 @@ export * from './polls/dto/create-poll.dto';
 export * from './polls/dto/poll-query.dto';
 
 export * from './blockchain/identifier.util';
+export * from './blockchain/dto/join-group.dto';
+export * from './blockchain/dto/submit-vote.dto';

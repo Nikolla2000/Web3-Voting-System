@@ -12,6 +12,7 @@ import { TransformInterceptor } from './common/interceptors/transform.intercepto
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AuthModule } from './auth/auth.module';
 import { PollsModule } from './polls/polls.module';
+import { BlockchainModule } from './blockchain/blockchain.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { PollsModule } from './polls/polls.module';
     }]),
     AuthModule,
     PollsModule,
+    BlockchainModule,
   ],
   controllers: [],
   providers: [

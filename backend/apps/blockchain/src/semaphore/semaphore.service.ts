@@ -15,10 +15,11 @@ export interface MerkleProof {
 
 export interface VerifyVoteProofInput {
   pollId: string;
-  optionId: string;
   merkleTreeDepth: number;
   merkleTreeRoot: string;
   nullifier: string;
+  // The chosen option as a Semaphore field element (uuidToFieldElement(optionId)).
+  // This *is* the vote, taken at face value like nullifier — nothing to cross-check it against.
   message: string;
   scope: string;
   points: string[];
@@ -126,11 +127,10 @@ export class SemaphoreService {
 
   async verifyProof(input: VerifyVoteProofInput): Promise<boolean> {
     const expectedScope = uuidToFieldElement(input.pollId).toString();
-    const expectedMessage = uuidToFieldElement(input.optionId).toString();
-    if (input.scope !== expectedScope || input.message !== expectedMessage) {
-      this.logger.warn(
-        `Proof scope/message doesn't match pollId/optionId for poll ${input.pollId}`,
-      );
+    if (input.scope !== expectedScope) {
+      // pollId comes from the route, scope from the proof — this is what
+      // stops a proof generated for one poll's group being replayed on another.
+      this.logger.warn(`Proof scope doesn't match poll ${input.pollId}`);
       return false;
     }
 

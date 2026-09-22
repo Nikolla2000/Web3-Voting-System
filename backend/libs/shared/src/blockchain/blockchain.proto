@@ -56,13 +56,14 @@ message MerkleProofResponse {
 
 message VerifyVoteProofRequest {
   string pollId = 1;
-  string optionId = 2;
-  int32 merkleTreeDepth = 3;
-  string merkleTreeRoot = 4;
-  string nullifier = 5;
-  string message = 6;
-  string scope = 7;
-  repeated string points = 8;
+  int32 merkleTreeDepth = 2;
+  string merkleTreeRoot = 3;
+  string nullifier = 4;
+  // The chosen option, as a Semaphore field element (see uuidToFieldElement) —
+  // this *is* the vote; there's no separate optionId to cross-check it against.
+  string message = 5;
+  string scope = 6;
+  repeated string points = 7;
 }
 
 message VerifyVoteProofResponse {
