@@ -6,19 +6,16 @@ import type { MerkleProofResponse } from '@/lib/api/voting';
 import type { VoteProofPayload } from '@/lib/api/voting';
 
 /**
- * Must match apps/blockchain/src/contract/contract.service.ts's
- * deployPollContract, which hardcodes this same value when provisioning a
- * poll's on-chain group (it picks which Groth16 verifying key/circuit gets
- * used). There's no shared package to enforce this — it's a protocol
- * constant the two sides just have to agree on.
- */
-export const SEMAPHORE_MERKLE_TREE_DEPTH = 20;
-
-/**
  * Runs the actual zero-knowledge proving in the browser — the expensive
  * step (real Groth16 proof generation, can take a few seconds). The
- * snark artifacts (wasm + zkey for this depth) are fetched automatically
- * from Semaphore's CDN on first use and cached by the browser.
+ * snark artifacts (wasm + zkey) are fetched automatically from Semaphore's
+ * CDN on first use and cached by the browser.
+ *
+ * No fixed tree depth is passed: Semaphore's on-chain groups (LeanIMT) have
+ * a dynamic depth that grows with membership, and both the contract's
+ * verifier and generateProof() infer which depth to use from the Merkle
+ * proof itself (padding as needed) — nothing here needs to agree on a
+ * constant with the backend.
  */
 export async function generateVoteProof(
   identity: Identity,
@@ -36,7 +33,7 @@ export async function generateVoteProof(
   const message = uuidToFieldElement(optionId);
   const scope = uuidToFieldElement(pollId);
 
-  const proof = await generateProof(identity, proofInput, message, scope, SEMAPHORE_MERKLE_TREE_DEPTH);
+  const proof = await generateProof(identity, proofInput, message, scope);
 
   return {
     merkleTreeDepth: proof.merkleTreeDepth,
