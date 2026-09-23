@@ -22,9 +22,10 @@ export const envValidationSchema = Joi.object({
   RELAYER_PRIVATE_KEY: Joi.string()
     .pattern(/^0x[0-9a-fA-F]{64}$/)
     .required(),
-  // Placeholder: contracts/ isn't written yet (see roadmap). Point this at
-  // the real deployed factory once it exists.
-  VOTING_FACTORY_ADDRESS: Joi.string()
+  // The one deployed PollVoting contract (contracts/contracts/PollVoting.sol)
+  // — shared across every poll, not per-poll. RELAYER_PRIVATE_KEY's address
+  // must be its on-chain owner or createPoll/addMember will revert.
+  POLL_VOTING_CONTRACT_ADDRESS: Joi.string()
     .pattern(/^0x[0-9a-fA-F]{40}$/)
     .required(),
   ...rabbitmqEnvValidation,

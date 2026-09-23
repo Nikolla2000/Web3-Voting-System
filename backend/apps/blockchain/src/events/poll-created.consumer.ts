@@ -11,11 +11,13 @@ interface PollCreatedEvent {
 }
 
 /**
- * Consumes poll.created (published by polls on poll creation) and provisions
- * the on-chain Semaphore group + contract for that poll. The resulting
- * contractAddress is published as poll.contract_deployed rather than
- * written directly to polls' database — polls owns that row (see
- * polls/src/events/poll-contract-deployed.consumer.ts, which persists it).
+ * Consumes poll.created (published by polls on poll creation) and creates
+ * this poll's Semaphore group on the shared PollVoting contract. The
+ * contract's address (the same one for every poll — see
+ * apps/blockchain/src/contract/contract.service.ts) is published as
+ * poll.contract_deployed rather than written directly to polls' database —
+ * polls owns that row (see polls/src/events/poll-contract-deployed.consumer.ts,
+ * which persists it).
  */
 @Injectable()
 export class PollCreatedConsumer implements OnModuleInit {
@@ -37,9 +39,9 @@ export class PollCreatedConsumer implements OnModuleInit {
 
   private async handlePollCreated(event: PollCreatedEvent) {
     this.logger.log(
-      `poll.created received for pollId=${event.pollId}, provisioning on-chain group + contract`,
+      `poll.created received for pollId=${event.pollId}, creating its Semaphore group on-chain`,
     );
-    const { contractAddress } = await this.contractService.deployPollContract(
+    const { contractAddress } = await this.contractService.createPoll(
       event.pollId,
     );
     this.publisher.publish(ROUTING_KEYS.POLL_CONTRACT_DEPLOYED, {

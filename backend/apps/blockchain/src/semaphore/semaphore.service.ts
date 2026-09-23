@@ -6,6 +6,7 @@ import { verifyProof } from '@semaphore-protocol/proof';
 import type { PackedGroth16Proof } from '@zk-kit/utils';
 import { uuidToFieldElement } from '@app/shared';
 import { PrismaService } from '../../prisma/prisma.service';
+import { ContractService } from '../contract/contract.service';
 
 export interface MerkleProof {
   root: string;
@@ -60,7 +61,10 @@ export class SemaphoreService {
   private readonly logger = new Logger(SemaphoreService.name);
   private readonly groups = new Map<string, Group>();
 
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly contractService: ContractService,
+  ) {}
 
   async joinGroup(
     pollId: string,
@@ -99,6 +103,19 @@ export class SemaphoreService {
       });
     }
 
+    // On-chain admission first: Semaphore's own on-chain verification needs
+    // this commitment in *its* tree too, not just our off-chain mirror (see
+    // ContractService's doc comment). This can't be undone if the off-chain
+    // write below fails, so a failure here must never be retried blindly —
+    // see the P2002 branch.
+    //
+    // NOTE: two concurrent joinGroup calls for the *same* poll can both pass
+    // the indexOf check above before either awaits addMember, letting both
+    // through to add on-chain members whose off-chain bookkeeping can then
+    // race. Acceptable for this project's expected load; a real fix would
+    // serialize joins per poll.
+    await this.contractService.addMember(pollId, identityCommitment);
+
     group.addMember(commitment);
     const index = group.indexOf(commitment);
 
@@ -118,10 +135,17 @@ export class SemaphoreService {
         'code' in error &&
         error.code === 'P2002'
       ) {
-        // Lost a race to a concurrent join for this poll — drop the stale
-        // in-memory tree and let the retry re-check against the DB.
+        // The on-chain addMember above already succeeded and can't be
+        // replayed — recover by re-reading the DB instead of recursing
+        // (which would call addMember on-chain a second time).
         this.groups.delete(pollId);
-        return this.joinGroup(pollId, identityCommitment, userId);
+        const recovered = await this.prisma.groupMember.findUnique({
+          where: { pollId_userId: { pollId, userId } },
+        });
+        if (recovered) {
+          const freshGroup = await this.loadGroup(pollId);
+          return { root: freshGroup.root.toString(), index: recovered.index };
+        }
       }
       throw error;
     }

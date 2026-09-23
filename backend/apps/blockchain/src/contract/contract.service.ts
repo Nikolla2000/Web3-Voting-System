@@ -1,21 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import {
-  createPublicClient,
-  createWalletClient,
-  http,
-  getAbiItem,
-  decodeEventLog,
-} from 'viem';
+import { createPublicClient, createWalletClient, http, getAbiItem } from 'viem';
 import type { Address } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { sepolia } from 'viem/chains';
 import { uuidToFieldElement } from '@app/shared';
-import { votingFactoryAbi } from './abi/voting-factory.abi';
-import { pollAbi } from './abi/poll.abi';
-import { PollsClientService } from '../polls-client/polls-client.service';
+import { pollVotingAbi } from './abi/poll-voting.abi';
 
 export interface CastVoteInput {
   pollId: string;
+  merkleTreeDepth: number;
   merkleTreeRoot: string;
   nullifier: string;
   message: string;
@@ -30,17 +23,16 @@ export interface VoteCastOnChainEvent {
 }
 
 /**
- * Owns the viem client and all reads/writes against the on-chain Semaphore
- * group + poll contracts.
- *
- * ABI is a placeholder: contracts/ hasn't been written yet (see roadmap), so
- * voting-factory.abi.ts / poll.abi.ts describe the interface this service
- * expects rather than a deployed contract. Swap in the real compiled ABI and
- * VOTING_FACTORY_ADDRESS once it exists — this class shouldn't need to change.
+ * Owns the viem client and all reads/writes against the on-chain PollVoting
+ * contract (see contracts/contracts/PollVoting.sol) — a single deployed
+ * instance shared across every poll, wrapping the canonical Semaphore
+ * contract with one Semaphore group per poll.
  *
  * Every on-chain tx is signed by the relayer account (RELAYER_PRIVATE_KEY),
  * never the voter's own wallet: anonymity depends on every vote sharing one
- * sender regardless of which identity generated the proof.
+ * sender regardless of which identity generated the proof. That same
+ * address must be the contract's owner on-chain (createPoll/addMember are
+ * onlyOwner), so createPoll/addMember revert if the two don't match.
  */
 @Injectable()
 export class ContractService {
@@ -57,42 +49,35 @@ export class ContractService {
     ),
   });
 
-  private readonly factoryAddress = process.env
-    .VOTING_FACTORY_ADDRESS as Address;
+  private readonly pollVotingAddress = process.env
+    .POLL_VOTING_CONTRACT_ADDRESS as Address;
 
-  constructor(private readonly pollsClient: PollsClientService) {}
-
-  async deployPollContract(
-    pollId: string,
-  ): Promise<{ contractAddress: string }> {
+  async createPoll(pollId: string): Promise<{ contractAddress: string }> {
     const pollIdField = uuidToFieldElement(pollId);
 
     const { request } = await this.publicClient.simulateContract({
-      address: this.factoryAddress,
-      abi: votingFactoryAbi,
+      address: this.pollVotingAddress,
+      abi: pollVotingAbi,
       functionName: 'createPoll',
-      args: [pollIdField, 20n],
+      args: [pollIdField],
       account: this.walletClient.account,
     });
     const hash = await this.walletClient.writeContract(request);
-    const receipt = await this.publicClient.waitForTransactionReceipt({ hash });
+    await this.publicClient.waitForTransactionReceipt({ hash });
 
-    const createdEvent = getAbiItem({
-      abi: votingFactoryAbi,
-      name: 'PollCreated',
+    return { contractAddress: this.pollVotingAddress };
+  }
+
+  async addMember(pollId: string, identityCommitment: string): Promise<void> {
+    const { request } = await this.publicClient.simulateContract({
+      address: this.pollVotingAddress,
+      abi: pollVotingAbi,
+      functionName: 'addMember',
+      args: [uuidToFieldElement(pollId), BigInt(identityCommitment)],
+      account: this.walletClient.account,
     });
-    for (const log of receipt.logs) {
-      try {
-        const decoded = decodeEventLog({ abi: [createdEvent], ...log });
-        return { contractAddress: decoded.args.pollContract };
-      } catch {
-        continue; // a log from an unrelated contract/topic on the same tx
-      }
-    }
-
-    throw new Error(
-      `createPoll tx ${hash} for poll ${pollId} didn't emit PollCreated`,
-    );
+    const hash = await this.walletClient.writeContract(request);
+    await this.publicClient.waitForTransactionReceipt({ hash });
   }
 
   async castVote(input: CastVoteInput): Promise<{ transactionHash: string }> {
@@ -100,9 +85,6 @@ export class ContractService {
       throw new Error(`Expected 8 proof points, got ${input.points.length}`);
     }
 
-    const pollContractAddress = (await this.pollsClient.getPollContractAddress(
-      input.pollId,
-    )) as Address;
     const points = input.points.map((point) => BigInt(point)) as [
       bigint,
       bigint,
@@ -115,15 +97,19 @@ export class ContractService {
     ];
 
     const { request } = await this.publicClient.simulateContract({
-      address: pollContractAddress,
-      abi: pollAbi,
+      address: this.pollVotingAddress,
+      abi: pollVotingAbi,
       functionName: 'castVote',
       args: [
-        BigInt(input.merkleTreeRoot),
-        BigInt(input.nullifier),
-        BigInt(input.message),
-        BigInt(input.scope),
-        points,
+        uuidToFieldElement(input.pollId),
+        {
+          merkleTreeDepth: BigInt(input.merkleTreeDepth),
+          merkleTreeRoot: BigInt(input.merkleTreeRoot),
+          nullifier: BigInt(input.nullifier),
+          message: BigInt(input.message),
+          scope: BigInt(input.scope),
+          points,
+        },
       ],
       account: this.walletClient.account,
     });
@@ -134,15 +120,15 @@ export class ContractService {
   }
 
   /**
-   * No `address` filter: every poll contract shares the same ABI/event
-   * signature, so one subscription catches VoteCast across every poll
-   * without this service needing to track which addresses exist.
+   * Filtered to the one known PollVoting address (unlike the old per-poll-
+   * contract placeholder design, there's only ever one address now).
    */
   watchVoteCastEvents(
     onEvent: (event: VoteCastOnChainEvent) => void,
   ): () => void {
-    const voteCastEvent = getAbiItem({ abi: pollAbi, name: 'VoteCast' });
+    const voteCastEvent = getAbiItem({ abi: pollVotingAbi, name: 'VoteCast' });
     return this.publicClient.watchEvent({
+      address: this.pollVotingAddress,
       event: voteCastEvent,
       onLogs: (logs) => {
         for (const log of logs) {
