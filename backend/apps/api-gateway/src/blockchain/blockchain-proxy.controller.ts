@@ -12,6 +12,8 @@ import type { ClientGrpc } from '@nestjs/microservices';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom, Observable } from 'rxjs';
 import { JoinGroupDto, SubmitVoteDto } from '@app/shared';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import type { JwtPayload } from '../auth/strategies/jwt.strategy';
 
 interface BlockchainServiceGrpc {
   joinGroup(data: unknown): Observable<unknown>;
@@ -21,12 +23,10 @@ interface BlockchainServiceGrpc {
 }
 
 // Every route here requires a logged-in platform user (the global JwtAuthGuard
-// applies — no @Public()), but that's account-level access control, not
-// Sybil-resistance for the ZK layer: nothing here yet stops one logged-in
-// user from generating many identity commitments and joining a poll's group
-// more than once. walletAddress was the interim Sybil mechanism (see
-// CLAUDE.md); a real fix — e.g. gating JoinGroup to one commitment per
-// (userId, pollId) — is still open.
+// applies — no @Public()). JoinGroup forwards that user's id to blockchain,
+// which gates group admission to one commitment per (pollId, userId) — see
+// GroupMember in apps/blockchain/prisma/schema.prisma for the privacy
+// trade-off that gate implies.
 @ApiTags('Voting')
 @ApiBearerAuth()
 @Controller('polls')
@@ -47,11 +47,16 @@ export class BlockchainProxyController implements OnModuleInit {
     summary:
       "Join this poll's Semaphore group with a client-generated identity commitment",
   })
-  async joinGroup(@Param('id') pollId: string, @Body() dto: JoinGroupDto) {
+  async joinGroup(
+    @Param('id') pollId: string,
+    @Body() dto: JoinGroupDto,
+    @CurrentUser() user: JwtPayload,
+  ) {
     return firstValueFrom(
       this.blockchainService.joinGroup({
         pollId,
         identityCommitment: dto.identityCommitment,
+        userId: user.sub,
       }),
     );
   }

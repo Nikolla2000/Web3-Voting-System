@@ -12,7 +12,9 @@ package blockchain;
 service BlockchainService {
   // Registers an identity commitment as a member of a poll's Semaphore
   // group (off-chain group state, mirrored on-chain by the contract layer).
-  // Idempotent: rejoining with the same commitment returns its existing root/index.
+  // Gated to one commitment per (pollId, userId): resubmitting the same
+  // commitment is idempotent, but a second, different commitment for a poll
+  // the user already joined is rejected (ALREADY_EXISTS).
   rpc JoinGroup (JoinGroupRequest) returns (JoinGroupResponse);
 
   // Returns the Merkle proof (path + siblings) the client needs to build a
@@ -36,6 +38,9 @@ service BlockchainService {
 message JoinGroupRequest {
   string pollId = 1;
   string identityCommitment = 2;
+  // Forwarded by the gateway from the caller's JWT — gates group admission
+  // to one commitment per (pollId, userId). Never used beyond that check.
+  string userId = 3;
 }
 
 message JoinGroupResponse {

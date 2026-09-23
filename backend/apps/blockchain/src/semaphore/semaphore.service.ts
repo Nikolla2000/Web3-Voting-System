@@ -65,13 +65,38 @@ export class SemaphoreService {
   async joinGroup(
     pollId: string,
     identityCommitment: string,
+    userId: string,
   ): Promise<{ root: string; index: number }> {
     const commitment = BigInt(identityCommitment);
+
+    const existingParticipant = await this.prisma.groupMember.findUnique({
+      where: { pollId_userId: { pollId, userId } },
+    });
+
+    if (existingParticipant) {
+      if (existingParticipant.identityCommitment !== commitment.toString()) {
+        // The actual Sybil gate: this user already claimed their one slot
+        // in this poll's group with a different commitment.
+        throw new RpcException({
+          code: grpcStatus.ALREADY_EXISTS,
+          message: `Already joined poll ${pollId} with a different identity commitment`,
+        });
+      }
+      // Same commitment resubmitted — e.g. a retried request. Idempotent success.
+      const group = await this.loadGroup(pollId);
+      return { root: group.root.toString(), index: existingParticipant.index };
+    }
+
     const group = await this.loadGroup(pollId);
 
-    const existingIndex = group.indexOf(commitment);
-    if (existingIndex !== -1) {
-      return { root: group.root.toString(), index: existingIndex };
+    // Two different users landing on the same commitment is astronomically
+    // unlikely (it's derived from a random secret), but don't let chance
+    // silently corrupt the (pollId, identityCommitment) uniqueness invariant.
+    if (group.indexOf(commitment) !== -1) {
+      throw new RpcException({
+        code: grpcStatus.ALREADY_EXISTS,
+        message: `Identity commitment already registered for poll ${pollId}`,
+      });
     }
 
     group.addMember(commitment);
@@ -79,7 +104,12 @@ export class SemaphoreService {
 
     try {
       await this.prisma.groupMember.create({
-        data: { pollId, identityCommitment: commitment.toString(), index },
+        data: {
+          pollId,
+          identityCommitment: commitment.toString(),
+          index,
+          userId,
+        },
       });
     } catch (error: unknown) {
       if (
@@ -89,9 +119,9 @@ export class SemaphoreService {
         error.code === 'P2002'
       ) {
         // Lost a race to a concurrent join for this poll — drop the stale
-        // in-memory tree and let the retry rebuild it from the DB.
+        // in-memory tree and let the retry re-check against the DB.
         this.groups.delete(pollId);
-        return this.joinGroup(pollId, identityCommitment);
+        return this.joinGroup(pollId, identityCommitment, userId);
       }
       throw error;
     }

@@ -13,10 +13,15 @@ export class BlockchainController {
   ) {}
 
   @GrpcMethod('BlockchainService', 'JoinGroup')
-  joinGroup(data: { pollId: string; identityCommitment: string }) {
+  joinGroup(data: {
+    pollId: string;
+    identityCommitment: string;
+    userId: string;
+  }) {
     return this.semaphoreService.joinGroup(
       data.pollId,
       data.identityCommitment,
+      data.userId,
     );
   }
 

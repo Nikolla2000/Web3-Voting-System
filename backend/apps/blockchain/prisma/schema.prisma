@@ -12,14 +12,24 @@ datasource db {
 /// itself (a Group from @semaphore-protocol/group) is rebuilt in memory from
 /// these rows on demand — `index` fixes insertion order so the rebuilt tree
 /// always matches the one members generated their Merkle proofs against.
+///
+/// userId is the Sybil-resistance gate: one commitment per (pollId, userId).
+/// This does mean this table can link an account to the anonymous commitment
+/// it registered — an unavoidable cost of admission control (something has to
+/// decide who's allowed to join). That link is never published anywhere:
+/// not to polls, not on-chain, not through any API. The vote itself stays
+/// unlinkable — a ZK proof only proves "some member of this group voted",
+/// never which index/commitment produced it.
 model GroupMember {
   id                 String   @id @default(uuid())
   pollId             String
   identityCommitment String
   index              Int
+  userId             String
   createdAt          DateTime @default(now())
 
   @@unique([pollId, identityCommitment])
   @@unique([pollId, index])
+  @@unique([pollId, userId])
   @@index([pollId])
 }
