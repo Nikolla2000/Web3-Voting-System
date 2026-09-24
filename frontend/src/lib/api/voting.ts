@@ -23,7 +23,10 @@ export async function getMerkleProof(pollId: string, identityCommitment: string)
   const res = await apiClient.get<ApiResponse<MerkleProofResponse>>(`/polls/${pollId}/group/merkle-proof`, {
     params: { identityCommitment },
   });
-  return res.data.data;
+  // Protobuf (gateway <-> blockchain, over gRPC) omits empty `repeated` fields
+  // entirely rather than sending [] — a one-member group's proof legitimately
+  // has zero siblings, which is exactly the case that gets dropped.
+  return { ...res.data.data, siblings: res.data.data.siblings ?? [] };
 }
 
 export interface VoteProofPayload {
