@@ -113,9 +113,9 @@ No test runner is configured. Husky + lint-staged run eslint/prettier on staged 
 
 ## Roadmap (not built yet — keep new work compatible with these)
 
-
 - Blockchain-indexer service publishing `vote.cast`, consumed by
   `polls` (consumer already exists and waits for this)
+- File upload/storage infrastructure for avatars
 - Google OAuth (`GoogleButton` is currently a stub)
 - Redis — planned, not implemented
 - Some kind of AI service, which will use vector databases, RAG and other AI things to show knowledge, possibly written in python
