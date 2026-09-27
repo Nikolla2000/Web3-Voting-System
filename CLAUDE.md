@@ -86,7 +86,7 @@ This is a microservices voting platform. The API gateway is the only HTTP-facing
 
 **Shared lib** (`libs/shared`, imported as `@app/shared`): message pattern constants, DTOs, RabbitMQ wrapper services (`RabbitMQConnectionService`/`Publisher`/`Consumer`, exchange `voting_system`), RPC exception helpers. Routing keys live in `rabbitmq.constants.ts` (`ROUTING_KEYS`) — note `POLLS_EVENTS.VOTE_CAST` (`libs/shared/src/polls/polls.events.ts`, value `'vote.cast'`) and `ROUTING_KEYS.VOTE_CAST` (value `'polls.vote_cast'`) are two different constants with overlapping intent; check which one a given consumer/publisher actually binds to before assuming they match.
 
-**Vote flow**: on-chain votes (Semaphore proofs) are expected to be picked up by a not-yet-built blockchain-indexer service, which will publish a `vote.cast`-style event to RabbitMQ. `polls/src/events/vote-sync.consumer.ts` already consumes this, incrementing cached `Poll.totalVotes`/`PollOption.votes` in Postgres inside a transaction. It's idempotent against at-least-once redelivery via a `ProcessedVote` unique constraint on `(pollId, nullifierHash)` — duplicate deliveries are caught via Prisma's `P2002` and swallowed.
+**Vote flow**: on-chain votes (Semaphore proofs) are expected to be picked up by the blockchain-indexer service, which publishes a `vote.cast`-style event to RabbitMQ. `polls/src/events/vote-sync.consumer.ts` already consumes this, incrementing cached `Poll.totalVotes`/`PollOption.votes` in Postgres inside a transaction. It's idempotent against at-least-once redelivery via a `ProcessedVote` unique constraint on `(pollId, nullifierHash)` — duplicate deliveries are caught via Prisma's `P2002` and swallowed.
 
 ## Frontend (`frontend/`)
 
@@ -113,7 +113,7 @@ No test runner is configured. Husky + lint-staged run eslint/prettier on staged 
 
 ## Roadmap (not built yet — keep new work compatible with these)
 
-- Semaphore ZK proofs for anonymous on-chain voting
+
 - Blockchain-indexer service publishing `vote.cast`, consumed by
   `polls` (consumer already exists and waits for this)
 - Google OAuth (`GoogleButton` is currently a stub)
