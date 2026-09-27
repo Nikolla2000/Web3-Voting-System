@@ -2,14 +2,8 @@
 
 import Link from 'next/link';
 import { Menu } from '@base-ui/react/menu';
-import { useAccount, useDisconnect } from 'wagmi';
-import { useConnectModal } from '@rainbow-me/rainbowkit';
 import { useAuthStore } from '@/lib/store/auth-store';
 import type { AuthUser } from '@/lib/api/auth';
-
-function truncateAddress(address: string) {
-  return `${address.slice(0, 6)}…${address.slice(-4)}`;
-}
 
 const menuItemClass =
   'flex cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-sm text-slate-700 outline-none transition-colors data-[highlighted]:bg-slate-50';
@@ -20,11 +14,6 @@ interface UserMenuProps {
 
 export function UserMenu({ user }: UserMenuProps) {
   const logout = useAuthStore((state) => state.logout);
-  const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
-  const { openConnectModal } = useConnectModal();
-
-  console.log(user)
 
   return (
     <Menu.Root>
@@ -44,28 +33,7 @@ export function UserMenu({ user }: UserMenuProps) {
 
             <Menu.Separator className="my-1 h-px bg-slate-100" />
 
-            {isConnected && address ? (
-              <Menu.Item onClick={() => disconnect()} className={menuItemClass}>
-                <span className="font-mono text-xs text-slate-500">
-                  {truncateAddress(address)}
-                </span>
-                <span className="text-xs text-red-500">Disconnect</span>
-              </Menu.Item>
-            ) : (
-              <Menu.Item
-                onClick={() => openConnectModal?.()}
-                className={`${menuItemClass} text-indigo-600 data-[highlighted]:bg-indigo-50`}
-              >
-                Connect wallet
-              </Menu.Item>
-            )}
-
-            <Menu.Separator className="my-1 h-px bg-slate-100" />
-
-            <Menu.Item
-              onClick={() => logout()}
-              className={`${menuItemClass} text-slate-500`}
-            >
+            <Menu.Item onClick={() => logout()} className={`${menuItemClass} text-slate-500`}>
               Log out
             </Menu.Item>
           </Menu.Popup>
