@@ -113,7 +113,6 @@ No test runner is configured. Husky + lint-staged run eslint/prettier on staged 
 
 ## Roadmap (not built yet — keep new work compatible with these)
 
-- Solidity contracts on Sepolia (`contracts/`, not started)
 - Semaphore ZK proofs for anonymous on-chain voting
 - Blockchain-indexer service publishing `vote.cast`, consumed by
   `polls` (consumer already exists and waits for this)
@@ -121,8 +120,3 @@ No test runner is configured. Husky + lint-staged run eslint/prettier on staged 
 - Redis — planned, not implemented
 - Some kind of AI service, which will use vector databases, RAG and other AI things to show knowledge, possibly written in python
 - Unit tests
-
-## Current focus
-
-`/polls/[id]` detail page — replace mock data with TanStack Query
-calls to the real `polls` API.
