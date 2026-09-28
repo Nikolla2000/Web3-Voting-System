@@ -9,6 +9,8 @@ import { SafeUser } from './users.types';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { RpcBadRequestException, RpcUnauthorizedException } from '@app/shared';
+import { ChangePasswordDto } from '@app/shared/users/dto/change-password.dto';
 
 @Injectable()
 export class UsersService {
@@ -16,7 +18,7 @@ export class UsersService {
 
   private sanitize(user: User): SafeUser {
     const { password, ...safeUser } = user;
-    return safeUser;
+    return { ...safeUser, hasPassword: !!password };
   }
 
   async create(dto: CreateUserDto): Promise<SafeUser> {
@@ -75,10 +77,6 @@ export class UsersService {
 
     if (!user) throw new NotFoundException('User not found');
 
-    if (dto.password) {
-      dto.password = await bcrypt.hash(dto.password, 12);
-    }
-
     const updated = await this.prisma.user.update({
       where: { id },
       data: dto,
@@ -87,14 +85,47 @@ export class UsersService {
     return this.sanitize(updated);
   }
 
+  async changePassword(id: string, dto: ChangePasswordDto): Promise<void> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    if (user.password) {
+      if (!dto.currentPassword) {
+        throw new RpcBadRequestException('Current password is required');
+      }
+
+      const passwordMatch = await bcrypt.compare(
+        dto.currentPassword,
+        user.password,
+      );
+
+      if (!passwordMatch) {
+        throw new RpcUnauthorizedException('Current password is incorrect');
+      }
+    }
+
+    const hashedPassword = await bcrypt.hash(dto.newPassword, 12);
+
+    await this.prisma.user.update({
+      where: { id },
+      data: { password: hashedPassword },
+    });
+  }
+
   async deactivate(id: string): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id } });
 
     if (!user) throw new NotFoundException('User not found');
 
-    await this.prisma.user.update({
-      where: { id },
-      data: { isActive: false },
-    });
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id },
+        data: { isActive: false },
+      }),
+      // Deactivating an account should end every active session, not just
+      // the one that requested it.
+      this.prisma.refreshToken.deleteMany({ where: { userId: id } }),
+    ]);
   }
 }

@@ -14,6 +14,7 @@ export interface SafeUser {
   avatar: string | null;
   role: Role;
   isActive: boolean;
+  hasPassword: boolean;
   createdAt: Date;
   updatedAt: Date;
 }

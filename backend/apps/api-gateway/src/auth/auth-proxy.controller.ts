@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Inject, Param, Patch, Post, Req, Res, UnauthorizedException } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, Patch, Post, Req, Res, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AuthProxyService } from "./auth-proxy.service";
 import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
@@ -11,6 +11,7 @@ import { JwtService } from "@nestjs/jwt";
 import { CurrentUser } from "./decorators/current-user.decorator";
 import type { JwtPayload } from "./strategies/jwt.strategy";
 import { UpdateUserDto } from "@app/shared/users/dto/update-user.dto";
+import { ChangePasswordDto } from "@app/shared/users/dto/change-password.dto";
 
 @ApiTags('Auth')
 @Controller()
@@ -91,14 +92,7 @@ export class AuthProxyController {
     ) {
       const refreshToken = req.cookies?.refreshToken;
       const data = await this.send(AUTH_PATTERNS.LOGOUT, { userId: user.sub, refreshToken });
-      const isProd = this.configService.get<string>('app.nodeEnv') === 'production';
-  
-      res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? 'strict' : 'lax' as const,
-        path: '/'
-      });
+      this.clearRefreshCookie(res);
       return data;
     }
 
@@ -111,14 +105,7 @@ export class AuthProxyController {
       @Res({ passthrough: true }) res: Response
     ) {
       const data = await this.send(AUTH_PATTERNS.LOGOUT_ALL, { userId: user.sub });
-      const isProd = this.configService.get<string>('app.nodeEnv') === 'production';
-  
-      res.clearCookie('refreshToken', {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? 'strict' : 'lax' as const,
-        path: '/'
-      });
+      this.clearRefreshCookie(res);
       return data;
     }
 
@@ -146,6 +133,29 @@ export class AuthProxyController {
       return this.send(USERS_PATTERNS.UPDATE_ME, { userId: user.sub, dto });
     }
 
+    @Patch('users/me/password')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Change (or set) the current user\'s password' })
+    async changePassword(
+      @CurrentUser() user: JwtPayload,
+      @Body() dto: ChangePasswordDto,
+    ) {
+      return this.send(USERS_PATTERNS.CHANGE_PASSWORD, { userId: user.sub, dto });
+    }
+
+    @Delete('users/me')
+    @HttpCode(HttpStatus.OK)
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Deactivate the current user\'s account' })
+    async deactivateMe(
+      @CurrentUser() user: JwtPayload,
+      @Res({ passthrough: true }) res: Response,
+    ) {
+      const data = await this.send(USERS_PATTERNS.DEACTIVATE_ME, { userId: user.sub });
+      this.clearRefreshCookie(res);
+      return data;
+    }
+
 
     /**
      * ClientProxy.send() wrapper
@@ -159,6 +169,16 @@ export class AuthProxyController {
           .send<T>({ cmd: pattern }, payload)
           .pipe(timeout(10000)),
       );
+    }
+
+    private clearRefreshCookie(res: Response): void {
+      const isProd = this.configService.get<string>('app.nodeEnv') === 'production';
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'strict' : 'lax' as const,
+        path: '/'
+      });
     }
 
     private setRefreshCookie(res: Response, refreshToken: string): void {
