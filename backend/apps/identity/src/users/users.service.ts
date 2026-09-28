@@ -11,6 +11,7 @@ import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { RpcBadRequestException, RpcUnauthorizedException } from '@app/shared';
 import { ChangePasswordDto } from '@app/shared/users/dto/change-password.dto';
+import { DeactivateAccountDto } from '@app/shared/users/dto/deactivate-account.dto';
 
 @Injectable()
 export class UsersService {
@@ -85,25 +86,33 @@ export class UsersService {
     return this.sanitize(updated);
   }
 
+  // Skips verification entirely for a Google-only account (no password set).
+  private async verifyCurrentPassword(
+    user: User,
+    currentPassword?: string,
+  ): Promise<void> {
+    if (!user.password) return;
+
+    if (!currentPassword) {
+      throw new RpcBadRequestException('Current password is required');
+    }
+
+    const passwordMatch = await bcrypt.compare(
+      currentPassword,
+      user.password,
+    );
+
+    if (!passwordMatch) {
+      throw new RpcUnauthorizedException('Current password is incorrect');
+    }
+  }
+
   async changePassword(id: string, dto: ChangePasswordDto): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id } });
 
     if (!user) throw new NotFoundException('User not found');
 
-    if (user.password) {
-      if (!dto.currentPassword) {
-        throw new RpcBadRequestException('Current password is required');
-      }
-
-      const passwordMatch = await bcrypt.compare(
-        dto.currentPassword,
-        user.password,
-      );
-
-      if (!passwordMatch) {
-        throw new RpcUnauthorizedException('Current password is incorrect');
-      }
-    }
+    await this.verifyCurrentPassword(user, dto.currentPassword);
 
     const hashedPassword = await bcrypt.hash(dto.newPassword, 12);
 
@@ -113,10 +122,12 @@ export class UsersService {
     });
   }
 
-  async deactivate(id: string): Promise<void> {
+  async deactivate(id: string, dto: DeactivateAccountDto): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id } });
 
     if (!user) throw new NotFoundException('User not found');
+
+    await this.verifyCurrentPassword(user, dto.password);
 
     await this.prisma.$transaction([
       this.prisma.user.update({

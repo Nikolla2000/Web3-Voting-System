@@ -12,6 +12,7 @@ import { CurrentUser } from "./decorators/current-user.decorator";
 import type { JwtPayload } from "./strategies/jwt.strategy";
 import { UpdateUserDto } from "@app/shared/users/dto/update-user.dto";
 import { ChangePasswordDto } from "@app/shared/users/dto/change-password.dto";
+import { DeactivateAccountDto } from "@app/shared/users/dto/deactivate-account.dto";
 
 @ApiTags('Auth')
 @Controller()
@@ -149,9 +150,10 @@ export class AuthProxyController {
     @ApiOperation({ summary: 'Deactivate the current user\'s account' })
     async deactivateMe(
       @CurrentUser() user: JwtPayload,
+      @Body() dto: DeactivateAccountDto,
       @Res({ passthrough: true }) res: Response,
     ) {
-      const data = await this.send(USERS_PATTERNS.DEACTIVATE_ME, { userId: user.sub });
+      const data = await this.send(USERS_PATTERNS.DEACTIVATE_ME, { userId: user.sub, dto });
       this.clearRefreshCookie(res);
       return data;
     }

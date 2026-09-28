@@ -4,6 +4,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { MessagePattern, Payload } from '@nestjs/microservices';
 import { USERS_PATTERNS } from '@app/shared';
 import { ChangePasswordDto } from '@app/shared/users/dto/change-password.dto';
+import { DeactivateAccountDto } from '@app/shared/users/dto/deactivate-account.dto';
 
 @Controller('users')
 export class UsersController {
@@ -33,8 +34,10 @@ export class UsersController {
   }
 
   @MessagePattern({ cmd: USERS_PATTERNS.DEACTIVATE_ME })
-  async deactivateMe(@Payload() payload: { userId: string }) {
-    await this.usersService.deactivate(payload.userId);
+  async deactivateMe(
+    @Payload() payload: { userId: string; dto: DeactivateAccountDto },
+  ) {
+    await this.usersService.deactivate(payload.userId, payload.dto);
     return { success: true };
   }
 }

@@ -42,6 +42,10 @@ export async function logoutRequest(): Promise<void> {
   await apiClient.post('/auth/logout');
 }
 
+export async function logoutAllRequest(): Promise<void> {
+  await apiClient.post('/auth/logout-all');
+}
+
 export async function fetchMe(): Promise<AuthUser | null> {
   try {
     const res = await apiClient.get<ApiResponse<AuthUser>>('/users/me');
