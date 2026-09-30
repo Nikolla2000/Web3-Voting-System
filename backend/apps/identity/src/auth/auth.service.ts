@@ -103,6 +103,7 @@ export class AuthService {
                 id: user.id,
                 email: user.email,
                 username: user.username,
+                avatar: user.avatar,
                 role: user.role
             },
             tokens
@@ -144,6 +145,7 @@ export class AuthService {
                 id: user.id,
                 email: user.email,
                 username: user.username,
+                avatar: user.avatar,
                 role: user.role,
             },
             tokens
@@ -182,6 +184,7 @@ export class AuthService {
                 id: user.id,
                 email: user.email,
                 username: user.username,
+                avatar: user.avatar,
                 role: user.role,
             },
             tokens

@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Menu } from '@base-ui/react/menu';
 import { useAuthStore } from '@/lib/store/auth-store';
 import type { AuthUser } from '@/lib/api/auth';
+import { ProfileAvatarPreview } from '@/components/profile/ProfileAvatarPreview';
 
 const menuItemClass =
   'flex cursor-pointer items-center justify-between rounded-xl px-3 py-2.5 text-sm text-slate-700 outline-none transition-colors data-[highlighted]:bg-slate-50';
@@ -18,9 +19,7 @@ export function UserMenu({ user }: UserMenuProps) {
   return (
     <Menu.Root>
       <Menu.Trigger className="flex items-center gap-2.5 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-3.5 text-sm font-medium text-slate-700 shadow-[0_2px_10px_-4px_rgba(15,23,42,0.08)] transition-colors hover:border-indigo-200 cursor-pointer">
-        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-violet-500 text-xs font-semibold text-white">
-          {user.username.slice(0, 2).toUpperCase()}
-        </span>
+        <ProfileAvatarPreview avatarUrl={user.avatar ?? undefined} username={user.username} size={28} />
         {user.username}
       </Menu.Trigger>
 

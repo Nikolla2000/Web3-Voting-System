@@ -9,13 +9,23 @@ import { SafeUser } from './users.types';
 import { CreateUserDto } from './dto/create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { RpcBadRequestException, RpcUnauthorizedException } from '@app/shared';
+import {
+  R2StorageService,
+  RpcBadRequestException,
+  RpcUnauthorizedException,
+} from '@app/shared';
 import { ChangePasswordDto } from '@app/shared/users/dto/change-password.dto';
 import { DeactivateAccountDto } from '@app/shared/users/dto/deactivate-account.dto';
+import { RequestAvatarUploadDto } from '@app/shared/users/dto/request-avatar-upload.dto';
+import { ConfirmAvatarDto } from '@app/shared/users/dto/confirm-avatar.dto';
+import { buildAvatarKey } from '@app/shared/storage/avatar-storage.constants';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly r2: R2StorageService,
+  ) {}
 
   private sanitize(user: User): SafeUser {
     const { password, ...safeUser } = user;
@@ -138,5 +148,79 @@ export class UsersService {
       // the one that requested it.
       this.prisma.refreshToken.deleteMany({ where: { userId: id } }),
     ]);
+  }
+
+  async requestAvatarUpload(
+    id: string,
+    dto: RequestAvatarUploadDto,
+  ): Promise<{ uploadUrl: string; key: string; publicUrl: string }> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    const key = buildAvatarKey(id, dto.contentType);
+    const { uploadUrl, publicUrl } = await this.r2.createPresignedUpload(
+      key,
+      dto.contentType,
+      dto.size,
+    );
+
+    return { uploadUrl, key, publicUrl };
+  }
+
+  async confirmAvatar(id: string, dto: ConfirmAvatarDto): Promise<SafeUser> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    // The key is generated server-side per-user in requestAvatarUpload, so a
+    // key outside that prefix could only be someone else's — reject it.
+    if (!dto.key.startsWith(`avatars/${id}/`)) {
+      throw new RpcBadRequestException('Invalid avatar key');
+    }
+
+    const exists = await this.r2.objectExists(dto.key);
+
+    if (!exists) {
+      throw new RpcBadRequestException(
+        'Upload not found — please try again',
+      );
+    }
+
+    const previousKey = user.avatar
+      ? this.r2.keyFromPublicUrl(user.avatar)
+      : null;
+
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { avatar: this.r2.getPublicUrl(dto.key) },
+    });
+
+    if (previousKey && previousKey !== dto.key) {
+      await this.r2.deleteObject(previousKey);
+    }
+
+    return this.sanitize(updated);
+  }
+
+  async deleteAvatar(id: string): Promise<SafeUser> {
+    const user = await this.prisma.user.findUnique({ where: { id } });
+
+    if (!user) throw new NotFoundException('User not found');
+
+    const previousKey = user.avatar
+      ? this.r2.keyFromPublicUrl(user.avatar)
+      : null;
+
+    const updated = await this.prisma.user.update({
+      where: { id },
+      data: { avatar: null },
+    });
+
+    if (previousKey) {
+      await this.r2.deleteObject(previousKey);
+    }
+
+    return this.sanitize(updated);
   }
 }

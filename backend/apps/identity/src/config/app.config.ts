@@ -2,6 +2,7 @@ import { registerAs } from "@nestjs/config"
 import * as Joi from 'joi';
 import { jwtEnvValidation } from "./jwt.config";
 import { rabbitmqEnvValidation } from "./rabbitmq.config";
+import { r2EnvValidation } from "./r2.config";
 
 export default registerAs('app', () => ({
     isDevelopment: process.env.NODE_ENV === 'development',
@@ -13,5 +14,6 @@ export const envValidationSchema = Joi.object({
   IDENTITY_SERVICE_PORT: Joi.number().port().default(3001),
   DATABASE_URL: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }).required(),
   ...jwtEnvValidation,
-  ...rabbitmqEnvValidation
+  ...rabbitmqEnvValidation,
+  ...r2EnvValidation,
 })

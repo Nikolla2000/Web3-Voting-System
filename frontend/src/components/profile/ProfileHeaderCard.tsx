@@ -1,6 +1,6 @@
 import { CalendarClock } from 'lucide-react';
 import type { UserProfile } from '@/types/user';
-import { ProfileAvatarPreview } from '@/components/profile/ProfileAvatarPreview';
+import { AvatarUploadControl } from '@/components/profile/AvatarUploadControl';
 
 interface ProfileHeaderCardProps {
   profile: UserProfile;
@@ -21,12 +21,9 @@ export function ProfileHeaderCard({ profile }: ProfileHeaderCardProps) {
       />
 
       <div className="relative flex flex-col gap-4 px-6 pb-6 sm:px-8 sm:pb-8">
-        <ProfileAvatarPreview
-          avatarUrl={profile.avatar ?? undefined}
-          username={profile.username}
-          size={80}
-          className="-mt-10 ring-4 ring-white sm:-mt-12"
-        />
+        <div className="-mt-10 sm:-mt-12">
+          <AvatarUploadControl avatarUrl={profile.avatar} username={profile.username} />
+        </div>
 
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>

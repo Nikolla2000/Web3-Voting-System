@@ -5,6 +5,8 @@ import { MessagePattern, Payload } from '@nestjs/microservices';
 import { USERS_PATTERNS } from '@app/shared';
 import { ChangePasswordDto } from '@app/shared/users/dto/change-password.dto';
 import { DeactivateAccountDto } from '@app/shared/users/dto/deactivate-account.dto';
+import { RequestAvatarUploadDto } from '@app/shared/users/dto/request-avatar-upload.dto';
+import { ConfirmAvatarDto } from '@app/shared/users/dto/confirm-avatar.dto';
 
 @Controller('users')
 export class UsersController {
@@ -39,5 +41,24 @@ export class UsersController {
   ) {
     await this.usersService.deactivate(payload.userId, payload.dto);
     return { success: true };
+  }
+
+  @MessagePattern({ cmd: USERS_PATTERNS.REQUEST_AVATAR_UPLOAD })
+  async requestAvatarUpload(
+    @Payload() payload: { userId: string; dto: RequestAvatarUploadDto },
+  ) {
+    return this.usersService.requestAvatarUpload(payload.userId, payload.dto);
+  }
+
+  @MessagePattern({ cmd: USERS_PATTERNS.CONFIRM_AVATAR })
+  async confirmAvatar(
+    @Payload() payload: { userId: string; dto: ConfirmAvatarDto },
+  ) {
+    return this.usersService.confirmAvatar(payload.userId, payload.dto);
+  }
+
+  @MessagePattern({ cmd: USERS_PATTERNS.DELETE_AVATAR })
+  async deleteAvatar(@Payload() payload: { userId: string }) {
+    return this.usersService.deleteAvatar(payload.userId);
   }
 }

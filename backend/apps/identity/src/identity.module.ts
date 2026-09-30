@@ -4,10 +4,11 @@ import { IdentityService } from './identity.service';
 import { ConfigModule } from '@nestjs/config';
 import appConfig, { envValidationSchema } from './config/app.config';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { PrismaModule } from '../prisma/prisma.module'; 
+import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import jwtConfig from './config/jwt.config';
 import rabbitmqConfig from './config/rabbitmq.config';
+import r2Config from './config/r2.config';
 import { UsersModule } from './users/users.module';
 import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
 
@@ -16,7 +17,7 @@ import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
     ConfigModule.forRoot({
       envFilePath: 'apps/identity/.env',
       isGlobal: true,
-      load: [appConfig, jwtConfig, rabbitmqConfig],
+      load: [appConfig, jwtConfig, rabbitmqConfig, r2Config],
       validationSchema: envValidationSchema,
       validationOptions: {
         allowUnknown: true,

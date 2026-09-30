@@ -13,6 +13,8 @@ import type { JwtPayload } from "./strategies/jwt.strategy";
 import { UpdateUserDto } from "@app/shared/users/dto/update-user.dto";
 import { ChangePasswordDto } from "@app/shared/users/dto/change-password.dto";
 import { DeactivateAccountDto } from "@app/shared/users/dto/deactivate-account.dto";
+import { RequestAvatarUploadDto } from "@app/shared/users/dto/request-avatar-upload.dto";
+import { ConfirmAvatarDto } from "@app/shared/users/dto/confirm-avatar.dto";
 
 @ApiTags('Auth')
 @Controller()
@@ -156,6 +158,33 @@ export class AuthProxyController {
       const data = await this.send(USERS_PATTERNS.DEACTIVATE_ME, { userId: user.sub, dto });
       this.clearRefreshCookie(res);
       return data;
+    }
+
+    @Post('users/me/avatar/upload-url')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Get a presigned URL to upload a new avatar directly to storage' })
+    async requestAvatarUpload(
+      @CurrentUser() user: JwtPayload,
+      @Body() dto: RequestAvatarUploadDto,
+    ) {
+      return this.send(USERS_PATTERNS.REQUEST_AVATAR_UPLOAD, { userId: user.sub, dto });
+    }
+
+    @Patch('users/me/avatar')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Confirm an uploaded avatar and save it to the profile' })
+    async confirmAvatar(
+      @CurrentUser() user: JwtPayload,
+      @Body() dto: ConfirmAvatarDto,
+    ) {
+      return this.send(USERS_PATTERNS.CONFIRM_AVATAR, { userId: user.sub, dto });
+    }
+
+    @Delete('users/me/avatar')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Remove the current avatar' })
+    async deleteAvatar(@CurrentUser() user: JwtPayload) {
+      return this.send(USERS_PATTERNS.DELETE_AVATAR, { userId: user.sub });
     }
 
 

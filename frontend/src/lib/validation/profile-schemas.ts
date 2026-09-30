@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+export const AVATAR_MAX_SIZE_BYTES = 5 * 1024 * 1024; // 5MB
+export const AVATAR_ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+
 export const profileInfoSchema = z.object({
   username: z
     .string()
@@ -7,7 +10,6 @@ export const profileInfoSchema = z.object({
     .max(20, 'Username must be under 20 characters')
     .regex(/^[a-zA-Z0-9_]+$/, 'Username can only contain letters, numbers and underscores'),
   email: z.string().min(1, 'Email is required').email('Enter a valid email address'),
-  avatar: z.union([z.literal(''), z.string().trim().url('Enter a valid image URL')]),
 });
 
 export type ProfileInfoFormValues = z.infer<typeof profileInfoSchema>;

@@ -12,7 +12,6 @@ import { useAuthStore } from '@/lib/store/auth-store';
 import type { UserProfile } from '@/types/user';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
-import { ProfileAvatarPreview } from '@/components/profile/ProfileAvatarPreview';
 import { SectionCard } from '@/components/profile/SectionCard';
 
 interface ProfileInfoFormProps {
@@ -27,7 +26,6 @@ export function ProfileInfoForm({ profile }: ProfileInfoFormProps) {
   const {
     register,
     handleSubmit,
-    watch,
     reset,
     formState: { errors, isDirty },
   } = useForm<ProfileInfoFormValues>({
@@ -35,19 +33,15 @@ export function ProfileInfoForm({ profile }: ProfileInfoFormProps) {
     defaultValues: {
       username: profile.username,
       email: profile.email,
-      avatar: profile.avatar ?? '',
     },
   });
-
-  const watchedAvatar = watch('avatar');
-  const watchedUsername = watch('username');
 
   const mutation = useMutation({
     mutationFn: updateProfile,
     onSuccess: (updated) => {
       setSuccessMessage('Profile updated.');
       queryClient.setQueryData(['profile'], updated);
-      reset({ username: updated.username, email: updated.email, avatar: updated.avatar ?? '' });
+      reset({ username: updated.username, email: updated.email });
       useAuthStore.setState((state) =>
         state.user ? { user: { ...state.user, username: updated.username, email: updated.email } } : state,
       );
@@ -58,28 +52,12 @@ export function ProfileInfoForm({ profile }: ProfileInfoFormProps) {
     setSubmitError(null);
     setSuccessMessage(null);
 
-    mutation.mutate(
-      { username: values.username, email: values.email, avatar: values.avatar },
-      { onError: (error) => setSubmitError(getApiErrorMessage(error)) },
-    );
+    mutation.mutate(values, { onError: (error) => setSubmitError(getApiErrorMessage(error)) });
   };
 
   return (
     <SectionCard eyebrow="Account" title="Account details" icon={UserRound}>
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-        <div className="flex items-center gap-4">
-          <ProfileAvatarPreview key={watchedAvatar} avatarUrl={watchedAvatar || undefined} username={watchedUsername || profile.username} />
-          <div className="flex-1">
-            <Input
-              label="Avatar URL"
-              type="url"
-              placeholder="https://example.com/avatar.jpg"
-              error={errors.avatar?.message}
-              {...register('avatar')}
-            />
-          </div>
-        </div>
-
         <Input label="Username" error={errors.username?.message} {...register('username')} />
 
         <Input label="Email" type="email" error={errors.email?.message} {...register('email')} />

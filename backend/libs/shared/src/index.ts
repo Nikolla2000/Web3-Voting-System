@@ -17,6 +17,8 @@ export * from './rabbitmq/rabbitmq-shared.module';
 
 export * from './exceptions/rpc-exceptions';
 
+export * from './storage/r2-storage.service';
+
 export * from './polls/dto/create-poll.dto';
 export * from './polls/dto/poll-query.dto';
 
