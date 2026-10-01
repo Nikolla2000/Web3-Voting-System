@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { IMAGE_ALLOWED_TYPES, IMAGE_MAX_SIZE_BYTES } from '@/lib/validation/image-upload';
 
 export const POLL_CATEGORY_VALUES = [
   'sports',
@@ -25,7 +26,10 @@ export const createPollSchema = z
       .string()
       .min(10, 'Description must be at least 10 characters')
       .max(2000, 'Description must be under 2000 characters'),
-    imageUrl: z.string().min(1, 'Image URL is required').url('Enter a valid URL'),
+    image: z
+      .instanceof(File, { message: 'Please choose a cover image' })
+      .refine((file) => IMAGE_ALLOWED_TYPES.includes(file.type), 'Please choose a JPG, PNG or WEBP image.')
+      .refine((file) => file.size <= IMAGE_MAX_SIZE_BYTES, 'Image must be under 5MB.'),
     category: z.enum(POLL_CATEGORY_VALUES, { message: 'Select a category' }),
     startsAt: z.string().min(1, 'Start date is required'),
     endsAt: z.string().min(1, 'End date is required'),

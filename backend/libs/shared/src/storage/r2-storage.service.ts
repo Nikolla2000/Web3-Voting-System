@@ -69,6 +69,24 @@ export class R2StorageService {
     return { uploadUrl, publicUrl: this.getPublicUrl(key) };
   }
 
+  /** Uploads a buffer directly — for server-mediated uploads (no presigned URL). */
+  async uploadObject(
+    key: string,
+    body: Buffer,
+    contentType: string,
+  ): Promise<string> {
+    await this.client.send(
+      new PutObjectCommand({
+        Bucket: this.bucket,
+        Key: key,
+        Body: body,
+        ContentType: contentType,
+      }),
+    );
+
+    return this.getPublicUrl(key);
+  }
+
   /** Confirms an object was actually uploaded before we trust it as someone's avatar. */
   async objectExists(key: string): Promise<boolean> {
     try {

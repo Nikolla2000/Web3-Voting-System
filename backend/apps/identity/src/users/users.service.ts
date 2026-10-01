@@ -18,7 +18,7 @@ import { ChangePasswordDto } from '@app/shared/users/dto/change-password.dto';
 import { DeactivateAccountDto } from '@app/shared/users/dto/deactivate-account.dto';
 import { RequestAvatarUploadDto } from '@app/shared/users/dto/request-avatar-upload.dto';
 import { ConfirmAvatarDto } from '@app/shared/users/dto/confirm-avatar.dto';
-import { buildAvatarKey } from '@app/shared/storage/avatar-storage.constants';
+import { buildObjectKey } from '@app/shared/storage/image-upload.constants';
 
 @Injectable()
 export class UsersService {
@@ -158,7 +158,7 @@ export class UsersService {
 
     if (!user) throw new NotFoundException('User not found');
 
-    const key = buildAvatarKey(id, dto.contentType);
+    const key = buildObjectKey(`avatars/${id}`, dto.contentType);
     const { uploadUrl, publicUrl } = await this.r2.createPresignedUpload(
       key,
       dto.contentType,

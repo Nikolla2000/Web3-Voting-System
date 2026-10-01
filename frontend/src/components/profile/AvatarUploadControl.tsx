@@ -6,7 +6,7 @@ import { Camera, Loader2, X } from 'lucide-react';
 import { confirmAvatar, deleteAvatar, requestAvatarUploadUrl, uploadAvatarFile } from '@/lib/api/users';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { useAuthStore } from '@/lib/store/auth-store';
-import { AVATAR_ALLOWED_TYPES, AVATAR_MAX_SIZE_BYTES } from '@/lib/validation/profile-schemas';
+import { IMAGE_ALLOWED_TYPES, IMAGE_MAX_SIZE_BYTES } from '@/lib/validation/image-upload';
 import { ProfileAvatarPreview } from '@/components/profile/ProfileAvatarPreview';
 import type { UserProfile } from '@/types/user';
 
@@ -50,12 +50,12 @@ export function AvatarUploadControl({ avatarUrl, username }: AvatarUploadControl
 
     setError(null);
 
-    if (!AVATAR_ALLOWED_TYPES.includes(file.type)) {
+    if (!IMAGE_ALLOWED_TYPES.includes(file.type)) {
       setError('Please choose a JPG, PNG or WEBP image.');
       return;
     }
 
-    if (file.size > AVATAR_MAX_SIZE_BYTES) {
+    if (file.size > IMAGE_MAX_SIZE_BYTES) {
       setError('Image must be under 5MB.');
       return;
     }
@@ -87,7 +87,7 @@ export function AvatarUploadControl({ avatarUrl, username }: AvatarUploadControl
         <input
           ref={inputRef}
           type="file"
-          accept={AVATAR_ALLOWED_TYPES.join(',')}
+          accept={IMAGE_ALLOWED_TYPES.join(',')}
           onChange={handleFileChange}
           className="hidden"
         />

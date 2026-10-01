@@ -2,9 +2,11 @@ import { Module } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { join } from 'path';
 import { PollsProxyController } from './polls-proxy.controller';
+import { StorageModule } from '../storage/storage.module';
 
 @Module({
   imports: [
+    StorageModule,
     ClientsModule.register([
       {
         name: 'POLLS_SERVICE',

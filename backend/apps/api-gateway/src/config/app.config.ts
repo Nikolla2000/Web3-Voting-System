@@ -2,6 +2,7 @@ import { registerAs } from "@nestjs/config";
 import * as Joi from 'joi';
 import { servicesEnvValidation } from "./services.config";
 import { jwtEnvValidation } from "./jwt.config";
+import { r2EnvValidation } from "./r2.config";
 
 export default registerAs('app', () => ({
     isDevelopment: process.env.NODE_ENV === 'development',
@@ -16,4 +17,5 @@ export const envValidationSchema = Joi.object({
   FRONTEND_URL: Joi.string().required(),
   ...jwtEnvValidation,
   ...servicesEnvValidation,
+  ...r2EnvValidation,
 })

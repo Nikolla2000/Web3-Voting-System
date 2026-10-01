@@ -82,3 +82,13 @@ export async function createPoll(payload: CreatePollPayload): Promise<Poll> {
   const res = await apiClient.post<ApiResponse<PollResponse>>('/polls', payload);
   return mapPollResponse(res.data.data);
 }
+
+export async function uploadPollImage(file: File): Promise<{ url: string }> {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const res = await apiClient.post<ApiResponse<{ url: string }>>('/polls/images', formData, {
+    headers: { 'Content-Type': undefined },
+  });
+  return res.data.data;
+}

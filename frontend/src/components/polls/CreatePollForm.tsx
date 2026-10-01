@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createPollSchema, MIN_POLL_END_LEAD_HOURS, type CreatePollFormValues } from '@/lib/validation/poll-schemas';
-import { createPoll, type CreatePollPayload } from '@/lib/api/polls';
+import { createPoll, uploadPollImage, type CreatePollPayload } from '@/lib/api/polls';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { POLL_CATEGORY_LABELS } from '@/lib/polls/utils';
 import type { PollCategory } from '@/types/poll';
@@ -15,6 +15,7 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { PollOptionsField } from '@/components/polls/PollOptionsField';
+import { PollImageField } from '@/components/polls/PollImageField';
 
 const CATEGORY_OPTIONS = Object.entries(POLL_CATEGORY_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -48,7 +49,21 @@ export function CreatePollForm() {
   });
 
   const mutation = useMutation({
-    mutationFn: (payload: CreatePollPayload) => createPoll(payload),
+    mutationFn: async (values: CreatePollFormValues) => {
+      const { url } = await uploadPollImage(values.image);
+
+      const payload: CreatePollPayload = {
+        title: values.title,
+        description: values.description,
+        imageUrl: url,
+        category: values.category as PollCategory,
+        startsAt: new Date(values.startsAt).toISOString(),
+        endsAt: new Date(values.endsAt).toISOString(),
+        options: values.options.map((option) => option.value),
+      };
+
+      return createPoll(payload);
+    },
     onSuccess: (poll) => {
       queryClient.invalidateQueries({ queryKey: ['polls'] });
       router.push(`/polls/${poll.id}`);
@@ -58,17 +73,7 @@ export function CreatePollForm() {
   const onSubmit = (values: CreatePollFormValues) => {
     setSubmitError(null);
 
-    const payload: CreatePollPayload = {
-      title: values.title,
-      description: values.description,
-      imageUrl: values.imageUrl,
-      category: values.category as PollCategory,
-      startsAt: new Date(values.startsAt).toISOString(),
-      endsAt: new Date(values.endsAt).toISOString(),
-      options: values.options.map((option) => option.value),
-    };
-
-    mutation.mutate(payload, {
+    mutation.mutate(values, {
       onError: (error) => setSubmitError(getApiErrorMessage(error)),
     });
   };
@@ -89,13 +94,7 @@ export function CreatePollForm() {
         {...register('description')}
       />
 
-      <Input
-        label="Image URL"
-        type="url"
-        placeholder="https://example.com/poll-cover.jpg"
-        error={errors.imageUrl?.message}
-        {...register('imageUrl')}
-      />
+      <PollImageField control={control} error={errors.image?.message} />
 
       <Select
         label="Category"
