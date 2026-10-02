@@ -4,4 +4,5 @@ export const AUTH_PATTERNS = {
     REFRESH: 'auth.refresh',
     LOGOUT: 'auth.logout',
     LOGOUT_ALL: 'auth.logout-all',
+    GOOGLE_AUTH: 'auth.google',
 }

@@ -3,7 +3,7 @@ export function GoogleButton() {
     <button
       type="button"
       onClick={() => {
-        // TODO: wire up Google OAuth when I make it in the backend
+        window.location.href = `${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/auth/google`;
       }}
       className="inline-flex w-full items-center justify-center gap-2.5 rounded-full border border-slate-200 bg-white px-6 py-3 text-sm font-medium text-slate-700 shadow-[0_2px_10px_-4px_rgba(15,23,42,0.08)] transition-all hover:-translate-y-0.5 hover:border-slate-300"
     >

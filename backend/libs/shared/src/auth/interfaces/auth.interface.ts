@@ -16,3 +16,10 @@ export interface UserRegisteredPayload {
   username: string;
   registeredViaGoogle: boolean;
 }
+
+export interface GoogleProfile {
+  id: string;
+  email: string;
+  username: string;
+  avatar: string;
+}

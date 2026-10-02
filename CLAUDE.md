@@ -98,6 +98,7 @@ This is a microservices voting platform. The API gateway is the only HTTP-facing
 - `api-gateway/src/polls/polls-proxy.controller.ts` — forwards to `polls` over gRPC (`ClientGrpc`, service name `PollsService`). Also hosts `POST /polls/images` (poll cover image upload — see **File storage (R2)** below), which doesn't touch the gRPC client at all.
 - `api-gateway/src/blockchain/blockchain-proxy.controller.ts` — forwards to `blockchain` over gRPC (`ClientGrpc`, service name `BlockchainService`) under `/polls/:id/group/join`, `/polls/:id/group/merkle-proof`, `/polls/:id/vote/verify`, `/polls/:id/vote`.
 - Refresh tokens are set as an httpOnly cookie by the gateway; access tokens are short-lived JWTs (15m) returned in the response body and attached client-side as a Bearer header.
+- Google OAuth: `GET /auth/google` and `/auth/google/callback` (gateway-side `GoogleStrategy`/`GoogleOAuthGuard`, `api-gateway/src/auth/`) handle the browser redirect/consent round trip — this has to live in the gateway, not `identity`, since `identity` is TCP-only and has no HTTP listener for Google to redirect back to. The callback forwards the Google profile to `identity` over the existing TCP client (`AUTH_PATTERNS.GOOGLE_AUTH` → `AuthService.googleAuth()`, find-or-create by email), sets the refresh cookie exactly like `login()` does, then redirects to the frontend root rather than putting a token in the URL — `AuthBootstrap` (mounted in the root layout) hydrates the session from that cookie like any other page load, so no dedicated callback page is needed. `GoogleProfile` (`@app/shared`) is the shared shape crossing that TCP boundary.
 
 **Shared lib** (`libs/shared`, imported as `@app/shared`): message pattern constants, DTOs, RabbitMQ wrapper services (`RabbitMQConnectionService`/`Publisher`/`Consumer`, exchange `voting_system`), RPC exception helpers, the R2 storage service (see below). Routing keys live in one place, `rabbitmq.constants.ts` (`ROUTING_KEYS`): `USER_REGISTERED`, `VOTE_CAST` (`'polls.vote_cast'`), `POLL_CREATED`, `POLL_CONTRACT_DEPLOYED`.
 
@@ -147,9 +148,6 @@ No test runner is configured. Husky + lint-staged run eslint/prettier on staged 
 
 ## Roadmap (not built yet — keep new work compatible with these)
 
-- Google OAuth — server-side groundwork exists (`identity`'s `GoogleStrategy`,
-  `AuthService.googleAuth()`) but isn't wired to an HTTP route on the gateway
-  yet, and `GoogleButton` on the frontend is still a stub.
 - Redis — planned, not implemented
 - Some kind of AI service, which will use vector databases, RAG and other AI things to show knowledge, possibly written in python
 - Unit tests — essentially none beyond Nest's generated scaffold spec files,

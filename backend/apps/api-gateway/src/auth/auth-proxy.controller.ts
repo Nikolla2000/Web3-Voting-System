@@ -1,15 +1,17 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Param, Patch, Post, Req, Res, UnauthorizedException } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Logger, Param, Patch, Post, Req, Res, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { AuthProxyService } from "./auth-proxy.service";
-import { ApiBearerAuth, ApiCookieAuth, ApiOperation, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiCookieAuth, ApiExcludeEndpoint, ApiOperation, ApiTags } from "@nestjs/swagger";
 import { Public } from "./decorators/public.decorator";
 import type { Request, Response } from 'express';
 import { firstValueFrom, timeout } from "rxjs";
 import { ClientProxy } from "@nestjs/microservices";
 import { AUTH_PATTERNS, AuthResponse, AuthTokens, LoginDto, RegisterDto, USERS_PATTERNS } from "@app/shared";
+import type { GoogleProfile } from "@app/shared";
 import { JwtService } from "@nestjs/jwt";
 import { CurrentUser } from "./decorators/current-user.decorator";
 import type { JwtPayload } from "./strategies/jwt.strategy";
+import { GoogleOAuthGuard } from "./guards/google-oauth.guard";
 import { UpdateUserDto } from "@app/shared/users/dto/update-user.dto";
 import { ChangePasswordDto } from "@app/shared/users/dto/change-password.dto";
 import { DeactivateAccountDto } from "@app/shared/users/dto/deactivate-account.dto";
@@ -19,6 +21,8 @@ import { ConfirmAvatarDto } from "@app/shared/users/dto/confirm-avatar.dto";
 @ApiTags('Auth')
 @Controller()
 export class AuthProxyController {
+    private readonly logger = new Logger(AuthProxyController.name);
+
     constructor(
         private readonly configService: ConfigService,
         private readonly authProxyService: AuthProxyService,
@@ -50,6 +54,36 @@ export class AuthProxyController {
       const data = await this.send<AuthResponse>(AUTH_PATTERNS.LOGIN, dto);
       this.setRefreshCookie(res, data.tokens.refreshToken);
       return { user: data.user, accessToken: data.tokens.accessToken };
+    }
+
+    @Public()
+    @Get('auth/google')
+    @UseGuards(GoogleOAuthGuard)
+    @ApiExcludeEndpoint()
+    async googleAuth() {
+      // GoogleOAuthGuard redirects to Google's consent screen; this body never runs.
+    }
+
+    @Public()
+    @Get('auth/google/callback')
+    @UseGuards(GoogleOAuthGuard)
+    @ApiExcludeEndpoint()
+    async googleAuthCallback(
+      @Req() req: Request,
+      @Res() res: Response,
+    ) {
+      // Validated as required at startup (see app.config.ts's Joi schema).
+      const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
+
+      try {
+        const profile = req.user as GoogleProfile;
+        const data = await this.send<AuthResponse>(AUTH_PATTERNS.GOOGLE_AUTH, profile);
+        this.setRefreshCookie(res, data.tokens.refreshToken);
+        res.redirect(frontendUrl);
+      } catch (error) {
+        this.logger.error('Google OAuth callback failed', error);
+        res.redirect(`${frontendUrl}/sign-in?error=google_auth_failed`);
+      }
     }
 
     @Public()

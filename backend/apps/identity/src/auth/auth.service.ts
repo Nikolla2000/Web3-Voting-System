@@ -5,7 +5,8 @@ import { JwtService } from "@nestjs/jwt";
 // import { Role } from "src/generated/prisma/enums";
 // import { UsersService } from "src/users/users.service";
 import { UsersService } from "../users/users.service";
-import { GoogleProfile, JwtPayload } from "./auth.types";
+import { JwtPayload } from "./auth.types";
+import type { GoogleProfile } from "@app/shared";
 import { RpcForbiddenException, RpcUnauthorizedException, UserRegisteredPayload } from "@app/shared";
 import { AuthTokens } from "@app/shared";
 import * as bcrypt from 'bcrypt';
@@ -167,6 +168,13 @@ export class AuthService {
                 email: profile.email,
                 username: username,
                 avatar: profile.avatar
+            });
+
+            this.rabbitMQService.publish<UserRegisteredPayload>(ROUTING_KEYS.USER_REGISTERED, {
+                userId: user.id,
+                email: user.email,
+                username: user.username,
+                registeredViaGoogle: true,
             });
         }
 

@@ -3,6 +3,7 @@ import * as Joi from 'joi';
 import { servicesEnvValidation } from "./services.config";
 import { jwtEnvValidation } from "./jwt.config";
 import { r2EnvValidation } from "./r2.config";
+import { googleEnvValidation } from "./google.config";
 
 export default registerAs('app', () => ({
     isDevelopment: process.env.NODE_ENV === 'development',
@@ -18,4 +19,5 @@ export const envValidationSchema = Joi.object({
   ...jwtEnvValidation,
   ...servicesEnvValidation,
   ...r2EnvValidation,
+  ...googleEnvValidation,
 })

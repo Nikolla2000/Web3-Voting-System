@@ -2,6 +2,7 @@ import { Controller } from "@nestjs/common";
 import { MessagePattern, Payload } from "@nestjs/microservices";
 import { AuthService } from "./auth.service";
 import { AUTH_PATTERNS, AuthResponse, RegisterDto, LoginDto } from "@app/shared";
+import type { GoogleProfile } from "@app/shared";
 import { UsersService } from "../users/users.service";
 import { UpdateUserDto } from "../users/dto/update-user.dto";
 
@@ -57,5 +58,18 @@ export class AuthController {
   async logoutAll(@Payload() payload: { userId: string }) {
     await this.authService.logoutAll(payload.userId);
     return { message: 'Logged out from all devices' };
+  }
+
+  @MessagePattern({ cmd: AUTH_PATTERNS.GOOGLE_AUTH })
+  async googleAuth(@Payload() profile: GoogleProfile): Promise<AuthResponse> {
+    const { user, tokens } = await this.authService.googleAuth(profile);
+
+    return {
+      user,
+      tokens: {
+        accessToken: tokens.accessToken,
+        refreshToken: tokens.refreshToken,
+      }
+    }
   }
 }

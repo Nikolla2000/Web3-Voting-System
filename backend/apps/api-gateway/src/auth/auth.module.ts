@@ -5,6 +5,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthProxyController } from './auth-proxy.controller';
 import { AuthProxyService } from './auth-proxy.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
@@ -30,7 +31,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
     ]),
   ],
   controllers: [AuthProxyController],
-  providers: [AuthProxyService, JwtStrategy],
+  providers: [AuthProxyService, JwtStrategy, GoogleStrategy],
   exports: [JwtStrategy],
 })
 export class AuthModule {}

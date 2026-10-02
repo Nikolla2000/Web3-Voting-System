@@ -5,6 +5,7 @@ import appConfig, { envValidationSchema } from './config/app.config';
 import jwtConfig from './config/jwt.config';
 import servicesConfig from './config/services.config';
 import r2Config from './config/r2.config';
+import googleConfig from './config/google.config';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -20,7 +21,7 @@ import { BlockchainModule } from './blockchain/blockchain.module';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [appConfig, jwtConfig, servicesConfig, r2Config],
+      load: [appConfig, jwtConfig, servicesConfig, r2Config, googleConfig],
       validationSchema: envValidationSchema,
       validationOptions: {
         allowUknown: true,
