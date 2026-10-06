@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { RabbitMQConsumerService, ROUTING_KEYS, RedisService } from '@app/shared';
 import { PrismaService } from '../../prisma/prisma.service';
-import { pollDetailCacheKey } from '../cache/polls-cache.constants';
+import { pollDetailCacheKey, pollsListVersionKey } from '../cache/polls-cache.constants';
 
 interface PollContractDeployedEvent {
   pollId: string;
@@ -39,6 +39,7 @@ export class PollContractDeployedConsumer implements OnModuleInit {
         data: { contractAddress: event.contractAddress },
       });
       await this.redis.getClient().del(pollDetailCacheKey(event.pollId));
+      await this.redis.getClient().incr(pollsListVersionKey());
       this.logger.log(
         `Poll ${event.pollId} contractAddress set to ${event.contractAddress}`,
       );

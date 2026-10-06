@@ -8,6 +8,9 @@ import { status as grpcStatus } from '@grpc/grpc-js';
 import {
   POLL_DETAIL_CACHE_TTL_SECONDS,
   pollDetailCacheKey,
+  POLLS_LIST_CACHE_TTL_SECONDS,
+  pollsListCacheKey,
+  pollsListVersionKey,
 } from './cache/polls-cache.constants';
 
 interface CreatePollInput {
@@ -52,6 +55,8 @@ export class PollsService {
       include: { options: true }
     });
 
+    await this.redis.getClient().incr(pollsListVersionKey());
+
     await this.publisher.publish(ROUTING_KEYS.POLL_CREATED, {
       pollId: poll.id,
       title: poll.title,
@@ -63,6 +68,15 @@ export class PollsService {
   }
 
   async findMany({ search, status = 'all', sortBy = 'newest', page = 1, limit = 12 }: FindManyInput) {
+    const version = (await this.redis.getClient().get(pollsListVersionKey())) ?? '0';
+    const cacheKey = pollsListCacheKey(version, { search, status, sortBy, page, limit });
+
+    const cached = await this.redis.getClient().get(cacheKey);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      return { ...parsed, items: parsed.items.map(deserializePoll) };
+    }
+
     const now = new Date();
 
     const statusWhere: Prisma.PollWhereInput =
@@ -93,7 +107,13 @@ export class PollsService {
       this.prisma.poll.count({ where }),
     ]);
 
-    return { items, total, page, limit };
+    const result = { items, total, page, limit };
+
+    await this.redis
+      .getClient()
+      .set(cacheKey, JSON.stringify(result), 'EX', POLLS_LIST_CACHE_TTL_SECONDS);
+
+    return result;
   }
 
   async findById(id: string) {
