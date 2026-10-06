@@ -15,6 +15,7 @@ import {
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import type { ClientGrpc } from '@nestjs/microservices';
+import { SkipThrottle, Throttle } from '@nestjs/throttler';
 import { ApiBearerAuth, ApiConsumes, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom, Observable } from 'rxjs';
 import { Public } from '../auth/decorators/public.decorator';
@@ -43,7 +44,12 @@ export class PollsProxyController implements OnModuleInit {
     this.pollsService = this.client.getService<PollsServiceGrpc>('PollsService');
   }
 
+  // Already behind the Redis cache-aside layer (polls.service.ts) and
+  // exercised by legitimate high-frequency traffic (the poll detail page's
+  // 15s active-poll refetch) — gateway-level throttling here would fight
+  // that caching rather than complement it.
   @Public()
+  @SkipThrottle()
   @Get()
   @ApiOperation({ summary: 'List polls (search, status filter, sort, pagination)' })
   async getPolls(@Query() query: PollQueryDto) {
@@ -51,12 +57,14 @@ export class PollsProxyController implements OnModuleInit {
   }
 
   @Public()
+  @SkipThrottle()
   @Get(':id')
   @ApiOperation({ summary: 'Get a single poll by id' })
   async getPollById(@Param('id') id: string) {
     return firstValueFrom(this.pollsService.getPollById({ id }));
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post()
   @HttpCode(HttpStatus.CREATED)
   @ApiBearerAuth()
@@ -69,6 +77,7 @@ export class PollsProxyController implements OnModuleInit {
   // its create form is open, so there's no entity to scope/attach an eager
   // direct-to-bucket upload to. Uploading through the gateway at submit time
   // means nothing lands in R2 until the poll is actually being created.
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('images')
   @HttpCode(HttpStatus.CREATED)
   @ApiBearerAuth()

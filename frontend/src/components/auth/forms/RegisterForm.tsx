@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { registerSchema, type RegisterFormValues } from '@/lib/validation/auth-schemas';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { getApiErrorMessage } from '@/lib/api/errors';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { GoogleButton } from '@/components/auth/GoogleButton';
@@ -29,8 +30,8 @@ export function RegisterForm() {
       const { confirmPassword: _confirmPassword, ...payload } = values;
       await registerUser(payload);
       router.push('/polls');
-    } catch {
-      setServerError('Could not create your account. Please try again.');
+    } catch (error) {
+      setServerError(getApiErrorMessage(error, 'Could not create your account. Please try again.'));
     }
   };
 

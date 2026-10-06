@@ -9,6 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
+import { Throttle } from '@nestjs/throttler';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom, Observable } from 'rxjs';
 import { JoinGroupDto, SubmitVoteDto } from '@app/shared';
@@ -42,6 +43,10 @@ export class BlockchainProxyController implements OnModuleInit {
       this.client.getService<BlockchainServiceGrpc>('BlockchainService');
   }
 
+  // join and vote both relay a real on-chain tx from the one relayer
+  // account — tighter than the gateway default since spam here has an
+  // actual (testnet) gas cost, unlike a normal web request.
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post(':id/group/join')
   @ApiOperation({
     summary:
@@ -89,6 +94,7 @@ export class BlockchainProxyController implements OnModuleInit {
     );
   }
 
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post(':id/vote')
   @ApiOperation({
     summary:

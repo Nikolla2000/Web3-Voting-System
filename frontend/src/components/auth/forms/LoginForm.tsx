@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { loginSchema, type LoginFormValues } from '@/lib/validation/auth-schemas';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { getApiErrorMessage } from '@/lib/api/errors';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { GoogleButton } from '@/components/auth/GoogleButton';
@@ -28,8 +29,8 @@ export function LoginForm() {
     try {
       await login(values);
       router.push('/');
-    } catch {
-      setServerError('Invalid email or password.');
+    } catch (error) {
+      setServerError(getApiErrorMessage(error, 'Invalid email or password.'));
     }
   };
 

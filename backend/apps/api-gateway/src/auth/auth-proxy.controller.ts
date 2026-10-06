@@ -1,4 +1,5 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Inject, Logger, Param, Patch, Post, Req, Res, UnauthorizedException, UseGuards } from "@nestjs/common";
+import { Throttle } from "@nestjs/throttler";
 import { ConfigService } from "@nestjs/config";
 import { AuthProxyService } from "./auth-proxy.service";
 import { ApiBearerAuth, ApiCookieAuth, ApiExcludeEndpoint, ApiOperation, ApiTags } from "@nestjs/swagger";
@@ -30,7 +31,10 @@ export class AuthProxyController {
         @Inject('IDENTITY_SERVICE') private readonly authClient: ClientProxy,
     ) {}
 
+    // Credential endpoints: the actual brute-force/credential-stuffing
+    // threat model, so tighter than the gateway's global default.
     @Public()
+    @Throttle({ default: { limit: 5, ttl: 60000 } })
     @Post('auth/register')
     @HttpCode(HttpStatus.CREATED)
     @ApiOperation({ summary: 'Register a new user' })
@@ -44,6 +48,7 @@ export class AuthProxyController {
     }
 
     @Public()
+    @Throttle({ default: { limit: 5, ttl: 60000 } })
     @Post('auth/login')
     @HttpCode(HttpStatus.OK)
     @ApiOperation({ summary: 'Login user with email and password' })
@@ -87,6 +92,7 @@ export class AuthProxyController {
     }
 
     @Public()
+    @Throttle({ default: { limit: 5, ttl: 60000 } })
     @Post('auth/refresh')
     @HttpCode(HttpStatus.OK)
     @ApiCookieAuth()

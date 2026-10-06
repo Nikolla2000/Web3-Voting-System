@@ -29,11 +29,10 @@ async function bootstrap() {
   app.enableCors({
     origin: frontendUrl,
     credentials: true,
-  });
-
-  app.enableCors({
-    origin: configService.get<string>('app.frontendUrl'),
-    credentials: true,
+    // Rate-limit headers aren't on the CORS-safelisted response header list,
+    // so the frontend can't read them (Retry-After in particular) unless
+    // they're explicitly exposed here.
+    exposedHeaders: ['Retry-After', 'X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
   });
 
   if (configService.get<string>('app.nodeEnv') !== 'production') {
