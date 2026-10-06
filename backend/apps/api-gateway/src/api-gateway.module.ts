@@ -6,6 +6,7 @@ import jwtConfig from './config/jwt.config';
 import servicesConfig from './config/services.config';
 import r2Config from './config/r2.config';
 import googleConfig from './config/google.config';
+import redisConfig from '@app/shared/redis/redis.config';
 import { JwtAuthGuard } from './auth/guards/jwt-auth.guard';
 import { GlobalExceptionFilter } from './common/filters/global-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
@@ -15,13 +16,14 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AuthModule } from './auth/auth.module';
 import { PollsModule } from './polls/polls.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [appConfig, jwtConfig, servicesConfig, r2Config, googleConfig],
+      load: [appConfig, jwtConfig, servicesConfig, r2Config, googleConfig, redisConfig],
       validationSchema: envValidationSchema,
       validationOptions: {
         allowUknown: true,
@@ -35,6 +37,7 @@ import { BlockchainModule } from './blockchain/blockchain.module';
     AuthModule,
     PollsModule,
     BlockchainModule,
+    RedisModule,
   ],
   controllers: [],
   providers: [

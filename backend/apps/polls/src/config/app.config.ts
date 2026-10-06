@@ -1,6 +1,7 @@
 import { registerAs } from "@nestjs/config"
 import * as Joi from 'joi';
 import { rabbitmqEnvValidation } from "./rabbitmq.config";
+import { redisEnvValidation } from "@app/shared";
 
 export default registerAs('app', () => ({
     isProduction: process.env.NODE_ENV === 'production',
@@ -12,4 +13,5 @@ export const envValidationSchema = Joi.object({
     POLLS_SERVICE_PORT: Joi.number().port().default(3002),
     POLLS_SERVICE_DATABASE_URL: Joi.string().uri({ scheme: ['postgres', 'postgresql'] }).required(),
     rabbitmqEnvValidation,
+    ...redisEnvValidation,
 });

@@ -19,6 +19,9 @@ export * from './exceptions/rpc-exceptions';
 
 export * from './storage/r2-storage.service';
 
+export * from './redis/redis.service';
+export * from './redis/redis.config';
+
 export * from './polls/dto/create-poll.dto';
 export * from './polls/dto/poll-query.dto';
 

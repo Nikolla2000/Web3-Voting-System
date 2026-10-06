@@ -6,15 +6,17 @@ import { PollsController } from './polls.controller';
 import { PollsService } from './polls.service';
 import rabbitmqConfig from './config/rabbitmq.config';
 import { RabbitMQSharedModule } from '@app/shared';
+import redisConfig from '@app/shared/redis/redis.config';
 import { VoteSyncConsumer } from './events/vote-sync.consumer';
 import { PollContractDeployedConsumer } from './events/poll-contract-deployed.consumer';
+import { RedisModule } from './redis/redis.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       envFilePath: 'apps/polls/.env',
       isGlobal: true,
-      load: [appConfig, rabbitmqConfig],
+      load: [appConfig, rabbitmqConfig, redisConfig],
       validationSchema: envValidationSchema,
       validationOptions: {
         allowUnknown: true,
@@ -23,6 +25,7 @@ import { PollContractDeployedConsumer } from './events/poll-contract-deployed.co
     }),
     PrismaModule,
     RabbitMQSharedModule,
+    RedisModule,
   ],
   controllers: [PollsController],
   providers: [PollsService, VoteSyncConsumer, PollContractDeployedConsumer],
