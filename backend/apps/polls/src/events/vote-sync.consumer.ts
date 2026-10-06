@@ -1,6 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { RabbitMQConsumerService, ROUTING_KEYS } from '@app/shared';
+import { RabbitMQConsumerService, ROUTING_KEYS, RedisService } from '@app/shared';
 import { PrismaService } from '../..//prisma/prisma.service';
+import { pollDetailCacheKey } from '../cache/polls-cache.constants';
 
 interface VoteCastEvent {
   pollId: string;
@@ -21,6 +22,7 @@ export class VoteSyncConsumer implements OnModuleInit {
   constructor(
     private readonly consumer: RabbitMQConsumerService,
     private readonly prisma: PrismaService,
+    private readonly redis: RedisService,
   ) {}
 
   async onModuleInit() {
@@ -38,6 +40,7 @@ export class VoteSyncConsumer implements OnModuleInit {
         this.prisma.pollOption.update({ where: { id: event.optionId }, data: { votes: { increment: 1 } } }),
         this.prisma.poll.update({ where: { id: event.pollId }, data: { totalVotes: { increment: 1 } } }),
       ]);
+      await this.redis.getClient().del(pollDetailCacheKey(event.pollId));
     } catch (error: any) {
       if (error.code === 'P2002') {
         this.logger.warn(`Duplicate vote.cast игнориран (nullifier вече обработен): ${event.nullifierHash}`);

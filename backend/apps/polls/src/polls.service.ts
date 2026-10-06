@@ -2,9 +2,13 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from './generated/prisma';
 // import { RabbitMQPublisherService } from './rabbitmq/rabbitmq.service';
-import { RabbitMQPublisherService, ROUTING_KEYS } from '@app/shared';
+import { RabbitMQPublisherService, ROUTING_KEYS, RedisService } from '@app/shared';
 import { RpcException } from '@nestjs/microservices';
 import { status as grpcStatus } from '@grpc/grpc-js';
+import {
+  POLL_DETAIL_CACHE_TTL_SECONDS,
+  pollDetailCacheKey,
+} from './cache/polls-cache.constants';
 
 interface CreatePollInput {
   creatorId: string;
@@ -30,6 +34,7 @@ export class PollsService {
   constructor (
     private readonly prisma: PrismaService,
     private readonly publisher: RabbitMQPublisherService,
+    private readonly redis: RedisService,
   ) {}
 
   async create(input: CreatePollInput) {
@@ -92,12 +97,36 @@ export class PollsService {
   }
 
   async findById(id: string) {
+    const cacheKey = pollDetailCacheKey(id);
+    const cached = await this.redis.getClient().get(cacheKey);
+    if (cached) {
+      return deserializePoll(JSON.parse(cached));
+    }
+
     const poll = await this.prisma.poll.findUnique({ where: { id }, include: { options: true } });
 
     if (!poll) {
       throw new RpcException({ code: grpcStatus.NOT_FOUND, message: `Poll ${id} not found` });
     }
 
+    await this.redis
+      .getClient()
+      .set(cacheKey, JSON.stringify(poll), 'EX', POLL_DETAIL_CACHE_TTL_SECONDS);
+
     return poll;
   }
+}
+
+// Round-tripping through JSON turns Date fields into strings — restore them
+// so a cache hit returns the same shape findById's live Prisma read does.
+function deserializePoll<T extends { startsAt: string; endsAt: string; createdAt: string; updatedAt: string }>(
+  poll: T,
+): T & { startsAt: Date; endsAt: Date; createdAt: Date; updatedAt: Date } {
+  return {
+    ...poll,
+    startsAt: new Date(poll.startsAt),
+    endsAt: new Date(poll.endsAt),
+    createdAt: new Date(poll.createdAt),
+    updatedAt: new Date(poll.updatedAt),
+  };
 }
