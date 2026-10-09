@@ -7,6 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createPollSchema, MIN_POLL_END_LEAD_HOURS, type CreatePollFormValues } from '@/lib/validation/poll-schemas';
 import { createPoll, uploadPollImage, type CreatePollPayload } from '@/lib/api/polls';
+import { checkDuplicatePoll, type DuplicatePollMatch } from '@/lib/api/ai';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { POLL_CATEGORY_LABELS } from '@/lib/polls/utils';
 import type { PollCategory } from '@/types/poll';
@@ -16,6 +17,7 @@ import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { PollOptionsField } from '@/components/polls/PollOptionsField';
 import { PollImageField } from '@/components/polls/PollImageField';
+import { PollDuplicateWarning } from '@/components/polls/PollDuplicateWarning';
 
 const CATEGORY_OPTIONS = Object.entries(POLL_CATEGORY_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -28,6 +30,9 @@ export function CreatePollForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [duplicateMatches, setDuplicateMatches] = useState<DuplicatePollMatch[] | null>(null);
+  const [pendingValues, setPendingValues] = useState<CreatePollFormValues | null>(null);
+  const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
 
   const [minStartsAt] = useState(() => toDatetimeLocalValue(new Date(Date.now())));
 
@@ -70,12 +75,32 @@ export function CreatePollForm() {
     },
   });
 
-  const onSubmit = (values: CreatePollFormValues) => {
-    setSubmitError(null);
-
+  const submitPoll = (values: CreatePollFormValues) => {
+    setDuplicateMatches(null);
+    setPendingValues(null);
     mutation.mutate(values, {
       onError: (error) => setSubmitError(getApiErrorMessage(error)),
     });
+  };
+
+  const onSubmit = async (values: CreatePollFormValues) => {
+    setSubmitError(null);
+    setIsCheckingDuplicates(true);
+
+    try {
+      const matches = await checkDuplicatePoll(values.title, values.description);
+      if (matches.length > 0) {
+        setDuplicateMatches(matches);
+        setPendingValues(values);
+        return;
+      }
+    } catch {
+      // the similarity check is a convenience, not a requirement to create a poll
+    } finally {
+      setIsCheckingDuplicates(false);
+    }
+
+    submitPoll(values);
   };
 
   return (
@@ -124,9 +149,26 @@ export function CreatePollForm() {
 
       {submitError && <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>}
 
-      <Button type="submit" variant="primary" className="mt-1 w-full" disabled={mutation.isPending}>
-        {mutation.isPending ? 'Creating poll…' : 'Create poll'}
-      </Button>
+      {duplicateMatches && pendingValues ? (
+        <PollDuplicateWarning
+          matches={duplicateMatches}
+          isSubmitting={mutation.isPending}
+          onEdit={() => {
+            setDuplicateMatches(null);
+            setPendingValues(null);
+          }}
+          onContinue={() => submitPoll(pendingValues)}
+        />
+      ) : (
+        <Button
+          type="submit"
+          variant="primary"
+          className="mt-1 w-full"
+          disabled={mutation.isPending || isCheckingDuplicates}
+        >
+          {isCheckingDuplicates ? 'Checking for similar polls…' : mutation.isPending ? 'Creating poll…' : 'Create poll'}
+        </Button>
+      )}
     </form>
   );
 }
