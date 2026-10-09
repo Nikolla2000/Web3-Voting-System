@@ -60,8 +60,11 @@ export class PollsService {
     await this.publisher.publish(ROUTING_KEYS.POLL_CREATED, {
       pollId: poll.id,
       title: poll.title,
+      description: poll.description,
+      category: poll.category,
       creatorId: poll.creatorId,
       startsAt: poll.startsAt,
+      endsAt: poll.endsAt,
     });
 
     return poll;

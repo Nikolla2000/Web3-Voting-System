@@ -17,6 +17,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { AuthModule } from './auth/auth.module';
 import { PollsModule } from './polls/polls.module';
 import { BlockchainModule } from './blockchain/blockchain.module';
+import { AiModule } from './ai/ai.module';
 import { RedisModule } from './redis/redis.module';
 import { RedisThrottlerStorage } from './throttler/redis-throttler-storage';
 
@@ -43,6 +44,7 @@ import { RedisThrottlerStorage } from './throttler/redis-throttler-storage';
     AuthModule,
     PollsModule,
     BlockchainModule,
+    AiModule,
     RedisModule,
   ],
   controllers: [],

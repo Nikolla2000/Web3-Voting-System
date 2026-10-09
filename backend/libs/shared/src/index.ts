@@ -28,3 +28,5 @@ export * from './polls/dto/poll-query.dto';
 export * from './blockchain/identifier.util';
 export * from './blockchain/dto/join-group.dto';
 export * from './blockchain/dto/submit-vote.dto';
+
+export * from './ai/dto/check-duplicate-poll.dto';

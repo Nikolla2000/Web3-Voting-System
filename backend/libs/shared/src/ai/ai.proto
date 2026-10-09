@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package ai;
+
+service AiService {
+  rpc CheckDuplicatePoll (CheckDuplicatePollRequest) returns (CheckDuplicatePollResponse);
+}
+
+message CheckDuplicatePollRequest {
+  string title = 1;
+  string description = 2;
+}
+
+message DuplicateMatch {
+  string pollId = 1;
+  string title = 2;
+  float similarity = 3;
+}
+
+message CheckDuplicatePollResponse {
+  repeated DuplicateMatch matches = 1;
+}

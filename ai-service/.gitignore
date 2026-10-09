@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.pyc
+
+.env
+.env.local
+
+*.egg-info/
+.pytest_cache/
+
+# generated from libs/shared/src/ai/*.proto via scripts/gen_proto.py
+src/ai_service/grpc_gen/
