@@ -18,3 +18,17 @@ export async function checkDuplicatePoll(title: string, description: string): Pr
   });
   return res.data.data.matches;
 }
+
+export interface PollSearchResult {
+  pollId: string;
+  similarity: number;
+}
+
+interface SearchPollsResponse {
+  results: PollSearchResult[];
+}
+
+export async function searchPolls(query: string): Promise<PollSearchResult[]> {
+  const res = await apiClient.post<ApiResponse<SearchPollsResponse>>('/polls/search', { query });
+  return res.data.data.results;
+}

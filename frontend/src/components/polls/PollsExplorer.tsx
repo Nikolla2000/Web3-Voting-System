@@ -4,9 +4,11 @@ import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { PollSortOption, PollStatus } from '@/types/poll';
 import { filterPolls, sortPolls } from '@/lib/polls/utils';
-import { fetchPolls } from '@/lib/api/polls';
+import { fetchPolls, fetchPollById } from '@/lib/api/polls';
+import { searchPolls } from '@/lib/api/ai';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { PollsToolbar } from '@/components/polls/PollsToolbar';
+import { PollsAiSearchBar } from '@/components/polls/PollsAiSearchBar';
 import { PollsGrid } from '@/components/polls/PollsGrid';
 import { PollsLoadingState } from '@/components/polls/PollsLoadingState';
 import { PollsErrorState } from '@/components/polls/PollsErrorState';
@@ -17,6 +19,7 @@ export function PollsExplorer() {
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<PollStatus | 'all'>('all');
   const [sortBy, setSortBy] = useState<PollSortOption>('newest');
+  const [aiQuery, setAiQuery] = useState<string | null>(null);
 
   const {
     data,
@@ -27,6 +30,16 @@ export function PollsExplorer() {
   } = useQuery({
     queryKey: ['polls'],
     queryFn: () => fetchPolls({ limit: MAX_POLLS_PER_FETCH }),
+    enabled: aiQuery === null,
+  });
+
+  const aiSearch = useQuery({
+    queryKey: ['polls-ai-search', aiQuery],
+    queryFn: async () => {
+      const results = await searchPolls(aiQuery!);
+      return Promise.all(results.map((result) => fetchPollById(result.pollId)));
+    },
+    enabled: aiQuery !== null,
   });
 
   const visiblePolls = useMemo(() => {
@@ -46,7 +59,22 @@ export function PollsExplorer() {
         sortBy={sortBy}
         onSortByChange={setSortBy}
       />
-      {isPending ? (
+      <PollsAiSearchBar
+        onSearch={setAiQuery}
+        onClear={() => setAiQuery(null)}
+        isSearching={aiSearch.isFetching}
+        isActive={aiQuery !== null}
+      />
+
+      {aiQuery !== null ? (
+        aiSearch.isPending ? (
+          <PollsLoadingState />
+        ) : aiSearch.isError ? (
+          <PollsErrorState message={getApiErrorMessage(aiSearch.error)} onRetry={() => aiSearch.refetch()} />
+        ) : (
+          <PollsGrid polls={aiSearch.data} hasActiveFilters />
+        )
+      ) : isPending ? (
         <PollsLoadingState />
       ) : isError ? (
         <PollsErrorState message={getApiErrorMessage(error)} onRetry={() => refetch()} />
