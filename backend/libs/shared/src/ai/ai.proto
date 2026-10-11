@@ -5,6 +5,7 @@ package ai;
 service AiService {
   rpc CheckDuplicatePoll (CheckDuplicatePollRequest) returns (CheckDuplicatePollResponse);
   rpc SearchPolls (SearchPollsRequest) returns (SearchPollsResponse);
+  rpc CheckPollNeutrality (CheckPollNeutralityRequest) returns (CheckPollNeutralityResponse);
 }
 
 message CheckDuplicatePollRequest {
@@ -33,4 +34,20 @@ message PollSearchResult {
 
 message SearchPollsResponse {
   repeated PollSearchResult results = 1;
+}
+
+message CheckPollNeutralityRequest {
+  string title = 1;
+  repeated string options = 2;
+}
+
+message NeutralityIssue {
+  string text = 1;
+  string explanation = 2;
+  string suggestion = 3;
+}
+
+message CheckPollNeutralityResponse {
+  bool isNeutral = 1;
+  repeated NeutralityIssue issues = 2;
 }

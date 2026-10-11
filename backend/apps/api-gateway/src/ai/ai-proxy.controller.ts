@@ -3,12 +3,13 @@ import type { ClientGrpc } from '@nestjs/microservices';
 import { Throttle } from '@nestjs/throttler';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom, Observable } from 'rxjs';
-import { CheckDuplicatePollDto, SearchPollsDto } from '@app/shared';
+import { CheckDuplicatePollDto, CheckPollNeutralityDto, SearchPollsDto } from '@app/shared';
 import { Public } from '../auth/decorators/public.decorator';
 
 interface AiServiceGrpc {
   checkDuplicatePoll(data: unknown): Observable<unknown>;
   searchPolls(data: unknown): Observable<unknown>;
+  checkPollNeutrality(data: unknown): Observable<unknown>;
 }
 
 // Costs a real embedding-API call per request, same reasoning as the
@@ -45,5 +46,14 @@ export class AiProxyController implements OnModuleInit {
   })
   async searchPolls(@Body() dto: SearchPollsDto) {
     return firstValueFrom(this.aiService.searchPolls(dto));
+  }
+
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Post('neutrality-check')
+  @ApiOperation({
+    summary: "Check a draft poll's title/options for neutral, non-leading framing",
+  })
+  async checkPollNeutrality(@Body() dto: CheckPollNeutralityDto) {
+    return firstValueFrom(this.aiService.checkPollNeutrality(dto));
   }
 }

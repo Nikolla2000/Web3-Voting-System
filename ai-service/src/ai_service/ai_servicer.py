@@ -4,11 +4,15 @@ from ai_service.grpc_gen.ai_grpc import AiServiceBase
 from ai_service.grpc_gen.ai_pb2 import (
     CheckDuplicatePollRequest,
     CheckDuplicatePollResponse,
+    CheckPollNeutralityRequest,
+    CheckPollNeutralityResponse,
     DuplicateMatch,
+    NeutralityIssue,
     PollSearchResult,
     SearchPollsRequest,
     SearchPollsResponse,
 )
+from ai_service.moderation.neutrality_check import check_poll_neutrality
 from ai_service.search.duplicate_detection import find_similar_polls
 from ai_service.search.poll_search import search_polls
 
@@ -36,5 +40,21 @@ class AiServicer(AiServiceBase):
         await stream.send_message(
             SearchPollsResponse(
                 results=[PollSearchResult(pollId=r["poll_id"], similarity=r["similarity"]) for r in results]
+            )
+        )
+
+    async def CheckPollNeutrality(
+        self, stream: Stream[CheckPollNeutralityRequest, CheckPollNeutralityResponse]
+    ) -> None:
+        request = await stream.recv_message()
+        result = await check_poll_neutrality(request.title, list(request.options))
+
+        await stream.send_message(
+            CheckPollNeutralityResponse(
+                isNeutral=result.is_neutral,
+                issues=[
+                    NeutralityIssue(text=i.text, explanation=i.explanation, suggestion=i.suggestion)
+                    for i in result.issues
+                ],
             )
         )

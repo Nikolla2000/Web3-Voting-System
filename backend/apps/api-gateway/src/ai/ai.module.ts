@@ -13,6 +13,12 @@ import { AiProxyController } from './ai-proxy.controller';
           package: 'ai',
           protoPath: join(process.cwd(), 'libs/shared/src/ai/ai.proto'),
           url: '127.0.0.1:3004',
+          // Without this, proto3's wire format omits default-valued fields
+          // entirely (false, 0, "", []) -- CheckPollNeutralityResponse's
+          // `isNeutral: false` and every empty `issues`/`matches`/`results`
+          // array would silently vanish from the response instead of
+          // coming through as their zero value.
+          loader: { defaults: true },
         },
       },
     ]),
