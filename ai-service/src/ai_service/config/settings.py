@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     database_url: str
     rabbitmq_url: str
     voyage_api_key: str
+    gemini_api_key: str
     ai_service_port: int = 3004
 
 

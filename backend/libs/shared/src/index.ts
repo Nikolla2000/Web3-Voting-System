@@ -30,3 +30,4 @@ export * from './blockchain/dto/join-group.dto';
 export * from './blockchain/dto/submit-vote.dto';
 
 export * from './ai/dto/check-duplicate-poll.dto';
+export * from './ai/dto/search-polls.dto';

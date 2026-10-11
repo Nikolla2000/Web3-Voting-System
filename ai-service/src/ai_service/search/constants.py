@@ -5,3 +5,5 @@ DUPLICATE_CHECK_TOP_K = 5
 # scored 0.18. 0.70 sits with margin below the real near-duplicates and far
 # above the unrelated case.
 DUPLICATE_CHECK_SIMILARITY_THRESHOLD = 0.70
+
+SEARCH_TOP_K = 10

@@ -4,6 +4,7 @@ package ai;
 
 service AiService {
   rpc CheckDuplicatePoll (CheckDuplicatePollRequest) returns (CheckDuplicatePollResponse);
+  rpc SearchPolls (SearchPollsRequest) returns (SearchPollsResponse);
 }
 
 message CheckDuplicatePollRequest {
@@ -19,4 +20,17 @@ message DuplicateMatch {
 
 message CheckDuplicatePollResponse {
   repeated DuplicateMatch matches = 1;
+}
+
+message SearchPollsRequest {
+  string query = 1;
+}
+
+message PollSearchResult {
+  string pollId = 1;
+  float similarity = 2;
+}
+
+message SearchPollsResponse {
+  repeated PollSearchResult results = 1;
 }

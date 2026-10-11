@@ -10,11 +10,13 @@ dependencies = [
     "aio-pika>=10.1.0",
     "alembic>=1.20.0",
     "asyncpg>=0.32.0",
+    "google-genai>=2.29.0",
     "grpcio>=1.84.0",
     "grpclib>=0.4.9",
     "pgvector>=0.5.0",
     "pydantic-settings>=2.15.0",
     "sqlalchemy[asyncio]>=2.1.4",
+    "tenacity>=9.1.4",
     "voyageai>=0.5.0",
 ]
 
