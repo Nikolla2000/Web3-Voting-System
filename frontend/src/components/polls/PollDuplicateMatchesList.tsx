@@ -1,28 +1,16 @@
 import Link from 'next/link';
-import { TriangleAlert } from 'lucide-react';
-import { Button } from '@/components/ui/Button';
 import type { DuplicatePollMatch } from '@/lib/api/ai';
 
-interface PollDuplicateWarningProps {
+interface PollDuplicateMatchesListProps {
   matches: DuplicatePollMatch[];
-  onEdit: () => void;
-  onContinue: () => void;
-  isSubmitting: boolean;
 }
 
-export function PollDuplicateWarning({ matches, onEdit, onContinue, isSubmitting }: PollDuplicateWarningProps) {
+export function PollDuplicateMatchesList({ matches }: PollDuplicateMatchesListProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
-      <div className="flex items-start gap-3">
-        <TriangleAlert className="mt-0.5 h-5 w-5 flex-none text-amber-500" />
-        <div className="flex flex-col gap-1">
-          <p className="text-sm font-medium text-amber-900">This looks similar to an existing poll</p>
-          <p className="text-sm text-amber-700">
-            Review the poll{matches.length > 1 ? 's' : ''} below before creating a new one.
-          </p>
-        </div>
-      </div>
-
+    <div className="flex flex-col gap-2">
+      <p className="text-sm font-medium text-amber-900">
+        This looks similar to an existing poll{matches.length > 1 ? 's' : ''}
+      </p>
       <ul className="flex flex-col gap-2">
         {matches.map((match) => (
           <li key={match.pollId}>
@@ -39,15 +27,6 @@ export function PollDuplicateWarning({ matches, onEdit, onContinue, isSubmitting
           </li>
         ))}
       </ul>
-
-      <div className="flex gap-3">
-        <Button type="button" variant="secondary" onClick={onEdit}>
-          Edit my poll
-        </Button>
-        <Button type="button" variant="primary" onClick={onContinue} disabled={isSubmitting}>
-          {isSubmitting ? 'Creating poll…' : 'Create anyway'}
-        </Button>
-      </div>
     </div>
   );
 }

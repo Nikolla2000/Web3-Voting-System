@@ -7,7 +7,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { createPollSchema, MIN_POLL_END_LEAD_HOURS, type CreatePollFormValues } from '@/lib/validation/poll-schemas';
 import { createPoll, uploadPollImage, type CreatePollPayload } from '@/lib/api/polls';
-import { checkDuplicatePoll, type DuplicatePollMatch } from '@/lib/api/ai';
+import { checkDuplicatePoll, checkPollNeutrality, type DuplicatePollMatch, type NeutralityIssue } from '@/lib/api/ai';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { POLL_CATEGORY_LABELS } from '@/lib/polls/utils';
 import type { PollCategory } from '@/types/poll';
@@ -17,7 +17,7 @@ import { Select } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { PollOptionsField } from '@/components/polls/PollOptionsField';
 import { PollImageField } from '@/components/polls/PollImageField';
-import { PollDuplicateWarning } from '@/components/polls/PollDuplicateWarning';
+import { PollPreflightWarnings } from '@/components/polls/PollPreflightWarnings';
 
 const CATEGORY_OPTIONS = Object.entries(POLL_CATEGORY_LABELS).map(([value, label]) => ({ value, label }));
 
@@ -30,9 +30,10 @@ export function CreatePollForm() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [duplicateMatches, setDuplicateMatches] = useState<DuplicatePollMatch[] | null>(null);
+  const [duplicateMatches, setDuplicateMatches] = useState<DuplicatePollMatch[]>([]);
+  const [neutralityIssues, setNeutralityIssues] = useState<NeutralityIssue[]>([]);
   const [pendingValues, setPendingValues] = useState<CreatePollFormValues | null>(null);
-  const [isCheckingDuplicates, setIsCheckingDuplicates] = useState(false);
+  const [isPreflightChecking, setIsPreflightChecking] = useState(false);
 
   const [minStartsAt] = useState(() => toDatetimeLocalValue(new Date(Date.now())));
 
@@ -76,7 +77,8 @@ export function CreatePollForm() {
   });
 
   const submitPoll = (values: CreatePollFormValues) => {
-    setDuplicateMatches(null);
+    setDuplicateMatches([]);
+    setNeutralityIssues([]);
     setPendingValues(null);
     mutation.mutate(values, {
       onError: (error) => setSubmitError(getApiErrorMessage(error)),
@@ -85,19 +87,26 @@ export function CreatePollForm() {
 
   const onSubmit = async (values: CreatePollFormValues) => {
     setSubmitError(null);
-    setIsCheckingDuplicates(true);
+    setIsPreflightChecking(true);
 
-    try {
-      const matches = await checkDuplicatePoll(values.title, values.description);
-      if (matches.length > 0) {
-        setDuplicateMatches(matches);
-        setPendingValues(values);
-        return;
-      }
-    } catch {
-      // the similarity check is a convenience, not a requirement to create a poll
-    } finally {
-      setIsCheckingDuplicates(false);
+    const [duplicateResult, neutralityResult] = await Promise.allSettled([
+      checkDuplicatePoll(values.title, values.description),
+      checkPollNeutrality(
+        values.title,
+        values.options.map((option) => option.value),
+      ),
+    ]);
+    setIsPreflightChecking(false);
+
+    // Either check failing is a convenience lost, not a reason to block poll creation.
+    const matches = duplicateResult.status === 'fulfilled' ? duplicateResult.value : [];
+    const issues = neutralityResult.status === 'fulfilled' ? neutralityResult.value.issues : [];
+
+    if (matches.length > 0 || issues.length > 0) {
+      setDuplicateMatches(matches);
+      setNeutralityIssues(issues);
+      setPendingValues(values);
+      return;
     }
 
     submitPoll(values);
@@ -149,12 +158,14 @@ export function CreatePollForm() {
 
       {submitError && <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>}
 
-      {duplicateMatches && pendingValues ? (
-        <PollDuplicateWarning
-          matches={duplicateMatches}
+      {pendingValues ? (
+        <PollPreflightWarnings
+          duplicates={duplicateMatches}
+          neutralityIssues={neutralityIssues}
           isSubmitting={mutation.isPending}
           onEdit={() => {
-            setDuplicateMatches(null);
+            setDuplicateMatches([]);
+            setNeutralityIssues([]);
             setPendingValues(null);
           }}
           onContinue={() => submitPoll(pendingValues)}
@@ -164,9 +175,9 @@ export function CreatePollForm() {
           type="submit"
           variant="primary"
           className="mt-1 w-full"
-          disabled={mutation.isPending || isCheckingDuplicates}
+          disabled={mutation.isPending || isPreflightChecking}
         >
-          {isCheckingDuplicates ? 'Checking for similar polls…' : mutation.isPending ? 'Creating poll…' : 'Create poll'}
+          {isPreflightChecking ? 'Checking your poll…' : mutation.isPending ? 'Creating poll…' : 'Create poll'}
         </Button>
       )}
     </form>
