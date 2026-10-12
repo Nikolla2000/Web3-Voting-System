@@ -2,6 +2,8 @@ from grpclib.server import Stream
 
 from ai_service.grpc_gen.ai_grpc import AiServiceBase
 from ai_service.grpc_gen.ai_pb2 import (
+    ChatChunk,
+    ChatRequest,
     CheckDuplicatePollRequest,
     CheckDuplicatePollResponse,
     CheckPollNeutralityRequest,
@@ -13,6 +15,7 @@ from ai_service.grpc_gen.ai_pb2 import (
     SearchPollsResponse,
 )
 from ai_service.moderation.neutrality_check import check_poll_neutrality
+from ai_service.qa_agent.chat import stream_chat_response
 from ai_service.search.duplicate_detection import find_similar_polls
 from ai_service.search.poll_search import search_polls
 
@@ -58,3 +61,10 @@ class AiServicer(AiServiceBase):
                 ],
             )
         )
+
+    async def Chat(self, stream: Stream[ChatRequest, ChatChunk]) -> None:
+        request = await stream.recv_message()
+        history = [{"role": turn.role, "content": turn.content} for turn in request.history]
+
+        async for text_delta in stream_chat_response(request.message, history):
+            await stream.send_message(ChatChunk(textDelta=text_delta))

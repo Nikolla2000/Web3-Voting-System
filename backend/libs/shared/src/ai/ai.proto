@@ -6,6 +6,7 @@ service AiService {
   rpc CheckDuplicatePoll (CheckDuplicatePollRequest) returns (CheckDuplicatePollResponse);
   rpc SearchPolls (SearchPollsRequest) returns (SearchPollsResponse);
   rpc CheckPollNeutrality (CheckPollNeutralityRequest) returns (CheckPollNeutralityResponse);
+  rpc Chat (ChatRequest) returns (stream ChatChunk);
 }
 
 message CheckDuplicatePollRequest {
@@ -50,4 +51,18 @@ message NeutralityIssue {
 message CheckPollNeutralityResponse {
   bool isNeutral = 1;
   repeated NeutralityIssue issues = 2;
+}
+
+message ChatTurn {
+  string role = 1; // "user" or "model"
+  string content = 2;
+}
+
+message ChatRequest {
+  string message = 1;
+  repeated ChatTurn history = 2;
+}
+
+message ChatChunk {
+  string textDelta = 1;
 }

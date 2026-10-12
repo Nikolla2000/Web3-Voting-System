@@ -32,3 +32,4 @@ export * from './blockchain/dto/submit-vote.dto';
 export * from './ai/dto/check-duplicate-poll.dto';
 export * from './ai/dto/search-polls.dto';
 export * from './ai/dto/check-poll-neutrality.dto';
+export * from './ai/dto/chat.dto';

@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Space_Grotesk, Inter, JetBrains_Mono } from 'next/font/google';
 import { AuthBootstrap } from '@/components/auth/AuthBootstrap';
+import { ChatWidget } from '@/components/chat/ChatWidget';
 import './globals.css';
 import { Providers } from './providers';
 
@@ -40,6 +41,7 @@ export default function RootLayout({
         <Providers>
           <AuthBootstrap />
           {children}
+          <ChatWidget />
         </Providers>
       </body>
     </html>
