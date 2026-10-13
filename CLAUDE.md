@@ -4,11 +4,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Repository layout
 
-Three independent projects, not a unified monorepo tool (no root package.json):
+Four independent projects, not a unified monorepo tool (no root package.json):
 
 - `backend/` — NestJS monorepo (6 apps + 1 shared lib), managed by `nest-cli.json`
 - `frontend/` — Next.js 16 / React 19 app
 - `contracts/` — Hardhat project for the on-chain Semaphore voting contract (`PollVoting.sol`)
+- `ai-service/` — Python (uv) microservice for AI/ML features, proxied through the gateway like every other service
 
 ## Project purpose & vision
 
@@ -117,6 +118,42 @@ This is a microservices voting platform. The API gateway is the only HTTP-facing
 - **Poll listing cache-aside** (`findMany`): the listing's key space (search/status/sortBy/page/limit) is combinatorial, so a single write can't target one specific cached entry the way poll-detail invalidation does. Instead every cache key embeds a version number (`polls-cache.constants.ts`); poll creation, vote tallies, and contract deployment all just increment it, orphaning every previously-cached listing at once in O(1) rather than scanning for and deleting each one. Orphaned entries fall out via a 30s TTL.
 - **Gateway rate limiting** (`ThrottlerModule`, `api-gateway.module.ts`): was configured from the start but never actually enforced — no guard was ever registered, so it did nothing until now. `ThrottlerGuard` is registered as `APP_GUARD`, backed by a custom `RedisThrottlerStorage` (`api-gateway/src/throttler/redis-throttler-storage.ts`, a Lua-scripted `ThrottlerStorage` implementation) instead of the library's default in-memory Map, so counters survive a restart and would be shared across instances. Limits are differentiated per endpoint by threat model rather than one global number: strict on `auth/register`/`login`/`refresh` (the actual brute-force/credential-stuffing surface), moderate on anything that costs the relayer real (testnet) gas or could be spammed (poll creation, poll image upload, group join, vote submission), and poll listing/detail are exempt via `@SkipThrottle()` since they're already behind the cache-aside layer above — throttling them at the gateway too would fight that caching rather than complement it. `Retry-After` is explicitly CORS-exposed (`main.ts`'s `enableCors`) since rate-limit headers aren't on the CORS-safelisted list by default; the frontend's `getApiErrorMessage` (`frontend/src/lib/api/errors.ts`) turns a 429 into a "try again in Ns" message.
 
+## AI service (`ai-service/`)
+
+Python (uv, Python 3.12) — not part of the Nest monorepo, a sibling top-level project proxied through `api-gateway`'s `AiModule`/`AiProxyController` like every other service. Own `.env`, own local Postgres (Docker, `ai_service_db_container`, port 5435, `pgvector/pgvector:pg16`) — the self-run-per-service pattern identity/polls/blockchain use, not the hosted-free-tier pattern Redis/RabbitMQ/R2 use, since pgvector needs the extension.
+
+### Commands
+
+Run from `ai-service/`:
+
+```bash
+uv run python -m ai_service.main    # RabbitMQ consumer + gRPC server (:3004) in one process
+uv run alembic upgrade head         # apply migrations
+uv run python scripts/gen_proto.py  # regenerate grpc_gen/ (gitignored) from ai.proto + polls.proto — rerun after editing either
+```
+
+`.env`: `DATABASE_URL`, `RABBITMQ_URL` (same CloudAMQP broker as the Nest apps), `VOYAGE_API_KEY`, `GEMINI_API_KEY`, `AI_SERVICE_PORT` (default 3004).
+
+### Architecture notes (not obvious from the code alone — see the referenced files for the rest)
+
+- `grpclib`, not `grpcio` — `grpcio`'s compiled extension is blocked by Smart App Control on the primary dev machine. `grpclib` is pure-Python, wire-compatible with the Node `@grpc/grpc-js` client. `grpcio-tools` stays dev-only, just for the `protoc` compiler.
+- `AiModule`'s gRPC client needs `loader: { defaults: true }` (see its comment) or proto3 silently drops default-valued fields from responses.
+- LLM is Gemini (`google-genai`), not Anthropic — no free tier on the Messages API. Model is pinned, not the `-latest` alias (see `llm/constants.py` for why).
+- Embeddings are Voyage (`voyage-4-lite`, 200M free tokens, no card required).
+- `poll_embeddings` (own Postgres, `vector(1024)`): one row per poll, populated from `ROUTING_KEYS.POLL_CREATED`. Write-once — polls have no update/delete RPC.
+- `polls_client.py` — a `grpclib` client to the real `polls` service, used only by the Q&A agent's tools.
+
+### RPCs (`AiService`, `libs/shared/src/ai/ai.proto`) → gateway routes
+
+- `CheckDuplicatePoll` → `POST /polls/duplicate-check` — pgvector similarity on title+description; see `search/constants.py` for the calibrated threshold and its caveat (title-level duplicates can slip through if the description is off-topic).
+- `SearchPolls` → `POST /polls/search` (public) — Gemini extracts a topic + category/date filters, one pgvector+SQL query. Returns `{pollId, similarity}` only; full poll data is re-fetched from `polls` as normal.
+- `CheckPollNeutrality` → `POST /polls/neutrality-check` — flags loaded/leading title/option wording with suggested rewrites.
+- `Chat` → `POST /polls/chat` — tool-calling agent (`qa_agent/`), **not RAG**: vote counts/dates are live facts, not embeddable docs. Server-streaming RPC adapted to SSE at the gateway (POST, not GET+`EventSource` — history doesn't fit a query string). See `qa_agent/chat.py` for the tool-call-loop and streaming-granularity notes.
+
+### Frontend touches
+
+`CreatePollForm.tsx` (duplicate + neutrality checks, run in parallel, one `PollPreflightWarnings` panel), `PollsAiSearchBar` (explicit-submit, not live-as-you-type), `ChatWidget`/`ChatPanel` (`src/components/chat/`, floating widget, signed-in only).
+
 ## Smart contracts (`contracts/`)
 
 Hardhat project (Hardhat 3, viem-based toolbox), independent `package.json`/`node_modules` from `backend/`.
@@ -153,7 +190,8 @@ No test runner is configured. Husky + lint-staged run eslint/prettier on staged 
 
 ## Roadmap (not built yet — keep new work compatible with these)
 
-- Some kind of AI service, which will use vector databases, RAG and other AI things to show knowledge, possibly written in python
+- `ai-service`: lightweight anomaly detection on voting patterns, consuming the existing `VOTE_CAST` event — lowest priority of the AI features, thin on genuine ML signal since Semaphore anonymity strips the identity/device/geo signals real voting-fraud detection usually relies on.
+- `ai-service` `Chat`: true token-by-token streaming for the final answer — see `qa_agent/chat.py` for the current deliberate simplification.
 - Unit tests — essentially none beyond Nest's generated scaffold spec files,
   with one real exception: `semaphore.service.spec.ts` covers the
   Sybil-resistance gate in `SemaphoreService.joinGroup`.

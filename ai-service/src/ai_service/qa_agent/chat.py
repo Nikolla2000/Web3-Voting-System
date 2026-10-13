@@ -36,6 +36,11 @@ async def stream_chat_response(message: str, history: list[dict]) -> AsyncIterat
         )
 
         if not response.function_calls:
+            # Sent as one chunk rather than re-issued through
+            # generate_content_stream for true token-by-token streaming --
+            # that would cost a second paid generation call per message just
+            # for display polish. The gRPC/SSE streaming plumbing is real;
+            # only this call's granularity is simplified.
             yield response.text or ""
             return
 
