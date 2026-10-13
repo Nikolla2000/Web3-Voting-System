@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Four independent projects, not a unified monorepo tool (no root package.json):
 
-- `backend/` — NestJS monorepo (6 apps + 1 shared lib), managed by `nest-cli.json`
+- `backend/` — NestJS monorepo (5 working services + 1 dead scaffold (`auth`, see below) + 1 shared lib), managed by `nest-cli.json`
 - `frontend/` — Next.js 16 / React 19 app
 - `contracts/` — Hardhat project for the on-chain Semaphore voting contract (`PollVoting.sol`)
 - `ai-service/` — Python (uv) microservice for AI/ML features, proxied through the gateway like every other service
