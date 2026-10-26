@@ -21,6 +21,7 @@ volumes:
   postgres-polls-data:
   postgres-blockchain-data:
   postgres-ai-data:
+  notifications-node-modules:
 
 services:
   postgres-identity:
@@ -96,5 +97,21 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - voting-system
+
+  # Step 3: notifications — simplest Node service (no DB, no inbound
+  # transport, just a RabbitMQ consumer against the existing CloudAMQP
+  # broker) — used to validate the base Node/Nest Dockerfile pattern.
+  notifications:
+    build:
+      context: ./backend
+      dockerfile: apps/notifications/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./backend/apps/notifications/.env
+    volumes:
+      - ./backend:/app
+      - notifications-node-modules:/app/node_modules
     networks:
       - voting-system
