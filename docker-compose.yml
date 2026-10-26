@@ -30,6 +30,8 @@ volumes:
   blockchain-prisma-generated:
   api-gateway-node-modules:
   ai-service-venv:
+  frontend-node-modules:
+  frontend-next-cache:
 
 services:
   postgres-identity:
@@ -254,5 +256,24 @@ services:
         condition: service_healthy
       polls:
         condition: service_started
+    networks:
+      - voting-system
+
+  # Step 8: frontend — NEXT_PUBLIC_API_GATEWAY_URL stays localhost:3000
+  # (unchanged), since it's read in the browser, which is outside the
+  # Docker network and only ever talks to the gateway's host-mapped port.
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./frontend/.env
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./frontend:/app
+      - frontend-node-modules:/app/node_modules
+      - frontend-next-cache:/app/.next
     networks:
       - voting-system
