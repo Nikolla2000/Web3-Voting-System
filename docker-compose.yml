@@ -1,0 +1,12 @@
+# Step 1 scaffolding: network + volumes only. Postgres and app services are
+# added in later steps of the containerization plan.
+
+networks:
+  voting-system:
+    driver: bridge
+
+volumes:
+  postgres-identity-data:
+  postgres-polls-data:
+  postgres-blockchain-data:
+  postgres-ai-data:
