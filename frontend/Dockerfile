@@ -14,4 +14,8 @@ RUN npm ci
 
 COPY . .
 
-CMD ["npm", "run", "dev"]
+# --webpack: falls back from the default Turbopack to the webpack dev
+# server, since only webpack's watcher (watchpack) supports the polling
+# config this project's next.config.ts sets for DOCKER_CONTAINER (Turbopack
+# has no equivalent polling fallback in this Next version).
+CMD ["npx", "next", "dev", "-p", "5000", "--webpack"]

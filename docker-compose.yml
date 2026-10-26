@@ -120,6 +120,11 @@ services:
     restart: unless-stopped
     env_file:
       - ./backend/apps/notifications/.env
+    environment:
+      # Makes webpack's watcher poll instead of relying on native fs
+      # events, which Docker Desktop on Windows doesn't reliably propagate
+      # across the bind-mount boundary — see backend/webpack.config.js.
+      DOCKER_CONTAINER: "true"
     volumes:
       - ./backend:/app
       - notifications-node-modules:/app/node_modules
@@ -139,6 +144,9 @@ services:
       # Only the DB host changes for the container network — everything
       # else (secrets, R2, RabbitMQ) comes from the real .env above.
       DATABASE_URL: postgresql://${IDENTITY_DB_USER}:${IDENTITY_DB_PASSWORD_URLENC}@postgres-identity:5432/identity_service_db
+      # See backend/webpack.config.js — makes the watcher poll instead of
+      # relying on native fs events across the Windows bind-mount boundary.
+      DOCKER_CONTAINER: "true"
     ports:
       - "3001:3001"
     volumes:
@@ -164,6 +172,7 @@ services:
       - ./backend/apps/polls/.env
     environment:
       POLLS_SERVICE_DATABASE_URL: postgresql://${POLLS_DB_USER}:${POLLS_DB_PASSWORD_URLENC}@postgres-polls:5432/polls_service_db
+      DOCKER_CONTAINER: "true"
     ports:
       - "3002:3002"
     volumes:
@@ -188,6 +197,7 @@ services:
       - ./backend/apps/blockchain/.env
     environment:
       BLOCKCHAIN_SERVICE_DATABASE_URL: postgresql://${BLOCKCHAIN_DB_USER}:${BLOCKCHAIN_DB_PASSWORD}@postgres-blockchain:5432/blockchain?schema=public
+      DOCKER_CONTAINER: "true"
     ports:
       - "3003:3003"
     volumes:
@@ -219,6 +229,7 @@ services:
       POLLS_SERVICE_HOST: polls
       BLOCKCHAIN_SERVICE_HOST: blockchain
       AI_SERVICE_HOST: ai-service
+      DOCKER_CONTAINER: "true"
     ports:
       - "3000:3000"
     volumes:
@@ -269,6 +280,9 @@ services:
     restart: unless-stopped
     env_file:
       - ./frontend/.env
+    environment:
+      # See next.config.ts and Dockerfile's --webpack flag.
+      DOCKER_CONTAINER: "true"
     ports:
       - "5000:5000"
     volumes:
