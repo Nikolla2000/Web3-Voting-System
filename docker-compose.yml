@@ -24,6 +24,10 @@ volumes:
   notifications-node-modules:
   identity-node-modules:
   identity-prisma-generated:
+  polls-node-modules:
+  polls-prisma-generated:
+  blockchain-node-modules:
+  blockchain-prisma-generated:
 
 services:
   postgres-identity:
@@ -139,6 +143,55 @@ services:
       - identity-prisma-generated:/app/apps/identity/src/generated
     depends_on:
       postgres-identity:
+        condition: service_healthy
+    networks:
+      - voting-system
+
+  # Step 5: polls — same pattern as identity, gRPC transport, plus the
+  # external Upstash Redis URL passed through unchanged. No migrations/
+  # directory exists for this app (schema-managed via `db push`, see its
+  # docker-entrypoint.sh).
+  polls:
+    build:
+      context: ./backend
+      dockerfile: apps/polls/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./backend/apps/polls/.env
+    environment:
+      POLLS_SERVICE_DATABASE_URL: postgresql://${POLLS_DB_USER}:${POLLS_DB_PASSWORD_URLENC}@postgres-polls:5432/polls_service_db
+    ports:
+      - "3002:3002"
+    volumes:
+      - ./backend:/app
+      - polls-node-modules:/app/node_modules
+      - polls-prisma-generated:/app/apps/polls/src/generated
+    depends_on:
+      postgres-polls:
+        condition: service_healthy
+    networks:
+      - voting-system
+
+  # Step 5: blockchain — same pattern, gRPC transport. RPC_URL/relayer key/
+  # contract address are all external Sepolia config, passed through
+  # unchanged from the real .env.
+  blockchain:
+    build:
+      context: ./backend
+      dockerfile: apps/blockchain/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./backend/apps/blockchain/.env
+    environment:
+      BLOCKCHAIN_SERVICE_DATABASE_URL: postgresql://${BLOCKCHAIN_DB_USER}:${BLOCKCHAIN_DB_PASSWORD}@postgres-blockchain:5432/blockchain?schema=public
+    ports:
+      - "3003:3003"
+    volumes:
+      - ./backend:/app
+      - blockchain-node-modules:/app/node_modules
+      - blockchain-prisma-generated:/app/apps/blockchain/src/generated
+    depends_on:
+      postgres-blockchain:
         condition: service_healthy
     networks:
       - voting-system
