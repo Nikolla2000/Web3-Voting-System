@@ -15,7 +15,7 @@ import { BlockchainProxyController } from './blockchain-proxy.controller';
             process.cwd(),
             'libs/shared/src/blockchain/blockchain.proto',
           ),
-          url: '127.0.0.1:3003',
+          url: `${process.env.BLOCKCHAIN_SERVICE_HOST ?? '127.0.0.1'}:3003`,
         },
       },
     ]),

@@ -24,7 +24,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
         name: 'IDENTITY_SERVICE',
         transport: Transport.TCP,
         options: {
-          host: '127.0.0.1',
+          host: process.env.IDENTITY_SERVICE_HOST ?? '127.0.0.1',
           port: 3001
         }
       }

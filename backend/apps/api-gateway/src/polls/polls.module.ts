@@ -14,7 +14,7 @@ import { StorageModule } from '../storage/storage.module';
         options: {
           package: 'polls',
           protoPath: join(process.cwd(), 'libs/shared/src/polls/polls.proto'),
-          url: '127.0.0.1:3002',
+          url: `${process.env.POLLS_SERVICE_HOST ?? '127.0.0.1'}:3002`,
         },
       },
     ]),

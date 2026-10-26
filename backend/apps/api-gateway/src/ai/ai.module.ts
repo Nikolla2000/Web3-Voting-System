@@ -12,7 +12,7 @@ import { AiProxyController } from './ai-proxy.controller';
         options: {
           package: 'ai',
           protoPath: join(process.cwd(), 'libs/shared/src/ai/ai.proto'),
-          url: '127.0.0.1:3004',
+          url: `${process.env.AI_SERVICE_HOST ?? '127.0.0.1'}:3004`,
           // Without this, proto3's wire format omits default-valued fields
           // entirely (false, 0, "", []) -- CheckPollNeutralityResponse's
           // `isNeutral: false` and every empty `issues`/`matches`/`results`

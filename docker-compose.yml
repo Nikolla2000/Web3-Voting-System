@@ -28,6 +28,7 @@ volumes:
   polls-prisma-generated:
   blockchain-node-modules:
   blockchain-prisma-generated:
+  api-gateway-node-modules:
 
 services:
   postgres-identity:
@@ -193,5 +194,36 @@ services:
     depends_on:
       postgres-blockchain:
         condition: service_healthy
+    networks:
+      - voting-system
+
+  # Step 6: api-gateway — ties identity/polls/blockchain/ai-service
+  # together. Their client URLs were hardcoded to 127.0.0.1 in source
+  # (auth.module.ts, polls.module.ts, blockchain.module.ts, ai.module.ts);
+  # those were parameterized to read an optional *_SERVICE_HOST env var,
+  # defaulting to 127.0.0.1 so native runs are unaffected. Only the host
+  # needs overriding here — ports are unchanged between native and Docker.
+  # No local Postgres of its own, so no DB var to override.
+  api-gateway:
+    build:
+      context: ./backend
+      dockerfile: apps/api-gateway/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./backend/.env
+    environment:
+      IDENTITY_SERVICE_HOST: identity
+      POLLS_SERVICE_HOST: polls
+      BLOCKCHAIN_SERVICE_HOST: blockchain
+      AI_SERVICE_HOST: ai-service
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - api-gateway-node-modules:/app/node_modules
+    depends_on:
+      - identity
+      - polls
+      - blockchain
     networks:
       - voting-system
