@@ -1,5 +1,16 @@
-# Step 1 scaffolding: network + volumes only. Postgres and app services are
-# added in later steps of the containerization plan.
+# Step 2: the 4 local Postgres databases, matching the names/credentials
+# already configured in each service's own .env. App services are added in
+# later steps of the containerization plan.
+#
+# Note: inside the Docker network every Postgres container listens on its
+# own internal 5432 — e.g. `postgres-identity:5432`, not `:5433`/`:5434`/
+# `:5435`. The host-side ports below (5432-5435) only exist so you can still
+# connect from tools on your machine (psql, a GUI client, a natively-run
+# service), exactly as today.
+#
+# Credentials come from a root-level .env (gitignored, auto-loaded by
+# Docker Compose for ${VAR} substitution) rather than being written here in
+# plaintext.
 
 networks:
   voting-system:
@@ -10,3 +21,80 @@ volumes:
   postgres-polls-data:
   postgres-blockchain-data:
   postgres-ai-data:
+
+services:
+  postgres-identity:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${IDENTITY_DB_USER}
+      POSTGRES_PASSWORD: ${IDENTITY_DB_PASSWORD}
+      POSTGRES_DB: identity_service_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-identity-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${IDENTITY_DB_USER} -d identity_service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - voting-system
+
+  postgres-polls:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POLLS_DB_USER}
+      POSTGRES_PASSWORD: ${POLLS_DB_PASSWORD}
+      POSTGRES_DB: polls_service_db
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-polls-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POLLS_DB_USER} -d polls_service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - voting-system
+
+  postgres-blockchain:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${BLOCKCHAIN_DB_USER}
+      POSTGRES_PASSWORD: ${BLOCKCHAIN_DB_PASSWORD}
+      POSTGRES_DB: blockchain
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres-blockchain-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${BLOCKCHAIN_DB_USER} -d blockchain"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - voting-system
+
+  postgres-ai:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${AI_DB_USER}
+      POSTGRES_PASSWORD: ${AI_DB_PASSWORD}
+      POSTGRES_DB: ai_service_db
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres-ai-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${AI_DB_USER} -d ai_service_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - voting-system
