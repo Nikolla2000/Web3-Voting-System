@@ -1,0 +1,17 @@
+# Only used by ai-service's build, whose context has to be the repo root
+# (its scripts/gen_proto.py reaches into ../backend/libs/shared — see
+# ai-service/Dockerfile for why). backend/ and frontend/ build with their
+# own context + .dockerignore and never see this file.
+backend/node_modules
+backend/**/node_modules
+backend/dist
+backend/**/dist
+backend/**/src/generated
+frontend/node_modules
+frontend/.next
+ai-service/.venv
+ai-service/__pycache__
+ai-service/**/__pycache__
+ai-service/src/ai_service/grpc_gen
+contracts/node_modules
+.git

@@ -1,9 +1,10 @@
 from grpclib.client import Channel
 
+from ai_service.config.settings import settings
 from ai_service.grpc_gen.polls_pb2 import GetPollByIdRequest, GetPollsRequest
 from ai_service.grpc_gen.polls_grpc import PollsServiceStub
 
-POLLS_SERVICE_HOST = "127.0.0.1"
+POLLS_SERVICE_HOST = settings.polls_service_host
 POLLS_SERVICE_PORT = 3002
 
 

@@ -29,6 +29,7 @@ volumes:
   blockchain-node-modules:
   blockchain-prisma-generated:
   api-gateway-node-modules:
+  ai-service-venv:
 
 services:
   postgres-identity:
@@ -225,5 +226,33 @@ services:
       - identity
       - polls
       - blockchain
+    networks:
+      - voting-system
+
+  # Step 7: ai-service — Python/uv, its own build context is the repo root
+  # (see ai-service/Dockerfile for why), own Postgres+pgvector, alembic
+  # migrate-on-boot. polls_client.py's POLLS_SERVICE_HOST had the same
+  # hardcoded-127.0.0.1 issue api-gateway's modules had — parameterized via
+  # pydantic-settings the same way, default unchanged for native runs.
+  ai-service:
+    build:
+      context: .
+      dockerfile: ai-service/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./ai-service/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${AI_DB_USER}:${AI_DB_PASSWORD}@postgres-ai:5432/ai_service_db
+      POLLS_SERVICE_HOST: polls
+    ports:
+      - "3004:3004"
+    volumes:
+      - ./ai-service:/repo/ai-service
+      - ai-service-venv:/repo/ai-service/.venv
+    depends_on:
+      postgres-ai:
+        condition: service_healthy
+      polls:
+        condition: service_started
     networks:
       - voting-system

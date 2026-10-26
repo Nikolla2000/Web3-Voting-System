@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     voyage_api_key: str
     gemini_api_key: str
     ai_service_port: int = 3004
+    polls_service_host: str = "127.0.0.1"
 
 
 settings = Settings()
