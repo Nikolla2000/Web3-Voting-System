@@ -22,6 +22,8 @@ volumes:
   postgres-blockchain-data:
   postgres-ai-data:
   notifications-node-modules:
+  identity-node-modules:
+  identity-prisma-generated:
 
 services:
   postgres-identity:
@@ -113,5 +115,30 @@ services:
     volumes:
       - ./backend:/app
       - notifications-node-modules:/app/node_modules
+    networks:
+      - voting-system
+
+  # Step 4: identity — adds the Prisma generate/migrate-on-boot pattern
+  # (see docker-entrypoint.sh) and the first local-Postgres dependency.
+  identity:
+    build:
+      context: ./backend
+      dockerfile: apps/identity/Dockerfile
+    restart: unless-stopped
+    env_file:
+      - ./backend/apps/identity/.env
+    environment:
+      # Only the DB host changes for the container network — everything
+      # else (secrets, R2, RabbitMQ) comes from the real .env above.
+      DATABASE_URL: postgresql://${IDENTITY_DB_USER}:${IDENTITY_DB_PASSWORD_URLENC}@postgres-identity:5432/identity_service_db
+    ports:
+      - "3001:3001"
+    volumes:
+      - ./backend:/app
+      - identity-node-modules:/app/node_modules
+      - identity-prisma-generated:/app/apps/identity/src/generated
+    depends_on:
+      postgres-identity:
+        condition: service_healthy
     networks:
       - voting-system
