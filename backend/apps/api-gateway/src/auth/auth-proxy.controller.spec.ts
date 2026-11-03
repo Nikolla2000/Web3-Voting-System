@@ -81,6 +81,7 @@ describe('AuthProxyController', () => {
         secure: false,
         sameSite: 'lax',
         maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/',
       });
     });
 
@@ -98,16 +99,12 @@ describe('AuthProxyController', () => {
       );
     });
 
-    // setRefreshCookie never passes a `path`, so Express/the browser default
-    // it to the *directory* of whichever endpoint set it (e.g. "/auth" for
-    // a login from "/auth/login") per RFC 6265 — not "/". clearRefreshCookie
-    // explicitly passes path: '/'. A Set-Cookie clear with a different path
-    // than the cookie was originally scoped to does not delete it in a real
-    // browser — it's treated as an unrelated cookie. Documenting this
-    // mismatch as a characterization test; see the session summary for this
-    // flagged as a likely real bug (logout not actually clearing the
-    // refresh cookie), not a deliberate design choice to preserve.
-    it('does not set a matching path on the cookie it later tries to clear with path "/"', async () => {
+    // Without a matching `path`, a Set-Cookie clear issued at a different
+    // path than the cookie was originally scoped to does not delete it in a
+    // real browser — it's treated as an unrelated cookie. Guards against
+    // regressing setRefreshCookie's explicit path: '/' (which must match
+    // clearRefreshCookie's).
+    it('sets the same path on the cookie as clearRefreshCookie later clears it with', async () => {
       authClient.send.mockReturnValue(of(authResponse));
       const loginRes = makeRes();
       await controller.login({ email: 'x', password: 'y' }, loginRes as any);
@@ -118,7 +115,7 @@ describe('AuthProxyController', () => {
       await controller.logoutAll(user, logoutRes as any);
       const clearOptions = logoutRes.clearCookie.mock.calls[0][1];
 
-      expect(cookieOptions.path).toBeUndefined();
+      expect(cookieOptions.path).toBe('/');
       expect(clearOptions.path).toBe('/');
     });
   });

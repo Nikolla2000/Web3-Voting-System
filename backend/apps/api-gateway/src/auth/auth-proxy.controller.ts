@@ -259,7 +259,11 @@ export class AuthProxyController {
         secure: isProd,
         sameSite: isProd ? 'strict' : 'lax' as const,
         maxAge: 7 * 24 * 60 * 60 * 1000,
-        // path: '/api/auth/refresh'
+        // Must match clearRefreshCookie's path — without an explicit path,
+        // the browser defaults it to the directory of whichever endpoint set
+        // it (e.g. "/auth" for a login from "/auth/login"), so clearCookie's
+        // path: '/' would not actually delete it.
+        path: '/',
       });
     }
 }
