@@ -23,3 +23,9 @@ export class RpcConflictException extends RpcException {
     super({ statusCode: 409, message });
   }
 }
+
+export class RpcNotFoundException extends RpcException {
+  constructor(message: string = 'Not Found') {
+    super({ statusCode: 404, message });
+  }
+}

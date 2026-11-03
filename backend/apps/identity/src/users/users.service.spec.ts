@@ -1,5 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException, NotFoundException } from '@nestjs/common';
+
 import { RpcException } from '@nestjs/microservices';
 import * as bcrypt from 'bcrypt';
 
@@ -114,8 +114,10 @@ describe('UsersService', () => {
         }),
       );
 
-      expect(error).toBeInstanceOf(ConflictException);
-      expect((error as ConflictException).message).toBe('Email already in use');
+      expect(error).toBeInstanceOf(RpcException);
+      expect((error as RpcException).error).toMatchObject({
+        message: 'Email already in use',
+      });
     });
 
     it('rejects a duplicate username when the email differs', async () => {
@@ -129,7 +131,9 @@ describe('UsersService', () => {
         }),
       );
 
-      expect((error as ConflictException).message).toBe('Username is taken');
+      expect((error as RpcException).error).toMatchObject({
+        message: 'Username is taken',
+      });
     });
 
     it('hashes the password and strips it from the returned user', async () => {
@@ -168,11 +172,11 @@ describe('UsersService', () => {
   });
 
   describe('findById', () => {
-    it('throws NotFoundException when the user does not exist', async () => {
+    it('throws a 404 when the user does not exist', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(service.findById(userId)).rejects.toBeInstanceOf(
-        NotFoundException,
+        RpcException,
       );
     });
 
@@ -187,12 +191,12 @@ describe('UsersService', () => {
   });
 
   describe('changePassword', () => {
-    it('throws NotFoundException when the user does not exist', async () => {
+    it('throws a 404 when the user does not exist', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(
         service.changePassword(userId, { newPassword: 'NewPass123' }),
-      ).rejects.toBeInstanceOf(NotFoundException);
+      ).rejects.toBeInstanceOf(RpcException);
     });
 
     it('requires currentPassword when the account already has one', async () => {
@@ -255,11 +259,11 @@ describe('UsersService', () => {
   });
 
   describe('deactivate', () => {
-    it('throws NotFoundException when the user does not exist', async () => {
+    it('throws a 404 when the user does not exist', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(service.deactivate(userId, {})).rejects.toBeInstanceOf(
-        NotFoundException,
+        RpcException,
       );
     });
 
@@ -310,12 +314,12 @@ describe('UsersService', () => {
   });
 
   describe('confirmAvatar', () => {
-    it('throws NotFoundException when the user does not exist', async () => {
+    it('throws a 404 when the user does not exist', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(
         service.confirmAvatar(userId, { key: `avatars/${userId}/x.png` }),
-      ).rejects.toBeInstanceOf(NotFoundException);
+      ).rejects.toBeInstanceOf(RpcException);
     });
 
     it("rejects a key outside this user's avatar prefix — the actual authorization boundary", async () => {
@@ -384,11 +388,11 @@ describe('UsersService', () => {
   });
 
   describe('deleteAvatar', () => {
-    it('throws NotFoundException when the user does not exist', async () => {
+    it('throws a 404 when the user does not exist', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(service.deleteAvatar(userId)).rejects.toBeInstanceOf(
-        NotFoundException,
+        RpcException,
       );
     });
 

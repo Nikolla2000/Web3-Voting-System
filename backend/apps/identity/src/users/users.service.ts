@@ -1,8 +1,4 @@
-import {
-  ConflictException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'apps/identity/prisma/prisma.service';
 import { User } from '../generated/prisma/client';
 import { SafeUser } from './users.types';
@@ -12,6 +8,8 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import {
   R2StorageService,
   RpcBadRequestException,
+  RpcConflictException,
+  RpcNotFoundException,
   RpcUnauthorizedException,
 } from '@app/shared';
 import { ChangePasswordDto } from '@app/shared/users/dto/change-password.dto';
@@ -40,7 +38,7 @@ export class UsersService {
     });
 
     if (existing) {
-      throw new ConflictException(
+      throw new RpcConflictException(
         existing.email === dto.email
           ? 'Email already in use'
           : 'Username is taken',
@@ -66,7 +64,7 @@ export class UsersService {
       where: { id },
     });
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new RpcNotFoundException('User not found');
 
     return this.sanitize(user);
   }
@@ -86,7 +84,7 @@ export class UsersService {
   async update(id: string, dto: UpdateUserDto): Promise<SafeUser> {
     const user = await this.prisma.user.findUnique({ where: { id } });
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new RpcNotFoundException('User not found');
 
     const updated = await this.prisma.user.update({
       where: { id },
@@ -120,7 +118,7 @@ export class UsersService {
   async changePassword(id: string, dto: ChangePasswordDto): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id } });
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new RpcNotFoundException('User not found');
 
     await this.verifyCurrentPassword(user, dto.currentPassword);
 
@@ -135,7 +133,7 @@ export class UsersService {
   async deactivate(id: string, dto: DeactivateAccountDto): Promise<void> {
     const user = await this.prisma.user.findUnique({ where: { id } });
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new RpcNotFoundException('User not found');
 
     await this.verifyCurrentPassword(user, dto.password);
 
@@ -156,7 +154,7 @@ export class UsersService {
   ): Promise<{ uploadUrl: string; key: string; publicUrl: string }> {
     const user = await this.prisma.user.findUnique({ where: { id } });
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new RpcNotFoundException('User not found');
 
     const key = buildObjectKey(`avatars/${id}`, dto.contentType);
     const { uploadUrl, publicUrl } = await this.r2.createPresignedUpload(
@@ -171,7 +169,7 @@ export class UsersService {
   async confirmAvatar(id: string, dto: ConfirmAvatarDto): Promise<SafeUser> {
     const user = await this.prisma.user.findUnique({ where: { id } });
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new RpcNotFoundException('User not found');
 
     // The key is generated server-side per-user in requestAvatarUpload, so a
     // key outside that prefix could only be someone else's — reject it.
@@ -206,7 +204,7 @@ export class UsersService {
   async deleteAvatar(id: string): Promise<SafeUser> {
     const user = await this.prisma.user.findUnique({ where: { id } });
 
-    if (!user) throw new NotFoundException('User not found');
+    if (!user) throw new RpcNotFoundException('User not found');
 
     const previousKey = user.avatar
       ? this.r2.keyFromPublicUrl(user.avatar)
