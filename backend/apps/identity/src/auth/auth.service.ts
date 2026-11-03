@@ -10,6 +10,7 @@ import type { GoogleProfile } from "@app/shared";
 import { RpcForbiddenException, RpcUnauthorizedException, UserRegisteredPayload } from "@app/shared";
 import { AuthTokens } from "@app/shared";
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { RegisterDto, LoginDto } from "@app/shared";
 // import { User } from "src/generated/prisma/client";
 // import { SafeUser } from "src/users/users.types";
@@ -46,13 +47,19 @@ export class AuthService {
             username,
             role
         }
+        // jti guarantees the refresh token is unique even if issued in the
+        // same second as another one for this user (iat has second-level
+        // granularity, and signing is otherwise deterministic) — without it,
+        // two such tokens would be byte-identical and collide against
+        // RefreshToken.token's unique constraint once stored.
+        const refreshPayload = { ...payload, jti: crypto.randomUUID() };
 
         const [accessToken, refreshToken] = await Promise.all([
             this.jwtService.signAsync(payload, {
                 secret: this.configService.get<string>('jwt.accessSecret'),
                 expiresIn: this.configService.get<any>('jwt.accessExpiresIn')
             }),
-            this.jwtService.signAsync(payload, {
+            this.jwtService.signAsync(refreshPayload, {
                 secret: this.configService.get<string>('jwt.refreshSecret'),
                 expiresIn: this.configService.get<any>('jwt.refreshExpiresIn'),
             })
@@ -62,13 +69,33 @@ export class AuthService {
     }
 
     /**
+     * Refresh tokens are high-entropy, server-generated JWTs, not
+     * low-entropy human passwords — bcrypt (meant to slow down brute-forcing
+     * guessable secrets) is the wrong tool, and worse, silently truncates
+     * its input at 72 bytes, well under a JWT's length. Since JWTs for the
+     * same user share an identical header and most of the payload, any two
+     * of that user's tokens collide under bcrypt once truncated — breaking
+     * one-time-use rotation entirely. SHA-256 has no such limit.
+     */
+    private hashRefreshToken(token: string): string {
+        return crypto.createHash('sha256').update(token).digest('hex');
+    }
+
+    private refreshTokenMatches(incomingToken: string, storedHash: string): boolean {
+        const candidate = Buffer.from(this.hashRefreshToken(incomingToken));
+        const stored = Buffer.from(storedHash);
+        if (candidate.length !== stored.length) return false;
+        return crypto.timingSafeEqual(candidate, stored);
+    }
+
+    /**
      * Stores hashed refresh token in DB for validation on refresh
      */
     private async storeRefreshToken(
         userId: string,
         refreshToken: string,
     ) : Promise<void> {
-        const hashedToken = await bcrypt.hash(refreshToken, 10);
+        const hashedToken = this.hashRefreshToken(refreshToken);
         const expiresAt = new Date();
         expiresAt.setDate(expiresAt.getDate() + 7);
 
@@ -209,8 +236,7 @@ export class AuthService {
 
         let matchedToken: RefreshToken | null = null;
         for (const stored of tokens) {
-            const match = await bcrypt.compare(incomingRefreshToken, stored.token);
-            if (match) {
+            if (this.refreshTokenMatches(incomingRefreshToken, stored.token)) {
                 matchedToken = stored;
                 break;
             }
@@ -243,9 +269,7 @@ export class AuthService {
         });
 
         for (const stored of tokens) {
-            const match = await bcrypt.compare(refreshToken, stored.token);
-
-            if (match) {
+            if (this.refreshTokenMatches(refreshToken, stored.token)) {
                 await this.prisma.refreshToken.delete({ where: { id: stored.id } });
                 return;
             }

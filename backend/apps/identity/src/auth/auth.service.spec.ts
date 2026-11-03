@@ -4,11 +4,19 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { ROUTING_KEYS } from '@app/shared';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 
 jest.mock('bcrypt', () => ({
   hash: jest.fn(),
   compare: jest.fn(),
 }));
+
+// Mirrors AuthService's own hashRefreshToken — refresh tokens are hashed
+// with SHA-256 (not bcrypt; see that method's comment for why), and that's
+// real, unmocked crypto here, not a mock to configure.
+function sha256(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
 
 // PrismaService's real module pulls in Prisma's generated client, which this
 // app's generator ("prisma-client", ESM-flavored TS output) emits using
@@ -37,9 +45,10 @@ async function catchError(promise: Promise<unknown>): Promise<unknown> {
 /**
  * Covers AuthService — the actual authentication surface: credential
  * checking on login, refresh-token rotation, and Google find-or-create.
- * Prisma/UsersService/JwtService/RabbitMQ and bcrypt are all mocked: this
- * is unit coverage of the auth decisions themselves, not an integration
- * test against a real database.
+ * Prisma/UsersService/JwtService/RabbitMQ are all mocked; bcrypt is mocked
+ * for password verification (login) but NOT for refresh-token hashing,
+ * which uses real SHA-256 (see auth.service.ts's hashRefreshToken) — real
+ * crypto there is what catches the truncation-collision class of bug.
  */
 describe('AuthService', () => {
   let service: AuthService;
@@ -97,8 +106,6 @@ describe('AuthService', () => {
     configService = { get: jest.fn().mockReturnValue('config-value') };
     rabbitMQService = { publish: jest.fn() };
 
-    (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh-token');
-
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -143,7 +150,7 @@ describe('AuthService', () => {
 
       expect(prisma.refreshToken.create).toHaveBeenCalledWith({
         data: expect.objectContaining({
-          token: 'hashed-refresh-token',
+          token: sha256('refresh-token'),
           userId: baseUser.id,
         }),
       });
@@ -308,9 +315,8 @@ describe('AuthService', () => {
   describe('refresh', () => {
     it('rejects when no stored, non-expired token matches the incoming one', async () => {
       prisma.refreshToken.findMany.mockResolvedValue([
-        { id: 'rt-1', token: 'hashed-a' },
+        { id: 'rt-1', token: sha256('some-other-token') },
       ]);
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       const error = await catchError(
         service.refresh(baseUser.id, 'incoming-token'),
@@ -324,12 +330,9 @@ describe('AuthService', () => {
 
     it('rotates the token on a match: deletes the old one and issues/stores a new one', async () => {
       prisma.refreshToken.findMany.mockResolvedValue([
-        { id: 'rt-1', token: 'hashed-a' },
-        { id: 'rt-2', token: 'hashed-b' },
+        { id: 'rt-1', token: sha256('some-other-token') },
+        { id: 'rt-2', token: sha256('incoming-token') },
       ]);
-      (bcrypt.compare as jest.Mock)
-        .mockResolvedValueOnce(false)
-        .mockResolvedValueOnce(true);
       usersService.findById.mockResolvedValue(baseUser);
 
       const result = await service.refresh(baseUser.id, 'incoming-token');
@@ -343,17 +346,34 @@ describe('AuthService', () => {
       });
       expect(prisma.refreshToken.create).toHaveBeenCalled();
     });
+
+    // The actual regression this guards: bcrypt previously truncated its
+    // input at 72 bytes, so a long token sharing a 72-byte prefix with a
+    // stored one (e.g. the same JWT plus a tampered/extended suffix) would
+    // incorrectly match. SHA-256 has no such limit.
+    it('rejects a token that shares a long common prefix with a stored one but is not identical', async () => {
+      const longToken = `${'a'.repeat(100)}-real`;
+      const similarButDifferentToken = `${'a'.repeat(100)}-tampered`;
+      prisma.refreshToken.findMany.mockResolvedValue([
+        { id: 'rt-1', token: sha256(longToken) },
+      ]);
+
+      const error = await catchError(
+        service.refresh(baseUser.id, similarButDifferentToken),
+      );
+
+      expect((error as RpcException).error).toMatchObject({
+        message: 'Invalid refresh token',
+      });
+    });
   });
 
   describe('logout', () => {
     it('deletes only the matching refresh token', async () => {
       prisma.refreshToken.findMany.mockResolvedValue([
-        { id: 'rt-1', token: 'hashed-a' },
-        { id: 'rt-2', token: 'hashed-b' },
+        { id: 'rt-1', token: sha256('some-other-token') },
+        { id: 'rt-2', token: sha256('incoming-token') },
       ]);
-      (bcrypt.compare as jest.Mock)
-        .mockResolvedValueOnce(false)
-        .mockResolvedValueOnce(true);
 
       await service.logout(baseUser.id, 'incoming-token');
 
@@ -365,9 +385,8 @@ describe('AuthService', () => {
 
     it('does nothing if no stored token matches', async () => {
       prisma.refreshToken.findMany.mockResolvedValue([
-        { id: 'rt-1', token: 'hashed-a' },
+        { id: 'rt-1', token: sha256('some-other-token') },
       ]);
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await service.logout(baseUser.id, 'incoming-token');
 
