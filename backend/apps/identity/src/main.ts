@@ -1,22 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { IdentityModule } from './identity.module';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
-import { ConfigService } from '@nestjs/config';
 import { Logger } from '@nestjs/common';
 
 async function bootstrap() {
+  const port = parseInt(process.env.IDENTITY_SERVICE_PORT || '3001', 10);
   const app = await NestFactory.createMicroservice<MicroserviceOptions>(
     IdentityModule,
     {
       transport: Transport.TCP,
       options: {
         host: '0.0.0.0',
-        port: 3001
-      }
-    }
+        port,
+      },
+    },
   );
-  const configService = app.get(ConfigService);
-  const port = configService.get<number>('app.port') ?? 3001;
   const logger = new Logger('Bootstrap');
 
   await app.listen();
