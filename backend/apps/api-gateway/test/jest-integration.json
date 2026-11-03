@@ -1,0 +1,15 @@
+{
+  "moduleFileExtensions": ["js", "json", "ts"],
+  "rootDir": "../../..",
+  "testRegex": "\\.integration-spec\\.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": "ts-jest"
+  },
+  "testEnvironment": "node",
+  "roots": ["<rootDir>/apps/", "<rootDir>/libs/"],
+  "modulePaths": ["<rootDir>"],
+  "moduleNameMapper": {
+    "^@app/shared(|/.*)$": "<rootDir>/libs/shared/src/$1"
+  },
+  "testTimeout": 60000
+}
