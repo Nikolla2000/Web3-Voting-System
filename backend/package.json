@@ -108,6 +108,9 @@
       "<rootDir>/apps/",
       "<rootDir>/libs/"
     ],
+    "modulePaths": [
+      "<rootDir>"
+    ],
     "moduleNameMapper": {
       "^@app/shared(|/.*)$": "<rootDir>/libs/shared/src/$1"
     }
