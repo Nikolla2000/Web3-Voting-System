@@ -30,4 +30,11 @@ build-backend = "uv_build"
 [dependency-groups]
 dev = [
     "grpcio-tools>=1.84.0",
+    "pytest>=9.2.0",
+    "pytest-asyncio>=1.4.1.post1",
+    "pytest-mock>=3.17.0",
 ]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
