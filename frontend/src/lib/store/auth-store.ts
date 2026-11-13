@@ -46,7 +46,7 @@ export const useAuthStore = create<AuthState>((set) => ({
 
   register: async (values) => {
     const data = await registerRequest(values);
-    set({ user: data.user, status: 'authenticated' });
+    set({ user: data.user, accessToken: data.accessToken, status: 'authenticated' });
   },
 
   logout: async () => {

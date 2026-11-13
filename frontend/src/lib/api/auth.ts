@@ -35,8 +35,7 @@ export async function registerRequest(payload: RegisterPayload): Promise<AuthRes
 // Uses httpOnly cookie
 export async function refreshRequest(): Promise<string> {
   const { data } = await apiClient.post<ApiResponse<{ accessToken: string }>>('/auth/refresh');
-  console.log(data);
-  return data.data.accessToken; 
+  return data.data.accessToken;
 }
  
 export async function logoutRequest(): Promise<void> {
