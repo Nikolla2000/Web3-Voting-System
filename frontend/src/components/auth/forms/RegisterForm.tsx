@@ -70,7 +70,7 @@ export function RegisterForm() {
         <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{serverError}</p>
       )}
 
-      <Button type="submit" variant="primary" className="mt-1 w-full">
+      <Button type="submit" variant="primary" className="mt-1 w-full" disabled={isSubmitting}>
         {isSubmitting ? 'Creating account…' : 'Create account'}
       </Button>
 

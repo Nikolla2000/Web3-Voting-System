@@ -39,14 +39,32 @@ beforeEach(() => {
 });
 
 describe('LoginForm', () => {
-  it('shows required-field errors and does not call login when submitted empty', async () => {
-    const { submit } = setup();
+  it('shows required-field errors on the fields themselves and does not call login when submitted empty', async () => {
+    const { email, password, submit } = setup();
 
     await submit();
 
-    expect(await screen.findByText('Email is required')).toBeInTheDocument();
-    expect(screen.getByText('Password is required')).toBeInTheDocument();
+    await vi.waitFor(() => expect(email).toBeInvalid());
+    expect(email).toHaveAccessibleDescription('Email is required');
+    expect(password).toBeInvalid();
+    expect(password).toHaveAccessibleDescription('Password is required');
     expect(login).not.toHaveBeenCalled();
+  });
+
+  it('disables the button while signing in, so a double-click sends one request', async () => {
+    const pending = deferred<void>();
+    login.mockReturnValue(pending.promise);
+    const { user, email, password } = setup();
+
+    await user.type(email, 'alice@example.com');
+    await user.type(password, 'Secret123');
+    await user.dblClick(screen.getByRole('button', { name: 'Sign in' }));
+
+    expect(screen.getByRole('button', { name: 'Signing in…' })).toBeDisabled();
+    expect(login).toHaveBeenCalledTimes(1);
+
+    pending.resolve();
+    expect(await screen.findByRole('button', { name: 'Sign in' })).toBeEnabled();
   });
 
   it('rejects a malformed email', async () => {

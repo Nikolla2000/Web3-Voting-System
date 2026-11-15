@@ -67,6 +67,19 @@ describe('RegisterForm', () => {
     expect(push).toHaveBeenCalledWith('/polls');
   });
 
+  it('disables the button while the account is being created', async () => {
+    let finish!: () => void;
+    register.mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
+    const { fill } = setup();
+
+    await fill(valid);
+    await userEvent.dblClick(screen.getByRole('button', { name: 'Create account' }));
+
+    expect(await screen.findByRole('button', { name: 'Creating account…' })).toBeDisabled();
+    expect(register).toHaveBeenCalledTimes(1);
+    finish();
+  });
+
   it('shows the server’s message when registration is rejected', async () => {
     const config = { headers: new AxiosHeaders() } as InternalAxiosRequestConfig;
     register.mockRejectedValue(

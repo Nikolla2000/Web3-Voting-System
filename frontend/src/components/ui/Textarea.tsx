@@ -1,4 +1,5 @@
 import { forwardRef, type TextareaHTMLAttributes } from 'react';
+import { useFieldA11y } from '@/components/ui/use-field-a11y';
 
 interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string;
@@ -6,16 +7,24 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 }
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
-  ({ label, error, id, name, rows = 4, ...props }, ref) => {
-    const inputId = id ?? name;
+  (
+    { label, error, id, name, rows = 4, 'aria-describedby': ariaDescribedBy, 'aria-invalid': ariaInvalid, ...props },
+    ref,
+  ) => {
+    const { controlId, errorId, controlProps } = useFieldA11y({
+      id,
+      name,
+      error,
+      'aria-describedby': ariaDescribedBy,
+      'aria-invalid': ariaInvalid,
+    });
 
     return (
       <div className="flex flex-col gap-1.5 text-left">
-        <label htmlFor={inputId} className="text-sm font-medium text-slate-700">
+        <label htmlFor={controlId} className="text-sm font-medium text-slate-700">
           {label}
         </label>
         <textarea
-          id={inputId}
           name={name}
           rows={rows}
           ref={ref}
@@ -23,8 +32,13 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             error ? 'border-red-300' : 'border-slate-200'
           }`}
           {...props}
+          {...controlProps}
         />
-        {error && <span className="text-xs text-red-500">{error}</span>}
+        {error && (
+          <span id={errorId} className="text-xs text-red-500">
+            {error}
+          </span>
+        )}
       </div>
     );
   },
