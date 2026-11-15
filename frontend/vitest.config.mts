@@ -13,6 +13,9 @@ export default defineConfig({
     include: ['src/**/*.test.{ts,tsx}'],
     setupFiles: ['./src/test/setup.ts'],
     // Every test starts from a clean slate regardless of execution order.
+    // Vitest 4's restoreMocks only restores vi.spyOn spies; clearMocks is what wipes recorded
+    // calls on module-mock vi.fn()s between tests.
+    clearMocks: true,
     restoreMocks: true,
     unstubEnvs: true,
     unstubGlobals: true,
