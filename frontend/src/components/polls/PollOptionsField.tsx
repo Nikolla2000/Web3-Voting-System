@@ -1,3 +1,4 @@
+import { useId } from 'react';
 import { useFieldArray, type Control, type FieldErrors, type UseFormRegister } from 'react-hook-form';
 import { Plus, X } from 'lucide-react';
 import type { CreatePollFormValues } from '@/lib/validation/poll-schemas';
@@ -10,17 +11,28 @@ interface PollOptionsFieldProps {
 
 export function PollOptionsField({ control, errors, register }: PollOptionsFieldProps) {
   const { fields, append, remove } = useFieldArray({ control, name: 'options' });
+  const baseId = useId();
+  const groupLabelId = `${baseId}-label`;
+  const arrayErrorId = `${baseId}-error`;
 
   const arrayError =
     errors.options?.root?.message ?? (typeof errors.options?.message === 'string' ? errors.options.message : undefined);
 
   return (
-    <div className="flex flex-col gap-3">
-      <span className="text-sm font-medium text-slate-700">Options</span>
+    <div
+      role="group"
+      aria-labelledby={groupLabelId}
+      aria-describedby={arrayError ? arrayErrorId : undefined}
+      className="flex flex-col gap-3"
+    >
+      <span id={groupLabelId} className="text-sm font-medium text-slate-700">
+        Options
+      </span>
 
       <div className="flex flex-col gap-2.5">
         {fields.map((field, index) => {
           const optionError = errors.options?.[index]?.value?.message;
+          const optionErrorId = `option-${field.id}-error`;
 
           return (
             <div key={field.id} className="flex flex-col gap-1">
@@ -35,6 +47,8 @@ export function PollOptionsField({ control, errors, register }: PollOptionsField
                     optionError ? 'border-red-300' : 'border-slate-200'
                   }`}
                   {...register(`options.${index}.value` as const)}
+                  aria-invalid={optionError ? true : undefined}
+                  aria-describedby={optionError ? optionErrorId : undefined}
                 />
                 <button
                   type="button"
@@ -46,13 +60,21 @@ export function PollOptionsField({ control, errors, register }: PollOptionsField
                   <X className="h-4 w-4" />
                 </button>
               </div>
-              {optionError && <span className="text-xs text-red-500">{optionError}</span>}
+              {optionError && (
+                <span id={optionErrorId} className="text-xs text-red-500">
+                  {optionError}
+                </span>
+              )}
             </div>
           );
         })}
       </div>
 
-      {arrayError && <span className="text-xs text-red-500">{arrayError}</span>}
+      {arrayError && (
+        <span id={arrayErrorId} className="text-xs text-red-500">
+          {arrayError}
+        </span>
+      )}
 
       <button
         type="button"

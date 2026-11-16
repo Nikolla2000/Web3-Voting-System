@@ -48,11 +48,10 @@ function setup({ applyAccept = true } = {}) {
   const wrapper = ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   );
-  const { container } = render(<CreatePollForm />, { wrapper });
+  render(<CreatePollForm />, { wrapper });
 
-  // The cover-image <label> isn't associated with any control (see report), so there is no
-  // accessible way to reach the hidden file input.
-  const fileInput = container.querySelector<HTMLInputElement>('input[type="file"]')!;
+  // "Cover image" labels both the hidden file input and the visible picker button.
+  const fileInput = screen.getByLabelText<HTMLInputElement>('Cover image', { selector: 'input' });
 
   const fillValid = async (overrides: { options?: string[]; file?: File } = {}) => {
     await user.type(screen.getByLabelText('Title'), 'Best city for a weekend trip?');
@@ -100,10 +99,15 @@ describe('CreatePollForm — validation', () => {
     expect(screen.getByLabelText('Description')).toHaveAccessibleDescription(
       'Description must be at least 10 characters',
     );
-    expect(screen.getByText('Please choose a cover image')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cover image Click to choose an image' })).toHaveAccessibleDescription(
+      'Please choose a cover image',
+    );
     expect(screen.getByLabelText('Starts at')).toHaveAccessibleDescription('Start date is required');
     expect(screen.getByLabelText('Ends at')).toHaveAccessibleDescription('End date is required');
-    expect(screen.getAllByText('Option text is required')).toHaveLength(2);
+    for (const label of ['Option 1', 'Option 2']) {
+      expect(screen.getByLabelText(label)).toBeInvalid();
+      expect(screen.getByLabelText(label)).toHaveAccessibleDescription('Option text is required');
+    }
 
     expect(checkDuplicatePoll).not.toHaveBeenCalled();
     expect(uploadPollImage).not.toHaveBeenCalled();
@@ -117,6 +121,14 @@ describe('CreatePollForm — validation', () => {
 
     expect(await screen.findByText('Please choose a JPG, PNG or WEBP image.')).toBeInTheDocument();
     expect(uploadPollImage).not.toHaveBeenCalled();
+  });
+
+  it('names the image picker by its preview once an image is chosen', async () => {
+    const { user, fileInput } = setup();
+
+    await user.upload(fileInput, cover);
+
+    expect(screen.getByRole('button', { name: 'Cover image Cover preview' })).toBeInTheDocument();
   });
 
   it('lets options be added and removed, but never below two', async () => {
@@ -235,12 +247,27 @@ describe('CreatePollForm — preflight warnings', () => {
     await fillValid();
     await submit();
 
-    const match = await screen.findByRole('link', { name: /Favourite weekend city\?/ });
+    expect(await screen.findByText('This looks similar to an existing poll')).toBeInTheDocument();
+    const match = screen.getByRole('link', { name: /Favourite weekend city\?/ });
     expect(match).toHaveAttribute('href', '/polls/existing-1');
     expect(within(match).getByText('91% similar')).toBeInTheDocument();
     expect(uploadPollImage).not.toHaveBeenCalled();
     expect(createPoll).not.toHaveBeenCalled();
     expect(screen.queryByRole('button', { name: 'Create poll' })).not.toBeInTheDocument();
+  });
+
+  it('words the heading for several matches and lists each one', async () => {
+    vi.mocked(checkDuplicatePoll).mockResolvedValue([
+      { pollId: 'existing-1', title: 'Favourite weekend city?', similarity: 0.91 },
+      { pollId: 'existing-2', title: 'Where to spend a weekend?', similarity: 0.87 },
+    ]);
+    const { fillValid, submit } = setup();
+
+    await fillValid();
+    await submit();
+
+    expect(await screen.findByText('This looks similar to existing polls')).toBeInTheDocument();
+    expect(screen.getAllByRole('link', { name: /% similar/ })).toHaveLength(2);
   });
 
   it('shows neutrality issues with their suggested rewrite', async () => {

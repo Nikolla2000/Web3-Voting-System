@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { Controller, type Control } from 'react-hook-form';
 import { ImagePlus } from 'lucide-react';
 import type { CreatePollFormValues } from '@/lib/validation/poll-schemas';
@@ -14,6 +14,11 @@ interface PollImageFieldProps {
 export function PollImageField({ control, error }: PollImageFieldProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const baseId = useId();
+  const labelId = `${baseId}-label`;
+  const buttonId = `${baseId}-button`;
+  const inputId = `${baseId}-input`;
+  const errorId = `${baseId}-error`;
 
   // Revoke the object URL when the component unmounts or the preview changes
   useEffect(() => () => {
@@ -26,10 +31,17 @@ export function PollImageField({ control, error }: PollImageFieldProps) {
       control={control}
       render={({ field: { value, onChange } }) => (
         <div className="flex flex-col gap-1.5 text-left">
-          <label className="text-sm font-medium text-slate-700">Cover image</label>
+          <label id={labelId} htmlFor={inputId} className="text-sm font-medium text-slate-700">
+            Cover image
+          </label>
 
+          {/* The file input is visually hidden, so this button is the control assistive tech
+              actually reaches: named by the label plus its own content, described by the error. */}
           <button
+            id={buttonId}
             type="button"
+            aria-labelledby={`${labelId} ${buttonId}`}
+            aria-describedby={error ? errorId : undefined}
             onClick={() => inputRef.current?.click()}
             className={`flex aspect-[21/9] w-full cursor-pointer items-center justify-center overflow-hidden rounded-xl border bg-white transition-colors hover:border-indigo-300 ${
               error ? 'border-red-300' : 'border-slate-200'
@@ -46,6 +58,7 @@ export function PollImageField({ control, error }: PollImageFieldProps) {
           </button>
 
           <input
+            id={inputId}
             ref={inputRef}
             type="file"
             accept={IMAGE_ALLOWED_TYPES.join(',')}
@@ -61,7 +74,11 @@ export function PollImageField({ control, error }: PollImageFieldProps) {
             }}
           />
 
-          {error && <span className="text-xs text-red-500">{error}</span>}
+          {error && (
+            <span id={errorId} className="text-xs text-red-500">
+              {error}
+            </span>
+          )}
         </div>
       )}
     />

@@ -9,7 +9,7 @@ export function PollDuplicateMatchesList({ matches }: PollDuplicateMatchesListPr
   return (
     <div className="flex flex-col gap-2">
       <p className="text-sm font-medium text-amber-900">
-        This looks similar to an existing poll{matches.length > 1 ? 's' : ''}
+        This looks similar to {matches.length > 1 ? 'existing polls' : 'an existing poll'}
       </p>
       <ul className="flex flex-col gap-2">
         {matches.map((match) => (
