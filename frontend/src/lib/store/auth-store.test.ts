@@ -76,6 +76,18 @@ describe('auth store', () => {
       expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'unauthenticated' });
       expect(api.fetchMe).not.toHaveBeenCalled();
     });
+
+    // Regression: fetchMe used to swallow its own errors and return null, so a failed profile
+    // load after a good refresh left the store 'authenticated' with user: null.
+    it('ends unauthenticated, with the token dropped, when the profile cannot be loaded', async () => {
+      const { api, useAuthStore } = await setup();
+      api.refreshRequest.mockResolvedValue('access-from-cookie');
+      api.fetchMe.mockRejectedValue(new Error('500'));
+
+      await useAuthStore.getState().bootstrap();
+
+      expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'unauthenticated' });
+    });
   });
 
   describe('login', () => {
@@ -121,6 +133,18 @@ describe('auth store', () => {
       await useAuthStore.getState().logout();
 
       expect(api.logoutRequest).toHaveBeenCalledOnce();
+      expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'unauthenticated' });
+    });
+
+    // Regression: a failed server call used to reject before clearing anything, leaving the user
+    // signed in after clicking "Sign out" (and an unhandled rejection from the menu item).
+    it('still signs out locally, without rejecting, when the server call fails', async () => {
+      const { api, useAuthStore } = await setup();
+      api.logoutRequest.mockRejectedValue(new Error('Network Error'));
+      useAuthStore.setState({ user, accessToken: 'access-1', status: 'authenticated' });
+
+      await expect(useAuthStore.getState().logout()).resolves.toBeUndefined();
+
       expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'unauthenticated' });
     });
   });

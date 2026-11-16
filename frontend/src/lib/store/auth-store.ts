@@ -49,9 +49,17 @@ export const useAuthStore = create<AuthState>((set) => ({
     set({ user: data.user, accessToken: data.accessToken, status: 'authenticated' });
   },
 
+  // Signing out always ends the local session, even if the server call fails (offline, 5xx):
+  // leaving the user "signed in" after they asked to sign out is the worse outcome. Callers
+  // fire-and-forget this from a menu item, so it must not reject either.
   logout: async () => {
-    await logoutRequest();
-    set({ user: null, status: 'unauthenticated', accessToken: null });
+    try {
+      await logoutRequest();
+    } catch {
+      // The refresh cookie may survive; it expires on its own and the token in memory is gone.
+    } finally {
+      set({ user: null, status: 'unauthenticated', accessToken: null });
+    }
   },
 
   // Called by the axios interceptor when a refresh attempt fails

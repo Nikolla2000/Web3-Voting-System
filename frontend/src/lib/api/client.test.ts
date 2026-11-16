@@ -7,8 +7,8 @@ type Adapter = (config: InternalAxiosRequestConfig) => Promise<unknown>;
 const REFRESH_OK = { data: { accessToken: 'new-token' } };
 
 /**
- * client.ts keeps refresh state (`isRefreshing`, `pendingQueue`) at module level, and the store
- * is a module-level singleton — so each test imports both fresh rather than sharing them.
+ * client.ts and auth.ts keep their in-flight refresh promises at module level, and the store is a
+ * module-level singleton — so each test imports all of them fresh rather than sharing them.
  */
 async function setup(adapter: Adapter, accessToken: string | null = 'old-token') {
   vi.resetModules();
@@ -165,5 +165,88 @@ describe('apiClient 401 refresh-and-retry', () => {
     refreshShouldFail = false;
     await expect(apiClient.get('/d')).resolves.toMatchObject({ data: { ok: '/d' } });
     expect(callsTo('/auth/refresh')).toHaveLength(2);
+  });
+});
+
+describe('apiClient refresh coordination', () => {
+  // Regression: a request sent with the old token that 401s *after* a refresh has already
+  // replaced it used to start a second refresh, rotating the refresh token a needless extra time.
+  it('retries a late 401 with the current token instead of refreshing again', async () => {
+    const slow = deferred<void>();
+    const { apiClient, useAuthStore, callsTo, handleSessionExpired } = await setup(async (config) => {
+      if (config.url === '/auth/refresh') return respond(config, 200, REFRESH_OK);
+      if (config.url === '/slow' && authHeaderOf(config) === 'Bearer old-token') await slow.promise;
+      return protectedResource(config);
+    });
+
+    const late = apiClient.get('/slow');
+    await flushPromises(); // /slow is now in flight with the old token
+    await apiClient.get('/fast'); // 401 → refresh → token is now new-token
+    expect(useAuthStore.getState().accessToken).toBe('new-token');
+
+    slow.resolve(); // the old-token request finally comes back 401
+    await expect(late).resolves.toMatchObject({ data: { ok: '/slow' } });
+
+    expect(callsTo('/auth/refresh')).toHaveLength(1);
+    expect(callsTo('/slow').map(([c]) => authHeaderOf(c))).toEqual(['Bearer old-token', 'Bearer new-token']);
+    expect(handleSessionExpired).not.toHaveBeenCalled();
+  });
+
+  // Regression: at page load, AuthBootstrap's refresh and a 401 from a protected request each sent
+  // the same refresh cookie. The backend rotates it on use, so whichever arrived second 401'd and
+  // signed the user out.
+  it("joins bootstrap's in-flight refresh rather than sending the refresh cookie a second time", async () => {
+    const refresh = deferred<void>();
+    const { apiClient, callsTo, handleSessionExpired } = await setup(async (config) => {
+      if (config.url === '/auth/refresh') {
+        await refresh.promise;
+        return respond(config, 200, REFRESH_OK);
+      }
+      return protectedResource(config);
+    }, null);
+    const { refreshRequest } = await import('@/lib/api/auth');
+
+    const bootstrapRefresh = refreshRequest();
+    const request = apiClient.get('/users/me'); // no token yet → 401
+    await flushPromises();
+    expect(callsTo('/auth/refresh')).toHaveLength(1);
+
+    refresh.resolve();
+    await expect(bootstrapRefresh).resolves.toBe('new-token');
+    await expect(request).resolves.toMatchObject({ data: { ok: '/users/me' } });
+    expect(callsTo('/auth/refresh')).toHaveLength(1);
+    expect(handleSessionExpired).not.toHaveBeenCalled();
+  });
+});
+
+describe('refreshRequest', () => {
+  it('shares one request between concurrent callers, then starts fresh once it settles', async () => {
+    const refresh = deferred<void>();
+    let fail = true;
+    const { callsTo } = await setup(async (config) => {
+      await refresh.promise;
+      return fail ? respond(config, 401) : respond(config, 200, REFRESH_OK);
+    });
+    const { refreshRequest } = await import('@/lib/api/auth');
+
+    const first = Promise.allSettled([refreshRequest(), refreshRequest()]);
+    refresh.resolve();
+    expect((await first).map((r) => r.status)).toEqual(['rejected', 'rejected']);
+    expect(callsTo('/auth/refresh')).toHaveLength(1);
+
+    // A failure must not leave a rejected promise cached forever.
+    fail = false;
+    await expect(refreshRequest()).resolves.toBe('new-token');
+    expect(callsTo('/auth/refresh')).toHaveLength(2);
+  });
+});
+
+describe('fetchMe', () => {
+  // Regression: it used to catch everything and return null, hiding the failure from bootstrap.
+  it('rejects when the profile request fails, so the caller can tell', async () => {
+    await setup(async (config) => respond(config, 500, { message: 'boom' }));
+    const { fetchMe } = await import('@/lib/api/auth');
+
+    await expect(fetchMe()).rejects.toMatchObject({ response: { status: 500 } });
   });
 });

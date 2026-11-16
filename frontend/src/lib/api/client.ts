@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { refreshRequest } from '@/lib/api/auth';
 import { useAuthStore } from '@/lib/store/auth-store';
 
 export const apiClient = axios.create({
@@ -17,15 +18,29 @@ apiClient.interceptors.request.use((config) => {
   return config;
 });
 
-let isRefreshing = false;
-let pendingQueue: Array<{
-  resolve: () => void;
-  reject: (error: unknown) => void;
-}> = [];
+/**
+ * One refresh-and-store per burst of 401s: concurrent failures share it, so the session is
+ * expired (and the user redirected) once rather than once per failed request.
+ */
+let sessionRefresh: Promise<string> | null = null;
 
-function flushQueue(error: unknown | null) {
-  pendingQueue.forEach(({ resolve, reject }) => (error ? reject(error) : resolve()));
-  pendingQueue = [];
+function refreshSession(): Promise<string> {
+  sessionRefresh ??= refreshRequest()
+    .then(
+      (accessToken) => {
+        useAuthStore.setState({ accessToken });
+        return accessToken;
+      },
+      (refreshError) => {
+        // Refresh token is also invalid or expired
+        useAuthStore.getState().handleSessionExpired();
+        throw refreshError;
+      },
+    )
+    .finally(() => {
+      sessionRefresh = null;
+    });
+  return sessionRefresh;
 }
 
 apiClient.interceptors.response.use(
@@ -45,30 +60,14 @@ apiClient.interceptors.response.use(
 
     originalRequest._retry = true;
 
-    if (isRefreshing) {
-      //safe from race condition
-      return new Promise((resolve, reject) => {
-        pendingQueue.push({
-          resolve: () => resolve(apiClient(originalRequest)),
-          reject,
-        });
-      });
-    }
-
-    isRefreshing = true;
-
-    try {
-      const { data } = await apiClient.post<{ data: { accessToken: string }}>('/auth/refresh');
-      useAuthStore.setState({ accessToken: data.data.accessToken });
-      isRefreshing = false;
-      flushQueue(null);
+    // A late 401: the request went out with a token that has since been replaced (a refresh or a
+    // login finished while it was in flight). The current token is already fresh, so just retry.
+    const { accessToken } = useAuthStore.getState();
+    if (accessToken && originalRequest.headers?.Authorization !== `Bearer ${accessToken}`) {
       return apiClient(originalRequest);
-    } catch (refreshError) {
-      isRefreshing = false;
-      flushQueue(refreshError);
-      // Refresh token is also invalid or expired
-      useAuthStore.getState().handleSessionExpired();
-      return Promise.reject(refreshError);
     }
+
+    await refreshSession();
+    return apiClient(originalRequest);
   },
 );
