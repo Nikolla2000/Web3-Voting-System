@@ -96,7 +96,10 @@ export function AvatarUploadControl({ avatarUrl, username }: AvatarUploadControl
       {avatarUrl && (
         <button
           type="button"
-          onClick={() => removeMutation.mutate()}
+          onClick={() => {
+            setError(null);
+            removeMutation.mutate();
+          }}
           disabled={isBusy}
           className="inline-flex w-fit cursor-pointer items-center gap-1 text-xs text-slate-400 transition-colors hover:text-red-500 disabled:pointer-events-none disabled:opacity-60"
         >

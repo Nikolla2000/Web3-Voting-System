@@ -38,3 +38,15 @@ export function deferred<T>() {
 export function flushPromises(): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, 0));
 }
+
+/** An AxiosError shaped like a gateway error response, for mocked API functions to reject with. */
+export function apiError(status: number, message: string, headers: Record<string, string> = {}) {
+  const config = { headers: new AxiosHeaders() } as InternalAxiosRequestConfig;
+  return new AxiosError('Request failed', 'ERR_BAD_REQUEST', config, null, {
+    status,
+    statusText: '',
+    data: { message },
+    headers,
+    config,
+  });
+}
