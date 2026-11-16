@@ -22,6 +22,19 @@ function validPoll() {
   };
 }
 
+/** Issues on one option row, keyed by index: { 2: ['Each option must be different'] }. */
+function optionMessages(values: unknown): Record<number, string[]> {
+  const result = createPollSchema.safeParse(values);
+  const byIndex: Record<number, string[]> = {};
+  if (result.success) return byIndex;
+  for (const issue of result.error.issues) {
+    if (issue.path[0] === 'options' && typeof issue.path[1] === 'number') {
+      (byIndex[issue.path[1]] ??= []).push(issue.message);
+    }
+  }
+  return byIndex;
+}
+
 function messagesFor(values: unknown, field: string): string[] {
   const result = createPollSchema.safeParse(values);
   return result.success ? [] : result.error.issues.filter((i) => i.path[0] === field).map((i) => i.message);
@@ -42,6 +55,19 @@ describe('createPollSchema', () => {
   });
 
   describe('dates', () => {
+    it('accepts a start date up to 15 minutes in the past, so "start now" survives filling in the form', () => {
+      expect(messagesFor({ ...validPoll(), startsAt: at(-15 * 60_000) }, 'startsAt')).toEqual([]);
+    });
+
+    it('rejects a start date further in the past than that', () => {
+      expect(messagesFor({ ...validPoll(), startsAt: at(-15 * 60_000 - 1) }, 'startsAt')).toEqual([
+        "Start date can't be in the past",
+      ]);
+      expect(messagesFor({ ...validPoll(), startsAt: at(-30 * 24 * HOUR) }, 'startsAt')).toEqual([
+        "Start date can't be in the past",
+      ]);
+    });
+
     it('rejects an end date before the start date', () => {
       const messages = messagesFor({ ...validPoll(), startsAt: at(72 * HOUR), endsAt: at(48 * HOUR) }, 'endsAt');
       expect(messages).toContain('End date must be after the start date');
@@ -88,6 +114,43 @@ describe('createPollSchema', () => {
       expect(messagesFor({ ...validPoll(), options: [{ value: 'Only one' }] }, 'options')).toEqual([
         'At least 2 options are required',
       ]);
+    });
+
+    it('rejects a whitespace-only option as blank', () => {
+      expect(optionMessages({ ...validPoll(), options: [{ value: 'Lisbon' }, { value: '   ' }] })).toEqual({
+        1: ['Option text is required'],
+      });
+    });
+
+    it('rejects duplicate options, ignoring case and surrounding spaces, flagging each repeat', () => {
+      const options = [{ value: 'Lisbon' }, { value: 'Prague' }, { value: ' lisbon ' }, { value: 'LISBON' }];
+      expect(optionMessages({ ...validPoll(), options })).toEqual({
+        2: ['Each option must be different'],
+        3: ['Each option must be different'],
+      });
+    });
+
+    it('does not report two blank options as duplicates of each other', () => {
+      expect(optionMessages({ ...validPoll(), options: [{ value: '' }, { value: ' ' }] })).toEqual({
+        0: ['Option text is required'],
+        1: ['Option text is required'],
+      });
+    });
+
+    it('submits options, title and description trimmed', () => {
+      const result = createPollSchema.parse({
+        ...validPoll(),
+        title: '  Best city for a weekend trip?  ',
+        description: '\tPick the city you would most like to visit.\n',
+        options: [{ value: ' Lisbon ' }, { value: 'Prague  ' }],
+      });
+      expect(result.title).toBe('Best city for a weekend trip?');
+      expect(result.description).toBe('Pick the city you would most like to visit.');
+      expect(result.options).toEqual([{ value: 'Lisbon' }, { value: 'Prague' }]);
+    });
+
+    it('does not let padding satisfy the title minimum', () => {
+      expect(messagesFor({ ...validPoll(), title: '  ab   ' }, 'title')).toEqual(['Title must be at least 5 characters']);
     });
 
     it('rejects a blank option', () => {

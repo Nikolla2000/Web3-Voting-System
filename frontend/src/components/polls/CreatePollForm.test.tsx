@@ -123,6 +123,29 @@ describe('CreatePollForm — validation', () => {
     expect(uploadPollImage).not.toHaveBeenCalled();
   });
 
+  it('flags a repeated option on its own row and submits nothing', async () => {
+    const { fillValid, submit } = setup();
+
+    await fillValid({ options: ['Lisbon', 'Prague', 'lisbon'] });
+    await submit();
+
+    expect(await screen.findByLabelText('Option 3')).toHaveAccessibleDescription('Each option must be different');
+    expect(screen.getByLabelText('Option 1')).not.toHaveAttribute('aria-invalid');
+    expect(checkDuplicatePoll).not.toHaveBeenCalled();
+    expect(createPoll).not.toHaveBeenCalled();
+  });
+
+  it('sends options trimmed, so padding never reaches the AI checks or the API', async () => {
+    const { fillValid, submit } = setup();
+
+    await fillValid({ options: ['  Lisbon', 'Prague  '] });
+    await submit();
+
+    await vi.waitFor(() => expect(createPoll).toHaveBeenCalled());
+    expect(checkPollNeutrality).toHaveBeenCalledWith('Best city for a weekend trip?', ['Lisbon', 'Prague']);
+    expect(vi.mocked(createPoll).mock.calls[0]![0].options).toEqual(['Lisbon', 'Prague']);
+  });
+
   it('names the image picker by its preview once an image is chosen', async () => {
     const { user, fileInput } = setup();
 
