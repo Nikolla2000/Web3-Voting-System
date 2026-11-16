@@ -1,6 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
-import * as request from 'supertest';
+// `import * as` gives the CJS namespace wrapper, not the callable supertest export.
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+import request = require('supertest');
 import { AuthModule } from './../src/auth.module';
 
 describe('AuthController (e2e)', () => {

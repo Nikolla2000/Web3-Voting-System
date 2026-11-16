@@ -7,7 +7,7 @@
   },
   "testEnvironment": "node",
   "roots": ["<rootDir>/apps/api-gateway/"],
-  "testPathIgnorePatterns": ["/node_modules/", "/test/app\\.e2e-spec\\.ts$"],
+  "testPathIgnorePatterns": ["/node_modules/"],
   "modulePaths": ["<rootDir>"],
   "moduleNameMapper": {
     "^@app/shared(|/.*)$": "<rootDir>/libs/shared/src/$1"
