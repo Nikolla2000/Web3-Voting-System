@@ -73,8 +73,8 @@ npm test                       # jest, all *.spec.ts under apps/ and libs/
 npx jest path/to/file.spec.ts  # single test file
 npm run test:watch
 npm run test:cov
-npm run test:e2e               # note: script's --config path is stale (apps/backend/...); run e2e per-app instead, e.g.:
-npx jest --config apps/identity/test/jest-e2e.json
+npm run test:e2e               # gateway + auth e2e suites (testcontainers: needs Docker running)
+npm run test:integration       # gateway integration tests
 ```
 
 Each service loads its own `.env` (backend/.env for api-gateway; `apps/identity/.env`, `apps/polls/.env`, `apps/blockchain/.env`, `apps/notifications/.env` for the others). `identity`, `polls` and `blockchain` each have their own Prisma schema/DB — after editing any of them, regenerate from that app's directory context (schema paths: `apps/identity/prisma/schema.prisma`, `apps/polls/prisma/schema.prisma`, `apps/blockchain/prisma/schema.prisma`; generated clients land in each app's `src/generated/prisma`, gitignored). `backend/.env` (api-gateway) and `apps/polls/.env` additionally need `REDIS_URL` — the only two services that use Redis.
@@ -105,7 +105,7 @@ This is a microservices voting platform. The API gateway is the only HTTP-facing
 
 **Poll lifecycle, on-chain**: `polls` publishes `POLL_CREATED` when a poll is created. `blockchain/src/events/poll-created.consumer.ts` consumes it and deploys that poll's Semaphore group on the single shared `PollVoting` contract (`ContractService.createPoll`), then publishes `POLL_CONTRACT_DEPLOYED`; `polls/src/events/poll-contract-deployed.consumer.ts` writes the resulting `contractAddress` onto the `Poll` row — `polls` owns that column, `blockchain` never persists its own copy.
 
-**Vote flow**: the frontend generates a Semaphore proof client-side (see Frontend notes below) and submits it through `blockchain-proxy.controller.ts` → `blockchain`'s `SubmitVote` gRPC method, which verifies the proof (`SemaphoreService.verifyProof`) and relays `castVote` on-chain (`ContractService.castVote`). `blockchain/src/events/chain-listener.service.ts` — the blockchain-indexer the old roadmap described as "not yet built," implemented here rather than as a separate app — watches the contract's `VoteCast` log and republishes it as `ROUTING_KEYS.VOTE_CAST`. `polls/src/events/vote-sync.consumer.ts` consumes that, incrementing cached `Poll.totalVotes`/`PollOption.votes` in Postgres inside a transaction. It's idempotent against at-least-once redelivery via a `ProcessedVote` unique constraint on `(pollId, nullifierHash)` — duplicate deliveries are caught via Prisma's `P2002` and swallowed.
+**Vote flow**: the frontend generates a Semaphore proof client-side (see Frontend notes below) and submits it through `blockchain-proxy.controller.ts` → `blockchain`'s `SubmitVote` gRPC method, which verifies the proof (`SemaphoreService.verifyProof`) and relays `castVote` on-chain (`ContractService.castVote`). `blockchain/src/events/chain-listener.service.ts` (the chain indexer, kept inside `blockchain` rather than as a separate app) watches the contract's `VoteCast` log and republishes it as `ROUTING_KEYS.VOTE_CAST`. `polls/src/events/vote-sync.consumer.ts` consumes that, incrementing cached `Poll.totalVotes`/`PollOption.votes` in Postgres inside a transaction. It's idempotent against at-least-once redelivery via a `ProcessedVote` unique constraint on `(pollId, nullifierHash)` — duplicate deliveries are caught via Prisma's `P2002` and swallowed.
 
 **Blockchain service internals**: `SemaphoreService` owns group membership — the Merkle tree (`@semaphore-protocol/group`) only lives in memory, rebuilt on demand from `GroupMember` rows and cached per `pollId`, so a restart never loses membership or invalidates issued Merkle proofs. `GroupMember` is the Sybil-resistance gate (one commitment per `(pollId, userId)`, enforced in `joinGroup`) and the one place a platform account links to an anonymous commitment — that link is never published anywhere (not to `polls`, not on-chain, not through any API). `uuidToFieldElement`/`fieldElementToUuid` (`libs/shared/src/blockchain/identifier.util.ts`) convert poll/option UUIDs to/from the field elements Semaphore's `scope`/`message` need — the frontend must derive them the exact same way or proof verification fails.
 
@@ -174,9 +174,17 @@ npm run dev     # next dev -p 5000
 npm run build
 npm run start
 npm run lint
+
+npm test           # Vitest + React Testing Library (jsdom), src/**/*.test.ts(x)
+npm run test:cov
+npm run test:e2e   # Playwright: production build in Chromium against a mocked gateway
 ```
 
-No test runner is configured. Husky + lint-staged run eslint/prettier on staged `.ts(x)` files pre-commit.
+Husky + lint-staged run eslint/prettier on staged `.ts(x)` files pre-commit.
+
+- Unit tests mock at the network edge (swap axios's adapter so the real interceptors run; `src/test/` has the helpers), not by stubbing our own modules.
+- Never put test files under `src/app/`: Next's build compiles everything there.
+- E2E (`e2e/`): `e2e/support/mock-gateway.ts` is a stateful in-memory gateway served through request interception; nothing reaches the real backend. A request it has no handler for fails the test, so add a handler when the app calls a new endpoint. The vote test runs real in-browser proving and verifies it against the backend's own `uuidToFieldElement`. The E2E build goes to `.next-e2e` (its gateway URL is baked in), never `.next`.
 
 ### Notes
 
@@ -185,13 +193,5 @@ No test runner is configured. Husky + lint-staged run eslint/prettier on staged 
 - **No wallet integration** — wagmi/RainbowKit were tried and removed; see the Key decisions note above before adding any wallet-connect UI back.
 - ZK voting flow (`src/lib/voting/`): `identity.ts` generates a random `@semaphore-protocol/identity` keypair per poll on first vote and persists it in `localStorage` (deliberately — see the file's comment on why that's a different threat model than the access token); `generate-vote-proof.ts` builds the Semaphore proof; `use-cast-vote.ts` is the hook orchestrating join-group → get-merkle-proof → generate-proof → submit-vote (`src/lib/api/voting.ts`), surfaced in the `PollVote*` components under `src/components/polls/`.
 - `/profile` page (`src/app/profile/`, components under `src/components/profile/`): account details, password change/set (Google-only accounts have none), avatar upload, sign-out-everywhere, and deactivate-account (typed confirmation phrase + password). See the backend's **File storage (R2)** note for how avatar upload works.
-- Auth state: Zustand store (`src/lib/store/auth-store.ts`) holds the access token in memory; `src/lib/api/client.ts` is an axios instance that attaches it as a Bearer header and transparently retries once via `/auth/refresh` (using the httpOnly cookie) on a 401, queuing concurrent requests while a refresh is in flight.
+- Auth state: Zustand store (`src/lib/store/auth-store.ts`) holds the access token in memory; `src/lib/api/client.ts` is an axios instance that attaches it as a Bearer header and transparently retries once via `/auth/refresh` (using the httpOnly cookie) on a 401. The refresh token rotates on every use, so refreshes are single-flight: every caller (bootstrap, the interceptor, the chat stream's own `fetch`) joins the one in flight. Sign-in returns to the page that required it via `?next=`, validated as a same-site path (`src/lib/auth/return-to.ts`).
 - Forms use `react-hook-form` + `zod` (`src/lib/validation`).
-
-## Roadmap (not built yet — keep new work compatible with these)
-
-- `ai-service`: lightweight anomaly detection on voting patterns, consuming the existing `VOTE_CAST` event — lowest priority of the AI features, thin on genuine ML signal since Semaphore anonymity strips the identity/device/geo signals real voting-fraud detection usually relies on.
-- `ai-service` `Chat`: true token-by-token streaming for the final answer — see `qa_agent/chat.py` for the current deliberate simplification.
-- Unit tests — essentially none beyond Nest's generated scaffold spec files,
-  with one real exception: `semaphore.service.spec.ts` covers the
-  Sybil-resistance gate in `SemaphoreService.joinGroup`.
