@@ -76,3 +76,44 @@ test.describe('profile', () => {
     expect(user.avatar).toMatch(/\/avatars\/.+\.png$/);
   });
 });
+
+test.describe('signing out on a shared computer', () => {
+  test('the next person to sign in never sees the previous user’s cached profile', async ({ page, gateway }) => {
+    gateway.addUser();
+    gateway.addUser({ username: 'bob', email: 'bob@example.com' });
+    const signIn = async (email: string) => {
+      await page.getByLabel('Email').fill(email);
+      await page.getByLabel('Password').fill('Secret123');
+      await page.getByRole('button', { name: 'Sign in' }).click();
+    };
+
+    await page.goto('/profile');
+    await signIn('alice@example.com');
+    await expect(page.getByRole('heading', { level: 1, name: 'alice' })).toBeVisible();
+    await page.getByRole('button', { name: 'alice' }).click();
+    await page.getByRole('menuitem', { name: 'Log out' }).click();
+    await expect(page).toHaveURL('/sign-in?next=%2Fprofile');
+
+    // Hold Bob's profile request, so whatever the page shows meanwhile can only come from cache.
+    let release!: () => void;
+    const released = new Promise<void>((resolve) => (release = resolve));
+    let held!: () => void;
+    const requestHeld = new Promise<void>((resolve) => (held = resolve));
+    await page.route('**/users/me', async (route) => {
+      if (route.request().method() === 'GET') {
+        held();
+        await released;
+      }
+      await route.fallback();
+    });
+
+    await signIn('bob@example.com'); // same tab: a client-side navigation back to /profile
+    await requestHeld;
+    await expect(page).toHaveURL('/profile');
+    await expect(page.getByText('alice', { exact: true })).toHaveCount(0);
+    await expect(page.getByText('alice@example.com')).toHaveCount(0);
+
+    release();
+    await expect(page.getByRole('heading', { level: 1, name: 'bob' })).toBeVisible();
+  });
+});
