@@ -14,6 +14,7 @@ export function ChatMessageBubble({ message }: ChatMessageBubbleProps) {
           isUser ? 'bg-indigo-600 text-white' : 'bg-slate-100 text-slate-700'
         }`}
       >
+        <span className="sr-only">{isUser ? 'You: ' : 'Assistant: '}</span>
         {message.content || (!isUser && <span className="text-slate-400">Thinking…</span>)}
       </div>
     </div>

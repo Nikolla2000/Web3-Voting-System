@@ -1,3 +1,4 @@
+import { refreshSession } from '@/lib/api/client';
 import { useAuthStore } from '@/lib/store/auth-store';
 
 export interface ChatTurn {
@@ -5,10 +6,12 @@ export interface ChatTurn {
   content: string;
 }
 
-export async function* streamChat(message: string, history: ChatTurn[]): AsyncGenerator<string> {
+const UNAVAILABLE = 'The assistant is unavailable right now.';
+
+function postChat(message: string, history: ChatTurn[]): Promise<Response> {
   const { accessToken } = useAuthStore.getState();
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/polls/chat`, {
+  return fetch(`${process.env.NEXT_PUBLIC_API_GATEWAY_URL}/polls/chat`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -16,9 +19,26 @@ export async function* streamChat(message: string, history: ChatTurn[]): AsyncGe
     },
     body: JSON.stringify({ message, history }),
   });
+}
+
+/**
+ * Streams the assistant's answer as text deltas from the gateway's SSE endpoint.
+ *
+ * This uses fetch, not apiClient (axios can't hand over a streaming body in the browser), so it
+ * doesn't get the client's 401 handling for free: an expired access token is refreshed here
+ * through the same shared refresh, and the request retried once.
+ */
+export async function* streamChat(message: string, history: ChatTurn[]): AsyncGenerator<string> {
+  let res = await postChat(message, history);
+
+  if (res.status === 401) {
+    // Rejects (and expires the session) if the refresh cookie is no good either.
+    await refreshSession();
+    res = await postChat(message, history);
+  }
 
   if (!res.ok || !res.body) {
-    throw new Error('The assistant is unavailable right now.');
+    throw new Error(UNAVAILABLE);
   }
 
   const reader = res.body.getReader();
@@ -27,7 +47,9 @@ export async function* streamChat(message: string, history: ChatTurn[]): AsyncGe
 
   while (true) {
     const { done, value } = await reader.read();
-    if (done) return;
+    // The gateway always ends with a `done` or an error event; closing without either means the
+    // connection dropped mid-answer, and a truncated answer must not pass for a complete one.
+    if (done) throw new Error('The answer was cut off. Please try again.');
 
     buffer += decoder.decode(value, { stream: true });
     const events = buffer.split('\n\n');

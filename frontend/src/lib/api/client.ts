@@ -24,7 +24,7 @@ apiClient.interceptors.request.use((config) => {
  */
 let sessionRefresh: Promise<string> | null = null;
 
-function refreshSession(): Promise<string> {
+export function refreshSession(): Promise<string> {
   sessionRefresh ??= refreshRequest()
     .then(
       (accessToken) => {

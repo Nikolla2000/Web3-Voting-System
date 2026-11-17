@@ -52,7 +52,15 @@ export function ChatPanel() {
         <p className="text-xs text-slate-400">Vote counts, dates, status — grounded in live data.</p>
       </div>
 
-      <div ref={scrollRef} className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4">
+      {/* A log region: new messages are announced politely, and aria-busy holds the announcement
+          back while an answer is still streaming, so it isn't read out one fragment at a time. */}
+      <div
+        ref={scrollRef}
+        role="log"
+        aria-label="Conversation"
+        aria-busy={isStreaming}
+        className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4"
+      >
         {messages.length === 0 && (
           <p className="text-sm text-slate-400">
             Try “which poll has the most votes?” or “when does the bike lane poll end?”
