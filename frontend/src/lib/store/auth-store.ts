@@ -8,6 +8,7 @@ import {
   type AuthUser,
 } from '@/lib/api/auth';
 import type { LoginFormValues, RegisterFormValues } from '@/lib/validation/auth-schemas';
+import { signInHrefForCurrentPage } from '@/lib/auth/return-to';
 
 type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'unauthenticated';
 
@@ -66,7 +67,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   handleSessionExpired: async () => {
     set({ user: null, accessToken: null, status: 'unauthenticated' });
     if (typeof window !== 'undefined') {
-      window.location.assign('/sign-in')
+      window.location.assign(signInHrefForCurrentPage());
     }
   },
 }));

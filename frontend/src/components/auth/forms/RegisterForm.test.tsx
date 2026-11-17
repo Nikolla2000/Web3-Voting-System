@@ -5,14 +5,14 @@ import { AxiosError, AxiosHeaders, type InternalAxiosRequestConfig } from 'axios
 import { RegisterForm } from '@/components/auth/forms/RegisterForm';
 import { useAuthStore } from '@/lib/store/auth-store';
 
-const push = vi.fn();
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
+const replace = vi.fn();
+vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
 
 const register = vi.fn();
 
-function setup() {
+function setup(returnTo?: string | null) {
   const user = userEvent.setup();
-  render(<RegisterForm />);
+  render(<RegisterForm returnTo={returnTo} />);
   const fill = async (values: { username: string; email: string; password: string; confirm: string }) => {
     await user.type(screen.getByLabelText('Username'), values.username);
     await user.type(screen.getByLabelText('Email'), values.email);
@@ -64,7 +64,17 @@ describe('RegisterForm', () => {
     await submit();
 
     expect(register).toHaveBeenCalledWith({ username: 'alice_01', email: 'alice@example.com', password: 'Secret123' });
-    expect(push).toHaveBeenCalledWith('/polls');
+    expect(replace).toHaveBeenCalledWith('/polls');
+  });
+
+  it('returns to the page that asked the user to sign in, instead of the polls page', async () => {
+    register.mockResolvedValue(undefined);
+    const { fill, submit } = setup('/polls/create');
+
+    await fill(valid);
+    await submit();
+
+    expect(replace).toHaveBeenCalledExactlyOnceWith('/polls/create');
   });
 
   it('disables the button while the account is being created', async () => {
@@ -97,6 +107,6 @@ describe('RegisterForm', () => {
     await submit();
 
     expect(await screen.findByText('Email already in use')).toBeInTheDocument();
-    expect(push).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
   });
 });

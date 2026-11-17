@@ -17,6 +17,7 @@ function renderProtected() {
 
 beforeEach(() => {
   useAuthStore.setState({ status: 'idle', user: null, accessToken: null });
+  window.history.replaceState(null, '', '/');
 });
 
 describe('RequireAuth', () => {
@@ -47,6 +48,14 @@ describe('RequireAuth', () => {
 
     expect(router.replace).toHaveBeenCalledExactlyOnceWith('/sign-in');
     expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+  });
+
+  it('asks sign-in to bring the user back to this page, query string included', () => {
+    window.history.replaceState(null, '', '/polls/create?category=travel');
+    useAuthStore.setState({ status: 'unauthenticated' });
+    renderProtected();
+
+    expect(router.replace).toHaveBeenCalledExactlyOnceWith('/sign-in?next=%2Fpolls%2Fcreate%3Fcategory%3Dtravel');
   });
 
   it('redirects once the session check finishes and finds no session', () => {

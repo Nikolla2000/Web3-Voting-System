@@ -4,6 +4,7 @@ import { useEffect, type ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { useShallow } from 'zustand/react/shallow';
 import { useAuthStore } from '@/lib/store/auth-store';
+import { signInHrefForCurrentPage } from '@/lib/auth/return-to';
 
 interface RequireAuthProps {
   children: ReactNode;
@@ -15,7 +16,9 @@ export function RequireAuth({ children }: RequireAuthProps) {
 
   useEffect(() => {
     if (status === 'unauthenticated') {
-      router.replace('/sign-in');
+      // Read from window rather than usePathname/useSearchParams: this only runs client-side, and
+      // useSearchParams would force a Suspense boundary on every protected page.
+      router.replace(signInHrefForCurrentPage());
     }
   }, [status, router]);
 

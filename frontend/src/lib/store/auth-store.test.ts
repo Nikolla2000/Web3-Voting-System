@@ -161,5 +161,15 @@ describe('auth store', () => {
       expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'unauthenticated' });
       expect(assign).toHaveBeenCalledWith('/sign-in');
     });
+
+    it('brings the user back to the page they were on once they sign in again', async () => {
+      const assign = vi.fn();
+      vi.stubGlobal('location', { pathname: '/polls/abc', search: '?tab=results', hash: '', assign });
+      const { useAuthStore } = await setup();
+
+      useAuthStore.getState().handleSessionExpired();
+
+      expect(assign).toHaveBeenCalledWith('/sign-in?next=%2Fpolls%2Fabc%3Ftab%3Dresults');
+    });
   });
 });

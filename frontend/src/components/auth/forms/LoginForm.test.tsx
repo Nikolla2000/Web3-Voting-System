@@ -6,8 +6,8 @@ import { LoginForm } from '@/components/auth/forms/LoginForm';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { deferred } from '@/test/axios-adapter';
 
-const push = vi.fn();
-vi.mock('next/navigation', () => ({ useRouter: () => ({ push }) }));
+const replace = vi.fn();
+vi.mock('next/navigation', () => ({ useRouter: () => ({ replace }) }));
 
 const login = vi.fn();
 
@@ -22,9 +22,9 @@ function apiError(status: number, message: string) {
   });
 }
 
-function setup() {
+function setup(returnTo?: string | null) {
   const user = userEvent.setup();
-  render(<LoginForm />);
+  render(<LoginForm returnTo={returnTo} />);
   return {
     user,
     email: screen.getByLabelText('Email'),
@@ -78,7 +78,7 @@ describe('LoginForm', () => {
     expect(login).not.toHaveBeenCalled();
   });
 
-  it('logs in with the entered credentials and redirects home', async () => {
+  it('logs in with the entered credentials and redirects home, replacing the sign-in entry', async () => {
     login.mockResolvedValue(undefined);
     const { user, email, password, submit } = setup();
 
@@ -87,7 +87,18 @@ describe('LoginForm', () => {
     await submit();
 
     expect(login).toHaveBeenCalledWith({ email: 'alice@example.com', password: 'Secret123' });
-    expect(push).toHaveBeenCalledWith('/');
+    expect(replace).toHaveBeenCalledWith('/');
+  });
+
+  it('returns to the page that asked the user to sign in', async () => {
+    login.mockResolvedValue(undefined);
+    const { user, email, password, submit } = setup('/polls/create');
+
+    await user.type(email, 'alice@example.com');
+    await user.type(password, 'Secret123');
+    await submit();
+
+    expect(replace).toHaveBeenCalledExactlyOnceWith('/polls/create');
   });
 
   it('shows the server’s message on failure and stays on the page', async () => {
@@ -99,7 +110,7 @@ describe('LoginForm', () => {
     await submit();
 
     expect(await screen.findByText('Invalid email or password')).toBeInTheDocument();
-    expect(push).not.toHaveBeenCalled();
+    expect(replace).not.toHaveBeenCalled();
   });
 
   it('shows a rate-limit countdown when the gateway throttles the attempt', async () => {

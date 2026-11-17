@@ -58,11 +58,11 @@ describe('PollVoteCard', () => {
     expect(container).toBeEmptyDOMElement();
   });
 
-  it('asks signed-out visitors to sign in', () => {
+  it('asks signed-out visitors to sign in, and brings them back to this poll afterwards', () => {
     useAuthStore.setState({ status: 'unauthenticated' });
     render(<PollVoteCard poll={poll()} />);
 
-    expect(screen.getByRole('link', { name: 'Sign in to vote' })).toHaveAttribute('href', '/sign-in');
+    expect(screen.getByRole('link', { name: 'Sign in to vote' })).toHaveAttribute('href', '/sign-in?next=%2Fpolls%2Fpoll-1');
   });
 
   it('shows the earlier vote’s receipt when this browser already voted on the poll', () => {

@@ -11,7 +11,12 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { GoogleButton } from '@/components/auth/GoogleButton';
 
-export function RegisterForm() {
+interface RegisterFormProps {
+  /** A validated same-site path to go to afterwards (see safeReturnTo), or null for the default. */
+  returnTo?: string | null;
+}
+
+export function RegisterForm({ returnTo = null }: RegisterFormProps) {
   const router = useRouter();
   const registerUser = useAuthStore((state) => state.register);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -29,7 +34,8 @@ export function RegisterForm() {
     try {
       const { confirmPassword: _confirmPassword, ...payload } = values;
       await registerUser(payload);
-      router.push('/polls');
+      // replace, not push: Back shouldn't land on this form once signed in.
+      router.replace(returnTo ?? '/polls');
     } catch (error) {
       setServerError(getApiErrorMessage(error, 'Could not create your account. Please try again.'));
     }

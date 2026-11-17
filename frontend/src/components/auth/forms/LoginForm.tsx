@@ -11,7 +11,12 @@ import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
 import { GoogleButton } from '@/components/auth/GoogleButton';
 
-export function LoginForm() {
+interface LoginFormProps {
+  /** A validated same-site path to go to afterwards (see safeReturnTo), or null for the default. */
+  returnTo?: string | null;
+}
+
+export function LoginForm({ returnTo = null }: LoginFormProps) {
   const router = useRouter();
   const login = useAuthStore((state) => state.login);
   const [serverError, setServerError] = useState<string | null>(null);
@@ -28,7 +33,8 @@ export function LoginForm() {
     setServerError(null);
     try {
       await login(values);
-      router.push('/');
+      // replace, not push: Back shouldn't land on this form once signed in.
+      router.replace(returnTo ?? '/');
     } catch (error) {
       setServerError(getApiErrorMessage(error, 'Invalid email or password.'));
     }

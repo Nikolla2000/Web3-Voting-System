@@ -27,7 +27,7 @@ export function PollVoteCard({ poll }: PollVoteCardProps) {
   }
 
   if (authStatus !== 'authenticated') {
-    return <PollVoteSignInPrompt />;
+    return <PollVoteSignInPrompt pollId={poll.id} />;
   }
 
   if (votedTx) {
