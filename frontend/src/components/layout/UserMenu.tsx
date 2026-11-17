@@ -19,7 +19,11 @@ export function UserMenu({ user }: UserMenuProps) {
   return (
     <Menu.Root>
       <Menu.Trigger className="flex items-center gap-2.5 rounded-full border border-slate-200 bg-white py-1.5 pl-1.5 pr-3.5 text-sm font-medium text-slate-700 shadow-[0_2px_10px_-4px_rgba(15,23,42,0.08)] transition-colors hover:border-indigo-200 cursor-pointer">
-        <ProfileAvatarPreview avatarUrl={user.avatar ?? undefined} username={user.username} size={28} />
+        {/* Decorative here: the username beside it names the button. Otherwise screen readers
+            hear the initials or "alice's avatar" run into the name ("ALalice"). */}
+        <span aria-hidden="true" className="flex">
+          <ProfileAvatarPreview avatarUrl={user.avatar ?? undefined} username={user.username} size={28} />
+        </span>
         {user.username}
       </Menu.Trigger>
 

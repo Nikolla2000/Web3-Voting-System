@@ -24,7 +24,7 @@ export function RequireAuth({ children }: RequireAuthProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div role="status" aria-label="Checking your session" className="flex flex-col gap-4">
       <div className="h-8 w-1/3 animate-pulse rounded bg-slate-100" />
       <div className="h-64 animate-pulse rounded-3xl border border-indigo-100/70 bg-white/80" />
     </div>
