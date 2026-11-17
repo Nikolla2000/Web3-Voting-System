@@ -42,17 +42,23 @@ export function PollsToolbar({
             type="text"
             value={query}
             onChange={(event) => onQueryChange(event.target.value)}
+            aria-label="Search polls by title"
             placeholder="Search polls by title…"
             className="w-full rounded-full border border-slate-200 bg-white/80 py-2 pl-9 pr-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none backdrop-blur-sm transition-colors focus:border-indigo-300 sm:w-64"
           />
         </div>
 
-        <div className="flex items-center gap-1 rounded-full border border-slate-200 bg-white/60 p-1 backdrop-blur-sm">
+        <div
+          role="group"
+          aria-label="Filter by status"
+          className="flex items-center gap-1 rounded-full border border-slate-200 bg-white/60 p-1 backdrop-blur-sm"
+        >
           {STATUS_FILTERS.map((filter) => (
             <button
               key={filter.value}
               type="button"
               onClick={() => onStatusChange(filter.value)}
+              aria-pressed={status === filter.value}
               className={cn(
                 'rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
                 status === filter.value

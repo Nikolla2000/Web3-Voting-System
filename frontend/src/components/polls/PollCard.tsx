@@ -37,7 +37,9 @@ export function PollCard({ poll }: PollCardProps) {
       <div className="relative aspect-[16/9] w-full overflow-hidden">
         <img
           src={poll.imageUrl}
-          alt={poll.title}
+          // Decorative: the title is the heading right below, and repeating it as alt text made
+          // screen readers read every card link's title twice.
+          alt=""
           loading="lazy"
           decoding="async"
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"

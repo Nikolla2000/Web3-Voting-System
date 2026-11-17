@@ -25,6 +25,8 @@ export function PollsAiSearchBar({ onSearch, onClear, isSearching, isActive }: P
 
   return (
     <form
+      role="search"
+      aria-label="AI search"
       onSubmit={handleSubmit}
       className="flex flex-col gap-2 rounded-2xl border border-indigo-100 bg-white/60 p-4 backdrop-blur-sm sm:flex-row sm:items-center"
     >
@@ -34,6 +36,7 @@ export function PollsAiSearchBar({ onSearch, onClear, isSearching, isActive }: P
           type="text"
           value={value}
           onChange={(event) => setValue(event.target.value)}
+          aria-label="Describe the polls you are looking for"
           placeholder="Or ask in plain English, e.g. “climate polls from last month”"
           className="w-full rounded-full border border-slate-200 bg-white/80 py-2 pl-9 pr-4 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-colors focus:border-indigo-300"
         />
