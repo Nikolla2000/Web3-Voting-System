@@ -1,6 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  CopyObjectCommand,
   DeleteObjectCommand,
   HeadObjectCommand,
   PutObjectCommand,
@@ -33,9 +34,8 @@ export class R2StorageService {
       endpoint: this.configService.getOrThrow<string>('r2.endpoint'),
       credentials: {
         accessKeyId: this.configService.getOrThrow<string>('r2.accessKeyId'),
-        secretAccessKey: this.configService.getOrThrow<string>(
-          'r2.secretAccessKey',
-        ),
+        secretAccessKey:
+          this.configService.getOrThrow<string>('r2.secretAccessKey'),
       },
     });
   }
@@ -85,6 +85,17 @@ export class R2StorageService {
     );
 
     return this.getPublicUrl(key);
+  }
+
+  /** Copies an object within the bucket. Throws (e.g. `NoSuchKey`) if the source is missing. */
+  async copyObject(sourceKey: string, destinationKey: string): Promise<void> {
+    await this.client.send(
+      new CopyObjectCommand({
+        Bucket: this.bucket,
+        CopySource: `${this.bucket}/${encodeURIComponent(sourceKey).replace(/%2F/g, '/')}`,
+        Key: destinationKey,
+      }),
+    );
   }
 
   /** Confirms an object was actually uploaded before we trust it as someone's avatar. */
