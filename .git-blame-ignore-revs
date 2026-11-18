@@ -1,0 +1,6 @@
+# Formatting-only commits, skipped by `git blame`. Locally: git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+# Add a Prettier config to the frontend and reformat it
+f8c220b06befd548393461cfc72f5f43083c29d5
+# Apply the backend's existing Prettier config across apps and libs
+f8d9ccf85f6ab6fe35bda7cf5dd9f4b17290803c

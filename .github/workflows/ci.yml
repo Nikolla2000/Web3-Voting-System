@@ -70,6 +70,10 @@ jobs:
           for app in identity polls blockchain; do
             (cd "apps/$app" && npx prisma generate)
           done
+      # Also enforces Prettier, via eslint-plugin-prettier. Runs after
+      # generation because the type-aware rules need the Prisma client types.
+      - name: Lint
+        run: npx eslint "{src,apps,libs,test}/**/*.ts"
       - name: Typecheck
         run: npx tsc --noEmit -p tsconfig.json
       - name: Unit tests
@@ -91,6 +95,10 @@ jobs:
           cache: npm
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Check formatting
+        run: npm run format:check
       - name: Typecheck
         run: npx tsc --noEmit
       - name: Unit tests
