@@ -43,7 +43,12 @@ export function SetPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} noValidate className="flex flex-col gap-5">
-      <Input label="New password" type="password" error={errors.newPassword?.message} {...register('newPassword')} />
+      <Input
+        label="New password"
+        type="password"
+        error={errors.newPassword?.message}
+        {...register('newPassword')}
+      />
       <Input
         label="Confirm new password"
         type="password"
@@ -51,9 +56,13 @@ export function SetPasswordForm() {
         {...register('confirmNewPassword')}
       />
 
-      {submitError && <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>}
+      {submitError && (
+        <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>
+      )}
       {successMessage && !submitError && (
-        <p className="rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-600">{successMessage}</p>
+        <p className="rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-600">
+          {successMessage}
+        </p>
       )}
 
       <Button type="submit" variant="primary" className="self-start" disabled={mutation.isPending}>

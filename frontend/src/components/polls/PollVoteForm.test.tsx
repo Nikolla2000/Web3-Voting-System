@@ -65,7 +65,11 @@ describe('PollVoteForm', () => {
 
   it('locks the form and shows the current step while a vote is in flight', () => {
     vi.mocked(useCastVote).mockReturnValue(
-      hookState({ isPending: true, step: 'proving', stepLabel: 'Generating zero-knowledge proof…' }),
+      hookState({
+        isPending: true,
+        step: 'proving',
+        stepLabel: 'Generating zero-knowledge proof…',
+      }),
     );
     render(<PollVoteForm poll={poll} />);
 
@@ -77,7 +81,9 @@ describe('PollVoteForm', () => {
   });
 
   it('shows a readable error after a failed vote and lets the user retry', () => {
-    vi.mocked(useCastVote).mockReturnValue(hookState({ isError: true, error: new Error('proof failed') }));
+    vi.mocked(useCastVote).mockReturnValue(
+      hookState({ isError: true, error: new Error('proof failed') }),
+    );
     render(<PollVoteForm poll={poll} />);
 
     expect(screen.getByText('Something went wrong. Please try again.')).toBeInTheDocument();
@@ -85,10 +91,15 @@ describe('PollVoteForm', () => {
   });
 
   it('replaces the form with a success view linking to the transaction', () => {
-    vi.mocked(useCastVote).mockReturnValue(hookState({ isSuccess: true, transactionHash: '0xdeadbeef' }));
+    vi.mocked(useCastVote).mockReturnValue(
+      hookState({ isSuccess: true, transactionHash: '0xdeadbeef' }),
+    );
     render(<PollVoteForm poll={poll} />);
 
     expect(screen.queryByRole('button', { name: 'Cast vote' })).not.toBeInTheDocument();
-    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://sepolia.etherscan.io/tx/0xdeadbeef');
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      'https://sepolia.etherscan.io/tx/0xdeadbeef',
+    );
   });
 });

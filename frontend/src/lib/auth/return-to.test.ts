@@ -44,7 +44,9 @@ describe('safeReturnTo', () => {
 
 describe('authHref', () => {
   it('encodes the return path as next', () => {
-    expect(authHref('/sign-in', '/polls/abc?tab=results')).toBe('/sign-in?next=%2Fpolls%2Fabc%3Ftab%3Dresults');
+    expect(authHref('/sign-in', '/polls/abc?tab=results')).toBe(
+      '/sign-in?next=%2Fpolls%2Fabc%3Ftab%3Dresults',
+    );
     expect(authHref('/register', '/profile')).toBe('/register?next=%2Fprofile');
   });
 

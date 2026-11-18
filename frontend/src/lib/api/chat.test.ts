@@ -7,11 +7,16 @@ function sse(chunks: Array<string | Uint8Array>, init: ResponseInit = {}) {
   const encoder = new TextEncoder();
   const body = new ReadableStream<Uint8Array>({
     start(controller) {
-      for (const chunk of chunks) controller.enqueue(typeof chunk === 'string' ? encoder.encode(chunk) : chunk);
+      for (const chunk of chunks)
+        controller.enqueue(typeof chunk === 'string' ? encoder.encode(chunk) : chunk);
       controller.close();
     },
   });
-  return new Response(body, { status: 200, headers: { 'Content-Type': 'text/event-stream' }, ...init });
+  return new Response(body, {
+    status: 200,
+    headers: { 'Content-Type': 'text/event-stream' },
+    ...init,
+  });
 }
 
 const delta = (text: string) => `data: ${JSON.stringify({ textDelta: text })}\n\n`;
@@ -36,7 +41,8 @@ async function setup(accessToken: string | null = 'access-1') {
   const handleSessionExpired = vi.fn();
   useAuthStore.setState({ accessToken, handleSessionExpired });
 
-  const authOf = (call: number) => new Headers(fetchMock.mock.calls[call]![1]!.headers).get('Authorization');
+  const authOf = (call: number) =>
+    new Headers(fetchMock.mock.calls[call]![1]!.headers).get('Authorization');
   return { streamChat, apiClient, useAuthStore, fetchMock, handleSessionExpired, authOf };
 }
 
@@ -48,14 +54,20 @@ describe('streamChat', () => {
   it('POSTs the message and history to the gateway with the access token', async () => {
     const { streamChat, fetchMock, authOf } = await setup();
     fetchMock.mockResolvedValue(sse([DONE]));
-    const history = [{ role: 'user' as const, content: 'hi' }, { role: 'model' as const, content: 'hello' }];
+    const history = [
+      { role: 'user' as const, content: 'hi' },
+      { role: 'model' as const, content: 'hello' },
+    ];
 
     await collect(streamChat('Which poll is most popular?', history));
 
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('https://api.example/polls/chat');
     expect(init!.method).toBe('POST');
-    expect(JSON.parse(init!.body as string)).toEqual({ message: 'Which poll is most popular?', history });
+    expect(JSON.parse(init!.body as string)).toEqual({
+      message: 'Which poll is most popular?',
+      history,
+    });
     expect(authOf(0)).toBe('Bearer access-1');
   });
 
@@ -70,7 +82,9 @@ describe('streamChat', () => {
     const { streamChat, fetchMock } = await setup();
     const all = delta('one') + delta('two') + delta('three') + DONE;
     // Split at awkward places: mid-JSON, mid-separator, and two whole events in one chunk.
-    fetchMock.mockResolvedValue(sse([all.slice(0, 9), all.slice(9, 27), all.slice(27, 28), all.slice(28)]));
+    fetchMock.mockResolvedValue(
+      sse([all.slice(0, 9), all.slice(9, 27), all.slice(27, 28), all.slice(28)]),
+    );
 
     expect(await collect(streamChat('q', []))).toEqual(['one', 'two', 'three']);
   });
@@ -100,7 +114,12 @@ describe('streamChat', () => {
 
   it('throws the gateway’s error event, after yielding what came before it', async () => {
     const { streamChat, fetchMock } = await setup();
-    fetchMock.mockResolvedValue(sse([delta('partial'), `data: ${JSON.stringify({ error: 'The assistant hit an error.' })}\n\n`]));
+    fetchMock.mockResolvedValue(
+      sse([
+        delta('partial'),
+        `data: ${JSON.stringify({ error: 'The assistant hit an error.' })}\n\n`,
+      ]),
+    );
     const seen: string[] = [];
 
     await expect(
@@ -127,7 +146,9 @@ describe('streamChat', () => {
     const { streamChat, fetchMock } = await setup();
     fetchMock.mockResolvedValue(makeResponse());
 
-    await expect(collect(streamChat('q', []))).rejects.toThrow('The assistant is unavailable right now.');
+    await expect(collect(streamChat('q', []))).rejects.toThrow(
+      'The assistant is unavailable right now.',
+    );
   });
 
   describe('expired access token', () => {
@@ -137,7 +158,9 @@ describe('streamChat', () => {
       const { streamChat, apiClient, useAuthStore, fetchMock, authOf } = await setup('expired');
       apiClient.defaults.adapter = (async (config: InternalAxiosRequestConfig) =>
         respond(config, 200, { data: { accessToken: 'fresh' } })) as never;
-      fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 })).mockResolvedValueOnce(sse([delta('ok'), DONE]));
+      fetchMock
+        .mockResolvedValueOnce(new Response(null, { status: 401 }))
+        .mockResolvedValueOnce(sse([delta('ok'), DONE]));
 
       expect(await collect(streamChat('q', []))).toEqual(['ok']);
       expect(authOf(0)).toBe('Bearer expired');
@@ -153,7 +176,9 @@ describe('streamChat', () => {
       apiClient.defaults.adapter = adapter as never;
       fetchMock.mockResolvedValue(new Response(null, { status: 401 }));
 
-      await expect(collect(streamChat('q', []))).rejects.toThrow('The assistant is unavailable right now.');
+      await expect(collect(streamChat('q', []))).rejects.toThrow(
+        'The assistant is unavailable right now.',
+      );
       expect(fetchMock).toHaveBeenCalledTimes(2);
       expect(adapter).toHaveBeenCalledTimes(1);
     });

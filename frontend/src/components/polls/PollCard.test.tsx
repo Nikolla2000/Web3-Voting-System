@@ -36,7 +36,11 @@ describe('PollCard', () => {
   });
 
   it('shows at most four options and counts the rest', () => {
-    const options = ['A', 'B', 'C', 'D', 'E', 'F'].map((label, i) => ({ id: `o${i}`, label, votes: 0 }));
+    const options = ['A', 'B', 'C', 'D', 'E', 'F'].map((label, i) => ({
+      id: `o${i}`,
+      label,
+      votes: 0,
+    }));
     render(<PollCard poll={pollFixture({ options })} />);
 
     expect(screen.getByText('D')).toBeInTheDocument();
@@ -51,7 +55,8 @@ describe('PollCard', () => {
     ];
     render(<PollCard poll={pollFixture({ options })} />);
 
-    for (const label of ['Yes', 'No']) expect(screen.getByText(label)).not.toHaveClass('font-semibold');
+    for (const label of ['Yes', 'No'])
+      expect(screen.getByText(label)).not.toHaveClass('font-semibold');
     expect(screen.getAllByText('0%')).toHaveLength(2);
   });
 

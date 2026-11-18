@@ -99,7 +99,9 @@ export class MockGateway {
   duplicateMatches: { pollId: string; title: string; similarity: number }[] = [];
   neutralityIssues: { text: string; explanation: string; suggestion: string }[] = [];
   searchResults: (query: string) => { pollId: string; similarity: number }[] = () => [];
-  chatReply: (message: string, history: unknown[]) => string[] = () => ['I can only talk about polls.'];
+  chatReply: (message: string, history: unknown[]) => string[] = () => [
+    'I can only talk about polls.',
+  ];
 
   private readonly accessTokens = new Map<string, string>();
   private readonly refreshTokens = new Map<string, string>();
@@ -127,7 +129,11 @@ export class MockGateway {
     return user;
   }
 
-  addPoll(overrides: Partial<Omit<MockPoll, 'options'>> & { options?: (string | [string, number])[] } = {}): MockPoll {
+  addPoll(
+    overrides: Partial<Omit<MockPoll, 'options'>> & {
+      options?: (string | [string, number])[];
+    } = {},
+  ): MockPoll {
     const { options = ['Lisbon', 'Prague'], ...rest } = overrides;
     const poll: MockPoll = {
       id: randomUUID(),
@@ -153,7 +159,9 @@ export class MockGateway {
   async signIn(context: BrowserContext, user: MockUser) {
     const refresh = token('refresh');
     this.refreshTokens.set(refresh, user.id);
-    await context.addCookies([{ name: REFRESH_COOKIE, value: refresh, url: GATEWAY_URL, httpOnly: true, sameSite: 'Lax' }]);
+    await context.addCookies([
+      { name: REFRESH_COOKIE, value: refresh, url: GATEWAY_URL, httpOnly: true, sameSite: 'Lax' },
+    ]);
   }
 
   /** Every access token issued so far now gets a 401, as when the 15-minute JWT expires. */
@@ -162,7 +170,10 @@ export class MockGateway {
   }
 
   requestsTo(method: string, path: string | RegExp) {
-    return this.requests.filter((r) => r.method === method && (typeof path === 'string' ? r.path === path : path.test(r.path)));
+    return this.requests.filter(
+      (r) =>
+        r.method === method && (typeof path === 'string' ? r.path === path : path.test(r.path)),
+    );
   }
 
   // ---- wiring -----------------------------------------------------------------------------
@@ -177,7 +188,8 @@ export class MockGateway {
       'access-control-allow-origin': APP_URL,
       'access-control-allow-credentials': 'true',
       'access-control-allow-methods': 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
-      'access-control-allow-headers': request.headers()['access-control-request-headers'] ?? 'content-type,authorization',
+      'access-control-allow-headers':
+        request.headers()['access-control-request-headers'] ?? 'content-type,authorization',
       // As the real gateway's enableCors does, so the 429 countdown can read it.
       'access-control-expose-headers': 'Retry-After',
     };
@@ -188,8 +200,15 @@ export class MockGateway {
     const headers = await request.allHeaders();
     const body = request.postDataBuffer();
     let json: unknown = null;
-    if (body && headers['content-type']?.includes('application/json')) json = JSON.parse(body.toString('utf8'));
-    const recorded = { method: request.method(), path: url.pathname.replace(prefix, '') || '/', headers, body, json };
+    if (body && headers['content-type']?.includes('application/json'))
+      json = JSON.parse(body.toString('utf8'));
+    const recorded = {
+      method: request.method(),
+      path: url.pathname.replace(prefix, '') || '/',
+      headers,
+      body,
+      json,
+    };
     return recorded;
   }
 
@@ -208,7 +227,10 @@ export class MockGateway {
 
       const bearer = req.headers['authorization']?.replace(/^Bearer /, '');
       const userId = bearer ? (this.accessTokens.get(bearer) ?? null) : null;
-      const reply = auth && !userId ? error(401, 'Unauthorized') : await handler({ req, params: match.slice(1) as Ctx['params'], query, userId });
+      const reply =
+        auth && !userId
+          ? error(401, 'Unauthorized')
+          : await handler({ req, params: match.slice(1) as Ctx['params'], query, userId });
 
       const status = reply.status ?? 200;
       return route.fulfill({
@@ -220,7 +242,11 @@ export class MockGateway {
     }
 
     this.unhandled.push(`${req.method} ${req.path}`);
-    return route.fulfill({ status: 501, headers: cors, body: '{"message":"No mock for this route"}' });
+    return route.fulfill({
+      status: 501,
+      headers: cors,
+      body: '{"message":"No mock for this route"}',
+    });
   }
 
   private async handleR2(route: Route) {
@@ -231,8 +257,12 @@ export class MockGateway {
     const key = req.path.replace(/^\//, '');
 
     if (req.method === 'PUT') {
-      if (!new URL(request.url()).searchParams.has('X-Amz-Signature')) return route.fulfill({ status: 403, headers: cors });
-      this.r2Objects.set(key, { contentType: req.headers['content-type'] ?? '', body: req.body ?? Buffer.alloc(0) });
+      if (!new URL(request.url()).searchParams.has('X-Amz-Signature'))
+        return route.fulfill({ status: 403, headers: cors });
+      this.r2Objects.set(key, {
+        contentType: req.headers['content-type'] ?? '',
+        body: req.body ?? Buffer.alloc(0),
+      });
       this.requests.push({ ...req, path: `R2 ${req.path}` });
       return route.fulfill({ status: 200, headers: cors });
     }
@@ -303,13 +333,16 @@ export class MockGateway {
   private defineRoutes() {
     this.on('POST', '/auth/register', ({ req }) => {
       const { username, email, password } = req.json as Record<string, string>;
-      if ([...this.users.values()].some((u) => u.email === email)) return error(409, 'Email is already registered');
+      if ([...this.users.values()].some((u) => u.email === email))
+        return error(409, 'Email is already registered');
       return { ...this.startSession(this.addUser({ username, email, password })), status: 201 };
     });
 
     this.on('POST', '/auth/login', ({ req }) => {
       const { email, password } = req.json as Record<string, string>;
-      const user = [...this.users.values()].find((u) => u.email === email && u.password === password);
+      const user = [...this.users.values()].find(
+        (u) => u.email === email && u.password === password,
+      );
       return user ? this.startSession(user) : error(401, 'Invalid email or password');
     });
 
@@ -339,13 +372,20 @@ export class MockGateway {
 
     this.authed('POST', '/users/me/avatar/upload-url', ({ userId }) => {
       const key = `avatars/${userId}/${randomUUID()}.png`;
-      return { data: { uploadUrl: `${R2_URL}/${key}?X-Amz-Signature=${token('sig')}`, key, publicUrl: `${R2_URL}/${key}` } };
+      return {
+        data: {
+          uploadUrl: `${R2_URL}/${key}?X-Amz-Signature=${token('sig')}`,
+          key,
+          publicUrl: `${R2_URL}/${key}`,
+        },
+      };
     });
 
     this.authed('PATCH', '/users/me/avatar', ({ req, userId }) => {
       const { key } = req.json as { key: string };
       // identity checks the key is the user's and that the object really was uploaded.
-      if (!key.startsWith(`avatars/${userId}/`) || !this.r2Objects.has(key)) return error(400, 'Avatar upload not found');
+      if (!key.startsWith(`avatars/${userId}/`) || !this.r2Objects.has(key))
+        return error(400, 'Avatar upload not found');
       const user = this.user(userId);
       user.avatar = `${R2_URL}/${key}`;
       return { data: this.profile(user) };
@@ -363,17 +403,23 @@ export class MockGateway {
 
     this.authed('POST', '/polls/images', ({ req }) => {
       // Rejected unless it really is multipart: a serialised body would never carry the file.
-      if (!/^multipart\/form-data; boundary=/.test(req.headers['content-type'] ?? '')) return error(400, 'File is required');
+      if (!/^multipart\/form-data; boundary=/.test(req.headers['content-type'] ?? ''))
+        return error(400, 'File is required');
       return { status: 201, data: { url: `${R2_URL}/polls/${randomUUID()}.png` } };
     });
 
     this.authed('POST', '/polls', ({ req, userId }) => {
-      const body = req.json as Omit<MockPoll, 'options' | 'id' | 'creatorId' | 'contractAddress'> & { options: string[] };
+      const body = req.json as Omit<
+        MockPoll,
+        'options' | 'id' | 'creatorId' | 'contractAddress'
+      > & { options: string[] };
       const poll = this.addPoll({ ...body, creatorId: userId!, contractAddress: null });
       return { status: 201, data: this.pollResponse(poll) };
     });
 
-    this.authed('POST', '/polls/duplicate-check', () => ({ data: { matches: this.duplicateMatches } }));
+    this.authed('POST', '/polls/duplicate-check', () => ({
+      data: { matches: this.duplicateMatches },
+    }));
     this.authed('POST', '/polls/neutrality-check', () => ({
       data: { isNeutral: this.neutralityIssues.length === 0, issues: this.neutralityIssues },
     }));
@@ -384,8 +430,13 @@ export class MockGateway {
     this.authed('POST', '/polls/chat', ({ req }) => {
       const { message, history } = req.json as { message: string; history: unknown[] };
       const deltas = this.chatReply(message, history);
-      const events = deltas.map((textDelta) => `event: message\ndata: ${JSON.stringify({ textDelta })}\n\n`);
-      return { raw: `${events.join('')}event: done\ndata: {}\n\n`, contentType: 'text/event-stream' };
+      const events = deltas.map(
+        (textDelta) => `event: message\ndata: ${JSON.stringify({ textDelta })}\n\n`,
+      );
+      return {
+        raw: `${events.join('')}event: done\ndata: {}\n\n`,
+        contentType: 'text/event-stream',
+      };
     });
 
     // ---- voting: what the blockchain service does, minus the chain ----
@@ -396,12 +447,16 @@ export class MockGateway {
       if (!members.includes(identityCommitment)) members.push(identityCommitment);
       this.groups.set(pollId, members);
       // Kept to one member per poll: a one-leaf LeanIMT's root is the leaf itself.
-      return { status: 201, data: { root: members[0], index: members.indexOf(identityCommitment) } };
+      return {
+        status: 201,
+        data: { root: members[0], index: members.indexOf(identityCommitment) },
+      };
     });
 
     this.authed('GET', '/polls/:id/group/merkle-proof', ({ params: [pollId], query }) => {
       const commitment = query.get('identityCommitment')!;
-      if (!this.groups.get(pollId)?.includes(commitment)) return error(404, 'Not a member of this poll');
+      if (!this.groups.get(pollId)?.includes(commitment))
+        return error(404, 'Not a member of this poll');
       // No `siblings` key at all: a one-member proof's siblings are [], which proto3 drops.
       return { data: { root: commitment, index: 0 } };
     });
@@ -410,11 +465,16 @@ export class MockGateway {
       const proof = req.json as SemaphoreProof;
       const poll = this.poll(pollId);
       if (!poll) return error(404, 'Poll not found');
-      if (!this.groups.get(pollId)?.includes(proof.merkleTreeRoot)) return error(400, 'Unknown Merkle root');
-      if (proof.scope !== uuidToFieldElement(pollId).toString()) return error(400, 'Proof is for a different poll');
-      const option = poll.options.find((o) => uuidToFieldElement(o.id).toString() === proof.message);
+      if (!this.groups.get(pollId)?.includes(proof.merkleTreeRoot))
+        return error(400, 'Unknown Merkle root');
+      if (proof.scope !== uuidToFieldElement(pollId).toString())
+        return error(400, 'Proof is for a different poll');
+      const option = poll.options.find(
+        (o) => uuidToFieldElement(o.id).toString() === proof.message,
+      );
       if (!option) return error(400, 'Proof is for an unknown option');
-      if (this.nullifiers.has(proof.nullifier)) return error(409, 'This identity has already voted');
+      if (this.nullifiers.has(proof.nullifier))
+        return error(409, 'This identity has already voted');
       if (!(await verifyProof(proof))) return error(400, 'Invalid proof');
 
       this.nullifiers.add(proof.nullifier);

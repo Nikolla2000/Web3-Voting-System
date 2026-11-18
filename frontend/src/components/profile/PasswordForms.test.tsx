@@ -28,7 +28,9 @@ describe('ChangePasswordForm', () => {
 
     await submit();
 
-    await vi.waitFor(() => expect(current).toHaveAccessibleDescription('Current password is required'));
+    await vi.waitFor(() =>
+      expect(current).toHaveAccessibleDescription('Current password is required'),
+    );
     expect(next).toBeInvalid();
     expect(confirm).toHaveAccessibleDescription('Please confirm your new password');
     expect(changePassword).not.toHaveBeenCalled();
@@ -72,7 +74,9 @@ describe('ChangePasswordForm', () => {
   });
 
   it('replaces an earlier success message with the error from a later attempt', async () => {
-    vi.mocked(changePassword).mockResolvedValueOnce().mockRejectedValueOnce(apiError(400, 'Password was used recently'));
+    vi.mocked(changePassword)
+      .mockResolvedValueOnce()
+      .mockRejectedValueOnce(apiError(400, 'Password was used recently'));
     const { fill, submit } = setup();
 
     await fill();

@@ -10,7 +10,14 @@ interface SectionCardProps {
   children: ReactNode;
 }
 
-export function SectionCard({ eyebrow, title, description, icon: Icon, tone = 'default', children }: SectionCardProps) {
+export function SectionCard({
+  eyebrow,
+  title,
+  description,
+  icon: Icon,
+  tone = 'default',
+  children,
+}: SectionCardProps) {
   const isDanger = tone === 'danger';
 
   return (
@@ -35,10 +42,14 @@ export function SectionCard({ eyebrow, title, description, icon: Icon, tone = 'd
           >
             {eyebrow}
           </span>
-          <h2 className={`font-display text-lg font-semibold ${isDanger ? 'text-red-600' : 'text-slate-900'}`}>
+          <h2
+            className={`font-display text-lg font-semibold ${isDanger ? 'text-red-600' : 'text-slate-900'}`}
+          >
             {title}
           </h2>
-          {description && <p className="mt-1 text-sm leading-relaxed text-slate-500">{description}</p>}
+          {description && (
+            <p className="mt-1 text-sm leading-relaxed text-slate-500">{description}</p>
+          )}
         </div>
       </div>
 

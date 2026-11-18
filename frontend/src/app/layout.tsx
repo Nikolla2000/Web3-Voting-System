@@ -28,11 +28,7 @@ export const metadata: Metadata = {
     'A decentralized voting platform where every ballot is cast, counted and verified on-chain.',
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body

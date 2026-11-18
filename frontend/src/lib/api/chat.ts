@@ -57,7 +57,10 @@ export async function* streamChat(message: string, history: ChatTurn[]): AsyncGe
 
     for (const rawEvent of events) {
       const lines = rawEvent.split('\n');
-      const eventName = lines.find((line) => line.startsWith('event:'))?.slice('event:'.length).trim();
+      const eventName = lines
+        .find((line) => line.startsWith('event:'))
+        ?.slice('event:'.length)
+        .trim();
       const dataLine = lines.find((line) => line.startsWith('data:'));
       if (!dataLine) continue;
 

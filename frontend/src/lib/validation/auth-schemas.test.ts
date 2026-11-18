@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest';
-import { loginSchema, registerSchema, type RegisterFormValues } from '@/lib/validation/auth-schemas';
+import {
+  loginSchema,
+  registerSchema,
+  type RegisterFormValues,
+} from '@/lib/validation/auth-schemas';
 
 const validRegistration: RegisterFormValues = {
   username: 'alice_01',
@@ -43,22 +47,35 @@ describe('registerSchema', () => {
 
   it('accepts the username length boundaries (3 and 20)', () => {
     expect(errorFor({ ...validRegistration, username: 'abc' }, 'username')).toBeUndefined();
-    expect(errorFor({ ...validRegistration, username: 'a'.repeat(20) }, 'username')).toBeUndefined();
+    expect(
+      errorFor({ ...validRegistration, username: 'a'.repeat(20) }, 'username'),
+    ).toBeUndefined();
   });
 
   it.each([
     ['Short1', 'Password must be at least 8 characters'],
     [`Aa1${'x'.repeat(30)}`, 'Password must be under 32 characters'],
-    ['alllower1', 'Password must contain at least one uppercase letter, one lowercase letter and one number'],
-    ['ALLUPPER1', 'Password must contain at least one uppercase letter, one lowercase letter and one number'],
-    ['NoDigitsHere', 'Password must contain at least one uppercase letter, one lowercase letter and one number'],
+    [
+      'alllower1',
+      'Password must contain at least one uppercase letter, one lowercase letter and one number',
+    ],
+    [
+      'ALLUPPER1',
+      'Password must contain at least one uppercase letter, one lowercase letter and one number',
+    ],
+    [
+      'NoDigitsHere',
+      'Password must contain at least one uppercase letter, one lowercase letter and one number',
+    ],
   ])('rejects weak password %j', (password, message) => {
-    expect(errorFor({ ...validRegistration, password, confirmPassword: password }, 'password')).toBe(message);
+    expect(
+      errorFor({ ...validRegistration, password, confirmPassword: password }, 'password'),
+    ).toBe(message);
   });
 
   it('reports a confirmation mismatch on confirmPassword (where the form shows it)', () => {
-    expect(errorFor({ ...validRegistration, confirmPassword: 'Secret124' }, 'confirmPassword')).toBe(
-      'Passwords do not match',
-    );
+    expect(
+      errorFor({ ...validRegistration, confirmPassword: 'Secret124' }, 'confirmPassword'),
+    ).toBe('Passwords do not match');
   });
 });

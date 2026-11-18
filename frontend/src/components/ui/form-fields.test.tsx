@@ -4,7 +4,13 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { Textarea } from '@/components/ui/Textarea';
 
-type FieldProps = { label: string; name?: string; id?: string; error?: string; 'aria-describedby'?: string };
+type FieldProps = {
+  label: string;
+  name?: string;
+  id?: string;
+  error?: string;
+  'aria-describedby'?: string;
+};
 
 const fields: Array<[string, (props: FieldProps) => React.ReactElement]> = [
   ['Input', (props) => <Input {...props} />],
@@ -33,11 +39,18 @@ describe.each(fields)('%s accessibility', (_, renderField) => {
     render(
       <>
         <p id="hint">Shown on the poll card</p>
-        {renderField({ label: 'Title', name: 'title', error: 'Too short', 'aria-describedby': 'hint' })}
+        {renderField({
+          label: 'Title',
+          name: 'title',
+          error: 'Too short',
+          'aria-describedby': 'hint',
+        })}
       </>,
     );
 
-    expect(screen.getByLabelText('Title')).toHaveAccessibleDescription('Shown on the poll card Too short');
+    expect(screen.getByLabelText('Title')).toHaveAccessibleDescription(
+      'Shown on the poll card Too short',
+    );
   });
 
   it('still links label and error when given neither id nor name', () => {

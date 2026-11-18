@@ -4,7 +4,10 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { changePasswordSchema, type ChangePasswordFormValues } from '@/lib/validation/profile-schemas';
+import {
+  changePasswordSchema,
+  type ChangePasswordFormValues,
+} from '@/lib/validation/profile-schemas';
 import { changePassword } from '@/lib/api/users';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { Input } from '@/components/ui/Input';
@@ -49,7 +52,12 @@ export function ChangePasswordForm() {
         error={errors.currentPassword?.message}
         {...register('currentPassword')}
       />
-      <Input label="New password" type="password" error={errors.newPassword?.message} {...register('newPassword')} />
+      <Input
+        label="New password"
+        type="password"
+        error={errors.newPassword?.message}
+        {...register('newPassword')}
+      />
       <Input
         label="Confirm new password"
         type="password"
@@ -57,12 +65,21 @@ export function ChangePasswordForm() {
         {...register('confirmNewPassword')}
       />
 
-      {submitError && <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>}
+      {submitError && (
+        <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>
+      )}
       {successMessage && !submitError && (
-        <p className="rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-600">{successMessage}</p>
+        <p className="rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-600">
+          {successMessage}
+        </p>
       )}
 
-      <Button type="submit" variant="primary" className="self-start cursor-pointer" disabled={mutation.isPending}>
+      <Button
+        type="submit"
+        variant="primary"
+        className="self-start cursor-pointer"
+        disabled={mutation.isPending}
+      >
         {mutation.isPending ? 'Updating…' : 'Update password'}
       </Button>
     </form>

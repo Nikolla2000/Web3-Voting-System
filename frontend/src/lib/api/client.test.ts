@@ -55,7 +55,10 @@ describe('apiClient request interceptor', () => {
   });
 
   it('reads the token at request time, not at client creation', async () => {
-    const { apiClient, useAuthStore, adapterSpy } = await setup(async (config) => respond(config, 200), null);
+    const { apiClient, useAuthStore, adapterSpy } = await setup(
+      async (config) => respond(config, 200),
+      null,
+    );
 
     useAuthStore.setState({ accessToken: 'set-later' });
     await apiClient.get('/polls');
@@ -66,8 +69,11 @@ describe('apiClient request interceptor', () => {
 
 describe('apiClient 401 refresh-and-retry', () => {
   it('refreshes once, stores the new token, and retries the original request with it', async () => {
-    const { apiClient, useAuthStore, callsTo, handleSessionExpired } = await setup(async (config) =>
-      config.url === '/auth/refresh' ? respond(config, 200, REFRESH_OK) : protectedResource(config),
+    const { apiClient, useAuthStore, callsTo, handleSessionExpired } = await setup(
+      async (config) =>
+        config.url === '/auth/refresh'
+          ? respond(config, 200, REFRESH_OK)
+          : protectedResource(config),
     );
 
     const res = await apiClient.get('/users/me');
@@ -75,12 +81,17 @@ describe('apiClient 401 refresh-and-retry', () => {
     expect(res.data).toEqual({ ok: '/users/me' });
     expect(useAuthStore.getState().accessToken).toBe('new-token');
     expect(callsTo('/auth/refresh')).toHaveLength(1);
-    expect(callsTo('/users/me').map(([c]) => authHeaderOf(c))).toEqual(['Bearer old-token', 'Bearer new-token']);
+    expect(callsTo('/users/me').map(([c]) => authHeaderOf(c))).toEqual([
+      'Bearer old-token',
+      'Bearer new-token',
+    ]);
     expect(handleSessionExpired).not.toHaveBeenCalled();
   });
 
   it('passes non-401 errors straight through without refreshing', async () => {
-    const { apiClient, callsTo } = await setup(async (config) => respond(config, 500, { message: 'boom' }));
+    const { apiClient, callsTo } = await setup(async (config) =>
+      respond(config, 500, { message: 'boom' }),
+    );
 
     await expect(apiClient.get('/polls')).rejects.toMatchObject({ response: { status: 500 } });
     expect(callsTo('/auth/refresh')).toHaveLength(0);
@@ -131,7 +142,10 @@ describe('apiClient 401 refresh-and-retry', () => {
     expect(results.map((r) => r.data)).toEqual([{ ok: '/a' }, { ok: '/b' }, { ok: '/c' }]);
     expect(callsTo('/auth/refresh')).toHaveLength(1);
     for (const url of ['/a', '/b', '/c']) {
-      expect(callsTo(url).map(([c]) => authHeaderOf(c))).toEqual(['Bearer old-token', 'Bearer new-token']);
+      expect(callsTo(url).map(([c]) => authHeaderOf(c))).toEqual([
+        'Bearer old-token',
+        'Bearer new-token',
+      ]);
     }
   });
 
@@ -149,14 +163,20 @@ describe('apiClient 401 refresh-and-retry', () => {
       return protectedResource(config);
     });
 
-    const outcomes = Promise.allSettled([apiClient.get('/a'), apiClient.get('/b'), apiClient.get('/c')]);
+    const outcomes = Promise.allSettled([
+      apiClient.get('/a'),
+      apiClient.get('/b'),
+      apiClient.get('/c'),
+    ]);
     await flushPromises();
     refresh.resolve();
     const settled = await outcomes;
 
     expect(settled.map((s) => s.status)).toEqual(['rejected', 'rejected', 'rejected']);
     for (const s of settled) {
-      expect((s as PromiseRejectedResult).reason).toMatchObject({ config: { url: '/auth/refresh' } });
+      expect((s as PromiseRejectedResult).reason).toMatchObject({
+        config: { url: '/auth/refresh' },
+      });
     }
     expect(callsTo('/a')).toHaveLength(1); // queued requests are not replayed after a failed refresh
     expect(handleSessionExpired).toHaveBeenCalledTimes(1);
@@ -173,11 +193,14 @@ describe('apiClient refresh coordination', () => {
   // replaced it used to start a second refresh, rotating the refresh token a needless extra time.
   it('retries a late 401 with the current token instead of refreshing again', async () => {
     const slow = deferred<void>();
-    const { apiClient, useAuthStore, callsTo, handleSessionExpired } = await setup(async (config) => {
-      if (config.url === '/auth/refresh') return respond(config, 200, REFRESH_OK);
-      if (config.url === '/slow' && authHeaderOf(config) === 'Bearer old-token') await slow.promise;
-      return protectedResource(config);
-    });
+    const { apiClient, useAuthStore, callsTo, handleSessionExpired } = await setup(
+      async (config) => {
+        if (config.url === '/auth/refresh') return respond(config, 200, REFRESH_OK);
+        if (config.url === '/slow' && authHeaderOf(config) === 'Bearer old-token')
+          await slow.promise;
+        return protectedResource(config);
+      },
+    );
 
     const late = apiClient.get('/slow');
     await flushPromises(); // /slow is now in flight with the old token
@@ -188,7 +211,10 @@ describe('apiClient refresh coordination', () => {
     await expect(late).resolves.toMatchObject({ data: { ok: '/slow' } });
 
     expect(callsTo('/auth/refresh')).toHaveLength(1);
-    expect(callsTo('/slow').map(([c]) => authHeaderOf(c))).toEqual(['Bearer old-token', 'Bearer new-token']);
+    expect(callsTo('/slow').map(([c]) => authHeaderOf(c))).toEqual([
+      'Bearer old-token',
+      'Bearer new-token',
+    ]);
     expect(handleSessionExpired).not.toHaveBeenCalled();
   });
 

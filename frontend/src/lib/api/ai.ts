@@ -11,11 +11,17 @@ interface CheckDuplicatePollResponse {
   matches: DuplicatePollMatch[];
 }
 
-export async function checkDuplicatePoll(title: string, description: string): Promise<DuplicatePollMatch[]> {
-  const res = await apiClient.post<ApiResponse<CheckDuplicatePollResponse>>('/polls/duplicate-check', {
-    title,
-    description,
-  });
+export async function checkDuplicatePoll(
+  title: string,
+  description: string,
+): Promise<DuplicatePollMatch[]> {
+  const res = await apiClient.post<ApiResponse<CheckDuplicatePollResponse>>(
+    '/polls/duplicate-check',
+    {
+      title,
+      description,
+    },
+  );
   return res.data.data.matches;
 }
 
@@ -44,10 +50,16 @@ interface CheckPollNeutralityResponse {
   issues: NeutralityIssue[];
 }
 
-export async function checkPollNeutrality(title: string, options: string[]): Promise<CheckPollNeutralityResponse> {
-  const res = await apiClient.post<ApiResponse<CheckPollNeutralityResponse>>('/polls/neutrality-check', {
-    title,
-    options,
-  });
+export async function checkPollNeutrality(
+  title: string,
+  options: string[],
+): Promise<CheckPollNeutralityResponse> {
+  const res = await apiClient.post<ApiResponse<CheckPollNeutralityResponse>>(
+    '/polls/neutrality-check',
+    {
+      title,
+      options,
+    },
+  );
   return res.data.data;
 }

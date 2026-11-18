@@ -42,8 +42,16 @@ beforeEach(() => {
 
 describe('PollVoteCard', () => {
   it.each([
-    ['upcoming', { startsAt: fromNow(DAY), endsAt: fromNow(2 * DAY) }, /Voting opens once this poll starts/],
-    ['ended', { startsAt: fromNow(-2 * DAY), endsAt: fromNow(-DAY) }, /Voting has closed for this poll/],
+    [
+      'upcoming',
+      { startsAt: fromNow(DAY), endsAt: fromNow(2 * DAY) },
+      /Voting opens once this poll starts/,
+    ],
+    [
+      'ended',
+      { startsAt: fromNow(-2 * DAY), endsAt: fromNow(-DAY) },
+      /Voting has closed for this poll/,
+    ],
   ] as const)('shows a closed notice instead of the form when the poll is %s', (_, dates, copy) => {
     render(<PollVoteCard poll={poll(dates)} />);
 
@@ -51,25 +59,34 @@ describe('PollVoteCard', () => {
     expect(screen.queryByRole('button', { name: 'Cast vote' })).not.toBeInTheDocument();
   });
 
-  it.each(['idle', 'loading'] as const)('renders nothing while auth is %s (avoids a sign-in flash)', (status) => {
-    useAuthStore.setState({ status });
-    const { container } = render(<PollVoteCard poll={poll()} />);
+  it.each(['idle', 'loading'] as const)(
+    'renders nothing while auth is %s (avoids a sign-in flash)',
+    (status) => {
+      useAuthStore.setState({ status });
+      const { container } = render(<PollVoteCard poll={poll()} />);
 
-    expect(container).toBeEmptyDOMElement();
-  });
+      expect(container).toBeEmptyDOMElement();
+    },
+  );
 
   it('asks signed-out visitors to sign in, and brings them back to this poll afterwards', () => {
     useAuthStore.setState({ status: 'unauthenticated' });
     render(<PollVoteCard poll={poll()} />);
 
-    expect(screen.getByRole('link', { name: 'Sign in to vote' })).toHaveAttribute('href', '/sign-in?next=%2Fpolls%2Fpoll-1');
+    expect(screen.getByRole('link', { name: 'Sign in to vote' })).toHaveAttribute(
+      'href',
+      '/sign-in?next=%2Fpolls%2Fpoll-1',
+    );
   });
 
   it('shows the earlier vote’s receipt when this browser already voted on the poll', () => {
     window.localStorage.setItem('voted-tx:poll-1', '0xfeed');
     render(<PollVoteCard poll={poll()} />);
 
-    expect(screen.getByRole('link')).toHaveAttribute('href', 'https://sepolia.etherscan.io/tx/0xfeed');
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      'https://sepolia.etherscan.io/tx/0xfeed',
+    );
     expect(screen.queryByRole('button', { name: 'Cast vote' })).not.toBeInTheDocument();
   });
 

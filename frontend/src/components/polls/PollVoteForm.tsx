@@ -15,7 +15,8 @@ interface PollVoteFormProps {
 
 export function PollVoteForm({ poll }: PollVoteFormProps) {
   const [selectedOptionId, setSelectedOptionId] = useState<string | null>(null);
-  const { castVote, isPending, isSuccess, isError, error, transactionHash, stepLabel } = useCastVote(poll.id);
+  const { castVote, isPending, isSuccess, isError, error, transactionHash, stepLabel } =
+    useCastVote(poll.id);
 
   if (isSuccess && transactionHash) {
     return <PollVoteSuccess transactionHash={transactionHash} />;
@@ -26,8 +27,8 @@ export function PollVoteForm({ poll }: PollVoteFormProps) {
       <div>
         <h2 className="font-display text-lg font-semibold text-slate-900">Cast your vote</h2>
         <p className="mt-1 text-xs text-slate-500">
-          Your vote is anonymous — a zero-knowledge proof confirms you&apos;re eligible without revealing who you
-          are.
+          Your vote is anonymous — a zero-knowledge proof confirms you&apos;re eligible without
+          revealing who you are.
         </p>
       </div>
 
@@ -40,7 +41,11 @@ export function PollVoteForm({ poll }: PollVoteFormProps) {
 
       {isPending && stepLabel && <PollVoteProgress label={stepLabel} />}
 
-      {isError && <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{getApiErrorMessage(error)}</p>}
+      {isError && (
+        <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">
+          {getApiErrorMessage(error)}
+        </p>
+      )}
 
       <Button
         type="button"

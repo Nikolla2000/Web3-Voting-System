@@ -14,7 +14,16 @@ interface SelectProps extends SelectHTMLAttributes<HTMLSelectElement> {
 
 export const Select = forwardRef<HTMLSelectElement, SelectProps>(
   (
-    { label, error, id, name, options, 'aria-describedby': ariaDescribedBy, 'aria-invalid': ariaInvalid, ...props },
+    {
+      label,
+      error,
+      id,
+      name,
+      options,
+      'aria-describedby': ariaDescribedBy,
+      'aria-invalid': ariaInvalid,
+      ...props
+    },
     ref,
   ) => {
     const { controlId, errorId, controlProps } = useFieldA11y({

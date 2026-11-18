@@ -17,7 +17,8 @@ async function openDialog(hasPassword = true) {
   const utils = renderWithQuery(<DangerZoneSection hasPassword={hasPassword} />);
   await utils.user.click(screen.getByRole('button', { name: 'Deactivate account' }));
   const dialog = await screen.findByRole('alertdialog', { name: 'Deactivate your account?' });
-  const confirm = () => utils.user.click(within(dialog).getByRole('button', { name: 'Deactivate account' }));
+  const confirm = () =>
+    utils.user.click(within(dialog).getByRole('button', { name: 'Deactivate account' }));
   return { ...utils, dialog, confirm };
 }
 
@@ -61,7 +62,11 @@ describe('DangerZoneSection', () => {
 
     await vi.waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
     expect(vi.mocked(deactivateAccount).mock.calls[0]![0]).toEqual({ password: 'Secret123' });
-    expect(useAuthStore.getState()).toMatchObject({ user: null, accessToken: null, status: 'unauthenticated' });
+    expect(useAuthStore.getState()).toMatchObject({
+      user: null,
+      accessToken: null,
+      status: 'unauthenticated',
+    });
   });
 
   it('for a Google-only account, asks for no password and sends none', async () => {

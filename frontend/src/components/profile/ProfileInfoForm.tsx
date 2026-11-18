@@ -43,7 +43,9 @@ export function ProfileInfoForm({ profile }: ProfileInfoFormProps) {
       queryClient.setQueryData(['profile'], updated);
       reset({ username: updated.username, email: updated.email });
       useAuthStore.setState((state) =>
-        state.user ? { user: { ...state.user, username: updated.username, email: updated.email } } : state,
+        state.user
+          ? { user: { ...state.user, username: updated.username, email: updated.email } }
+          : state,
       );
     },
   });
@@ -62,12 +64,21 @@ export function ProfileInfoForm({ profile }: ProfileInfoFormProps) {
 
         <Input label="Email" type="email" error={errors.email?.message} {...register('email')} />
 
-        {submitError && <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>}
+        {submitError && (
+          <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>
+        )}
         {successMessage && !submitError && (
-          <p className="rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-600">{successMessage}</p>
+          <p className="rounded-lg bg-emerald-50 px-4 py-2 text-sm text-emerald-600">
+            {successMessage}
+          </p>
         )}
 
-        <Button type="submit" variant="primary" className="self-start cursor-pointer" disabled={mutation.isPending || !isDirty}>
+        <Button
+          type="submit"
+          variant="primary"
+          className="self-start cursor-pointer"
+          disabled={mutation.isPending || !isDirty}
+        >
           {mutation.isPending ? 'Saving…' : 'Save changes'}
         </Button>
       </form>

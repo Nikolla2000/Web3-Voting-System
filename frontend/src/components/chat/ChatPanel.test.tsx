@@ -94,8 +94,13 @@ describe('ChatPanel', () => {
     stream.push('poll, on Friday.');
     stream.end();
 
-    await vi.waitFor(() => expect(conversation()[1]).toBe('Assistant: The bike lane poll, on Friday.'));
-    expect(conversation()).toEqual(['You: Which poll ends next?', 'Assistant: The bike lane poll, on Friday.']);
+    await vi.waitFor(() =>
+      expect(conversation()[1]).toBe('Assistant: The bike lane poll, on Friday.'),
+    );
+    expect(conversation()).toEqual([
+      'You: Which poll ends next?',
+      'Assistant: The bike lane poll, on Friday.',
+    ]);
     await vi.waitFor(() => expect(screen.getByRole('log')).toHaveAttribute('aria-busy', 'false'));
   });
 
@@ -118,7 +123,9 @@ describe('ChatPanel', () => {
   it('sends the earlier turns as history with the next question, not the new one', async () => {
     const first = controllableStream();
     const second = controllableStream();
-    vi.mocked(streamChat).mockImplementationOnce(first.generator).mockImplementationOnce(second.generator);
+    vi.mocked(streamChat)
+      .mockImplementationOnce(first.generator)
+      .mockImplementationOnce(second.generator);
     const { send, ask } = setup();
 
     await ask('Most votes?');
@@ -147,7 +154,10 @@ describe('ChatPanel', () => {
     stream.fail('The answer was cut off.');
 
     await vi.waitFor(() =>
-      expect(conversation()).toEqual(['You: Most votes?', "Assistant: Sorry, I couldn't get an answer that time."]),
+      expect(conversation()).toEqual([
+        'You: Most votes?',
+        "Assistant: Sorry, I couldn't get an answer that time.",
+      ]),
     );
     await user.type(input, 'Retry');
     expect(send).toBeEnabled();

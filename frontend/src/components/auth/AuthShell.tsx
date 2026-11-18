@@ -18,9 +18,7 @@ export function AuthShell({ title, subtitle, children, footer }: AuthShellProps)
       <div className="relative z-10 w-full max-w-md">
         <Link href="/" className="mb-8 flex items-center justify-center gap-2.5">
           <Image src="/logo-static.png" alt="VoteChain logo" width={30} height={30} />
-          <span className="text-[15px] font-semibold tracking-tight text-slate-900">
-            VoteChain
-          </span>
+          <span className="text-[15px] font-semibold tracking-tight text-slate-900">VoteChain</span>
         </Link>
 
         <div className="rounded-3xl border border-slate-100 bg-white/80 p-8 shadow-[0_20px_60px_-20px_rgba(79,70,229,0.25)] backdrop-blur-sm sm:p-10">

@@ -16,12 +16,12 @@ export function PollsPageHeader() {
         Polls
       </h1>
       <p className="mt-3 text-balance text-base leading-relaxed text-slate-500">
-        Browse the polls, cast your vote, and verify the results yourself. All anonymously,
-        stored on the Blockchain.
+        Browse the polls, cast your vote, and verify the results yourself. All anonymously, stored
+        on the Blockchain.
       </p>
       {status === 'authenticated' && (
-        <Button 
-          href="/polls/create" 
+        <Button
+          href="/polls/create"
           className="mt-6 bg-gradient-to-r from-indigo-600 to-violet-600 text-white hover:from-blue-700 hover:to-purple-700 shadow-md transition-all"
         >
           Create Poll

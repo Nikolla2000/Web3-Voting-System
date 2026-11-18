@@ -13,7 +13,12 @@ const register = vi.fn();
 function setup(returnTo?: string | null) {
   const user = userEvent.setup();
   render(<RegisterForm returnTo={returnTo} />);
-  const fill = async (values: { username: string; email: string; password: string; confirm: string }) => {
+  const fill = async (values: {
+    username: string;
+    email: string;
+    password: string;
+    confirm: string;
+  }) => {
     await user.type(screen.getByLabelText('Username'), values.username);
     await user.type(screen.getByLabelText('Email'), values.email);
     await user.type(screen.getByLabelText('Password'), values.password);
@@ -23,7 +28,12 @@ function setup(returnTo?: string | null) {
   return { fill, submit };
 }
 
-const valid = { username: 'alice_01', email: 'alice@example.com', password: 'Secret123', confirm: 'Secret123' };
+const valid = {
+  username: 'alice_01',
+  email: 'alice@example.com',
+  password: 'Secret123',
+  confirm: 'Secret123',
+};
 
 beforeEach(() => {
   useAuthStore.setState({ register });
@@ -41,7 +51,9 @@ describe('RegisterForm', () => {
     ).toBeInTheDocument();
     expect(screen.getByText('Enter a valid email address')).toBeInTheDocument();
     expect(
-      screen.getByText('Password must contain at least one uppercase letter, one lowercase letter and one number'),
+      screen.getByText(
+        'Password must contain at least one uppercase letter, one lowercase letter and one number',
+      ),
     ).toBeInTheDocument();
     expect(register).not.toHaveBeenCalled();
   });
@@ -63,7 +75,11 @@ describe('RegisterForm', () => {
     await fill(valid);
     await submit();
 
-    expect(register).toHaveBeenCalledWith({ username: 'alice_01', email: 'alice@example.com', password: 'Secret123' });
+    expect(register).toHaveBeenCalledWith({
+      username: 'alice_01',
+      email: 'alice@example.com',
+      password: 'Secret123',
+    });
     expect(replace).toHaveBeenCalledWith('/polls');
   });
 

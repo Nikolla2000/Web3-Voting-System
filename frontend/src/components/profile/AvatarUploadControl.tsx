@@ -3,7 +3,12 @@
 import { useRef, useState, type ChangeEvent } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Camera, Loader2, X } from 'lucide-react';
-import { confirmAvatar, deleteAvatar, requestAvatarUploadUrl, uploadAvatarFile } from '@/lib/api/users';
+import {
+  confirmAvatar,
+  deleteAvatar,
+  requestAvatarUploadUrl,
+  uploadAvatarFile,
+} from '@/lib/api/users';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { IMAGE_ALLOWED_TYPES, IMAGE_MAX_SIZE_BYTES } from '@/lib/validation/image-upload';
@@ -22,7 +27,9 @@ export function AvatarUploadControl({ avatarUrl, username }: AvatarUploadControl
 
   const syncAvatar = (updated: UserProfile) => {
     queryClient.setQueryData(['profile'], updated);
-    useAuthStore.setState((state) => (state.user ? { user: { ...state.user, avatar: updated.avatar } } : state));
+    useAuthStore.setState((state) =>
+      state.user ? { user: { ...state.user, avatar: updated.avatar } } : state,
+    );
   };
 
   const uploadMutation = useMutation({
@@ -66,7 +73,12 @@ export function AvatarUploadControl({ avatarUrl, username }: AvatarUploadControl
   return (
     <div className="flex flex-col gap-2">
       <div className="relative w-fit">
-        <ProfileAvatarPreview avatarUrl={avatarUrl ?? undefined} username={username} size={80} className="ring-4 ring-white" />
+        <ProfileAvatarPreview
+          avatarUrl={avatarUrl ?? undefined}
+          username={username}
+          size={80}
+          className="ring-4 ring-white"
+        />
 
         {isBusy && (
           <div className="absolute inset-0 flex items-center justify-center rounded-full bg-slate-900/40">

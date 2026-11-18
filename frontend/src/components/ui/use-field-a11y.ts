@@ -17,7 +17,9 @@ export function useFieldA11y({ id, name, error, ...aria }: FieldA11yInput) {
   const controlId = id ?? name ?? generatedId;
   const errorId = `${controlId}-error`;
 
-  const describedBy = [aria['aria-describedby'], error ? errorId : undefined].filter(Boolean).join(' ');
+  const describedBy = [aria['aria-describedby'], error ? errorId : undefined]
+    .filter(Boolean)
+    .join(' ');
 
   return {
     controlId,

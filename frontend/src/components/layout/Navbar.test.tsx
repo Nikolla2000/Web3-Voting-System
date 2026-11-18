@@ -14,13 +14,16 @@ beforeEach(() => {
 });
 
 describe('Navbar', () => {
-  it.each(['idle', 'loading'] as const)('shows neither sign-in links nor a user menu while %s', (status) => {
-    useAuthStore.setState({ status });
-    render(<Navbar />);
+  it.each(['idle', 'loading'] as const)(
+    'shows neither sign-in links nor a user menu while %s',
+    (status) => {
+      useAuthStore.setState({ status });
+      render(<Navbar />);
 
-    expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'alice' })).not.toBeInTheDocument();
-  });
+      expect(screen.queryByRole('link', { name: 'Sign in' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'alice' })).not.toBeInTheDocument();
+    },
+  );
 
   it('offers sign in and register when signed out', () => {
     useAuthStore.setState({ status: 'unauthenticated' });
@@ -56,7 +59,10 @@ describe('UserMenu', () => {
   it('links to the profile page', async () => {
     await openMenu();
 
-    expect(await screen.findByRole('menuitem', { name: 'Profile' })).toHaveAttribute('href', '/profile');
+    expect(await screen.findByRole('menuitem', { name: 'Profile' })).toHaveAttribute(
+      'href',
+      '/profile',
+    );
   });
 
   it('logs out from the menu', async () => {
@@ -75,7 +81,8 @@ describe('UserMenu', () => {
     await events.keyboard('{Enter}');
     const logOut = await screen.findByRole('menuitem', { name: 'Log out' });
     // Arrow down to "Log out" without assuming which item the menu highlights on open.
-    for (let i = 0; i < 3 && document.activeElement !== logOut; i++) await events.keyboard('{ArrowDown}');
+    for (let i = 0; i < 3 && document.activeElement !== logOut; i++)
+      await events.keyboard('{ArrowDown}');
     expect(logOut).toHaveFocus();
     await events.keyboard('{Enter}');
 

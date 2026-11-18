@@ -169,7 +169,9 @@ describe('useCastVote — identity persistence', () => {
     act(() => second.result.current.castVote(OPTION_ID));
     await waitFor(() => expect(second.result.current.isSuccess).toBe(true));
 
-    expect(storedCommitment(`semaphore-identity:${otherPoll}`)).not.toBe(storedCommitment(IDENTITY_KEY));
+    expect(storedCommitment(`semaphore-identity:${otherPoll}`)).not.toBe(
+      storedCommitment(IDENTITY_KEY),
+    );
   });
 });
 
@@ -179,20 +181,23 @@ describe('useCastVote — failure modes', () => {
     ['fetching the Merkle proof', getMerkleProof],
     ['generating the proof', generateProof],
     ['submitting the vote', submitVote],
-  ] as const)('a failure while %s surfaces the error, resets progress, and does not mark the poll voted', async (_, failingStep) => {
-    const failure = new Error('step failed');
-    vi.mocked(failingStep).mockRejectedValue(failure);
-    const { result, invalidateSpy } = renderCastVote();
+  ] as const)(
+    'a failure while %s surfaces the error, resets progress, and does not mark the poll voted',
+    async (_, failingStep) => {
+      const failure = new Error('step failed');
+      vi.mocked(failingStep).mockRejectedValue(failure);
+      const { result, invalidateSpy } = renderCastVote();
 
-    act(() => result.current.castVote(OPTION_ID));
-    await waitFor(() => expect(result.current.isError).toBe(true));
+      act(() => result.current.castVote(OPTION_ID));
+      await waitFor(() => expect(result.current.isError).toBe(true));
 
-    expect(result.current.error).toBe(failure);
-    expect(result.current.step).toBeNull();
-    expect(result.current.isPending).toBe(false);
-    expect(window.localStorage.getItem(VOTED_KEY)).toBeNull();
-    expect(invalidateSpy).not.toHaveBeenCalled();
-  });
+      expect(result.current.error).toBe(failure);
+      expect(result.current.step).toBeNull();
+      expect(result.current.isPending).toBe(false);
+      expect(window.localStorage.getItem(VOTED_KEY)).toBeNull();
+      expect(invalidateSpy).not.toHaveBeenCalled();
+    },
+  );
 
   it('stops at the failing step — nothing later in the chain runs', async () => {
     vi.mocked(getMerkleProof).mockRejectedValue(new Error('merkle failed'));

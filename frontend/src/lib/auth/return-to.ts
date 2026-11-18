@@ -20,7 +20,8 @@ export function safeReturnTo(raw: string | string[] | null | undefined): string 
   // Must be a path. "//evil.com" and "/\evil.com" are protocol-relative URLs to another host
   // (browsers treat "\" as "/"), and control characters are stripped by URL parsing, which could
   // hide either. Rejecting them up front keeps the check below simple.
-  if (!raw.startsWith('/') || raw.startsWith('//') || /[\\\u0000-\u001f\u007f]/.test(raw)) return null;
+  if (!raw.startsWith('/') || raw.startsWith('//') || /[\\\u0000-\u001f\u007f]/.test(raw))
+    return null;
 
   let url: URL;
   try {

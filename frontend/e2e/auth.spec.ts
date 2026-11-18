@@ -18,7 +18,10 @@ test.describe('accounts and sessions', () => {
     ]);
   });
 
-  test('a session survives a reload, restored from the httpOnly refresh cookie', async ({ page, gateway }) => {
+  test('a session survives a reload, restored from the httpOnly refresh cookie', async ({
+    page,
+    gateway,
+  }) => {
     gateway.addUser();
     await page.goto('/sign-in');
     await page.getByLabel('Email').fill('alice@example.com');
@@ -36,7 +39,10 @@ test.describe('accounts and sessions', () => {
     expect(await page.evaluate(() => document.cookie)).not.toContain('refresh_token');
   });
 
-  test('wrong credentials show the server’s message and stay on sign-in', async ({ page, gateway }) => {
+  test('wrong credentials show the server’s message and stay on sign-in', async ({
+    page,
+    gateway,
+  }) => {
     gateway.addUser();
     await page.goto('/sign-in');
 
@@ -48,7 +54,10 @@ test.describe('accounts and sessions', () => {
     await expect(page).toHaveURL('/sign-in');
   });
 
-  test('a protected page sends you to sign in, then back to it afterwards', async ({ page, gateway }) => {
+  test('a protected page sends you to sign in, then back to it afterwards', async ({
+    page,
+    gateway,
+  }) => {
     gateway.addUser();
     await page.goto('/polls/create');
 
@@ -89,7 +98,11 @@ test.describe('accounts and sessions', () => {
     await expect(page).toHaveURL('/');
   });
 
-  test('logging out from the user menu ends the session for good', async ({ page, context, gateway }) => {
+  test('logging out from the user menu ends the session for good', async ({
+    page,
+    context,
+    gateway,
+  }) => {
     await gateway.signIn(context, gateway.addUser());
     await page.goto('/profile');
     await expect(page.getByRole('heading', { level: 1, name: 'alice' })).toBeVisible();
@@ -104,7 +117,11 @@ test.describe('accounts and sessions', () => {
     expect((await context.cookies()).find((c) => c.name === 'refresh_token')).toBeUndefined();
   });
 
-  test('an expired access token is refreshed and the request retried, unnoticed', async ({ page, context, gateway }) => {
+  test('an expired access token is refreshed and the request retried, unnoticed', async ({
+    page,
+    context,
+    gateway,
+  }) => {
     await gateway.signIn(context, gateway.addUser());
     await page.goto('/profile');
     await expect(page.getByLabel('Username')).toHaveValue('alice');

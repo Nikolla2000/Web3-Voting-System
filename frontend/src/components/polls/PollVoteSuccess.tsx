@@ -10,8 +10,8 @@ export function PollVoteSuccess({ transactionHash }: PollVoteSuccessProps) {
       <div className="flex items-start gap-3">
         <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
         <p>
-          Your vote was submitted anonymously. It&apos;ll be reflected in the results below once the transaction
-          confirms on-chain.
+          Your vote was submitted anonymously. It&apos;ll be reflected in the results below once the
+          transaction confirms on-chain.
         </p>
       </div>
       <a

@@ -22,7 +22,11 @@ export function UserMenu({ user }: UserMenuProps) {
         {/* Decorative here: the username beside it names the button. Otherwise screen readers
             hear the initials or "alice's avatar" run into the name ("ALalice"). */}
         <span aria-hidden="true" className="flex">
-          <ProfileAvatarPreview avatarUrl={user.avatar ?? undefined} username={user.username} size={28} />
+          <ProfileAvatarPreview
+            avatarUrl={user.avatar ?? undefined}
+            username={user.username}
+            size={28}
+          />
         </span>
         {user.username}
       </Menu.Trigger>

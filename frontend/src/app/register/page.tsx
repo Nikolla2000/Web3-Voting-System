@@ -17,7 +17,10 @@ export default async function RegisterPage({
       footer={
         <>
           Already have an account?{' '}
-          <Link href={authHref('/sign-in', returnTo)} className="font-medium text-indigo-600 hover:text-indigo-700">
+          <Link
+            href={authHref('/sign-in', returnTo)}
+            className="font-medium text-indigo-600 hover:text-indigo-700"
+          >
             Sign in
           </Link>
         </>

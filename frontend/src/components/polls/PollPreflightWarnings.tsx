@@ -23,7 +23,9 @@ export function PollPreflightWarnings({
     <div className="flex flex-col gap-4 rounded-2xl border border-amber-200 bg-amber-50 p-5">
       <div className="flex items-start gap-3">
         <TriangleAlert className="mt-0.5 h-5 w-5 flex-none text-amber-500" />
-        <p className="text-sm text-amber-700">Review this before creating your poll — you can still proceed as is.</p>
+        <p className="text-sm text-amber-700">
+          Review this before creating your poll — you can still proceed as is.
+        </p>
       </div>
 
       {duplicates.length > 0 && <PollDuplicateMatchesList matches={duplicates} />}

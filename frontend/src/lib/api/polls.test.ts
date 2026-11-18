@@ -2,7 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import axios, { type InternalAxiosRequestConfig } from 'axios';
 import { authHeaderOf, respond } from '@/test/axios-adapter';
 
-const envelope = <T,>(data: T) => ({ data, statusCode: 200, success: true, timestamp: '' });
+const envelope = <T>(data: T) => ({ data, statusCode: 200, success: true, timestamp: '' });
 
 const rawPoll = {
   id: 'poll-1',
@@ -25,7 +25,11 @@ async function setup(handler: (config: InternalAxiosRequestConfig) => unknown) {
   useAuthStore.setState({ accessToken: 'access-1' });
   const adapter = vi.fn(async (config: InternalAxiosRequestConfig) => handler(config));
   apiClient.defaults.adapter = adapter as never;
-  return { adapter, polls: await import('@/lib/api/polls'), users: await import('@/lib/api/users') };
+  return {
+    adapter,
+    polls: await import('@/lib/api/polls'),
+    users: await import('@/lib/api/users'),
+  };
 }
 
 beforeEach(() => {
@@ -62,7 +66,11 @@ describe('polls API mapping', () => {
 
   it('passes list filters as query params and maps every item', async () => {
     const { polls, adapter } = await setup((config) =>
-      respond(config, 200, envelope({ items: [rawPoll, { ...rawPoll, id: 'poll-2' }], total: 7, page: 1, limit: 2 })),
+      respond(
+        config,
+        200,
+        envelope({ items: [rawPoll, { ...rawPoll, id: 'poll-2' }], total: 7, page: 1, limit: 2 }),
+      ),
     );
 
     const result = await polls.fetchPolls({ status: 'active', limit: 2 });
@@ -76,7 +84,9 @@ describe('polls API mapping', () => {
   });
 
   it('uploads the cover image as multipart form data, not serialised', async () => {
-    const { polls, adapter } = await setup((config) => respond(config, 200, envelope({ url: 'https://cdn/new.png' })));
+    const { polls, adapter } = await setup((config) =>
+      respond(config, 200, envelope({ url: 'https://cdn/new.png' })),
+    );
     const file = new File(['png'], 'cover.png', { type: 'image/png' });
 
     await expect(polls.uploadPollImage(file)).resolves.toEqual({ url: 'https://cdn/new.png' });
@@ -107,7 +117,9 @@ describe('avatar upload to R2', () => {
   });
 
   it('confirms the uploaded key through the authenticated API', async () => {
-    const { users, adapter } = await setup((config) => respond(config, 200, envelope({ id: 'u1', avatar: 'x' })));
+    const { users, adapter } = await setup((config) =>
+      respond(config, 200, envelope({ id: 'u1', avatar: 'x' })),
+    );
 
     await users.confirmAvatar('avatars/u1/abc.png');
 

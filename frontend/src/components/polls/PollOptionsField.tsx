@@ -1,5 +1,10 @@
 import { useId } from 'react';
-import { useFieldArray, type Control, type FieldErrors, type UseFormRegister } from 'react-hook-form';
+import {
+  useFieldArray,
+  type Control,
+  type FieldErrors,
+  type UseFormRegister,
+} from 'react-hook-form';
 import { Plus, X } from 'lucide-react';
 import type { CreatePollFormValues } from '@/lib/validation/poll-schemas';
 
@@ -16,7 +21,8 @@ export function PollOptionsField({ control, errors, register }: PollOptionsField
   const arrayErrorId = `${baseId}-error`;
 
   const arrayError =
-    errors.options?.root?.message ?? (typeof errors.options?.message === 'string' ? errors.options.message : undefined);
+    errors.options?.root?.message ??
+    (typeof errors.options?.message === 'string' ? errors.options.message : undefined);
 
   return (
     <div

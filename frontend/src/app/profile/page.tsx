@@ -23,7 +23,8 @@ function ProfilePageBody() {
   });
 
   if (isPending) return <ProfileLoadingState />;
-  if (isError) return <ProfileErrorState message={getApiErrorMessage(error)} onRetry={() => refetch()} />;
+  if (isError)
+    return <ProfileErrorState message={getApiErrorMessage(error)} onRetry={() => refetch()} />;
 
   return <ProfileContent profile={profile} />;
 }

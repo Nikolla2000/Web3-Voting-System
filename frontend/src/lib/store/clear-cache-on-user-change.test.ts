@@ -10,7 +10,10 @@ let queryClient: QueryClient;
 let unsubscribe: () => void;
 
 function cachedKeys() {
-  return queryClient.getQueryCache().getAll().map((q) => q.queryKey);
+  return queryClient
+    .getQueryCache()
+    .getAll()
+    .map((q) => q.queryKey);
 }
 
 beforeEach(() => {
@@ -24,7 +27,10 @@ describe('clearCacheOnUserChange', () => {
   it.each([
     // Every way a session ends (log out, sign out everywhere, deactivate, expiry) lands here.
     ['the session ending', { user: null, accessToken: null, status: 'unauthenticated' as const }],
-    ['a different user taking over', { user: bob, accessToken: 'access-2', status: 'authenticated' as const }],
+    [
+      'a different user taking over',
+      { user: bob, accessToken: 'access-2', status: 'authenticated' as const },
+    ],
   ])('empties the cache on %s', (_name, next) => {
     useAuthStore.setState({ user: alice, accessToken: 'access-1', status: 'authenticated' });
     queryClient.setQueryData(['profile'], { username: 'alice' });

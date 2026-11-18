@@ -27,7 +27,9 @@ export function ProfileHeaderCard({ profile }: ProfileHeaderCardProps) {
 
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="font-display text-xl font-semibold text-slate-900 sm:text-2xl">{profile.username}</h1>
+            <h1 className="font-display text-xl font-semibold text-slate-900 sm:text-2xl">
+              {profile.username}
+            </h1>
             <p className="text-sm text-slate-500">{profile.email}</p>
           </div>
 

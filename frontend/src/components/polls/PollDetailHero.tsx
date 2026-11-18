@@ -1,5 +1,10 @@
 import type { Poll } from '@/types/poll';
-import { POLL_CATEGORY_LABELS, formatDeadline, formatStartCountdown, getPollStatus } from '@/lib/polls/utils';
+import {
+  POLL_CATEGORY_LABELS,
+  formatDeadline,
+  formatStartCountdown,
+  getPollStatus,
+} from '@/lib/polls/utils';
 import { PollStatusBadge } from '@/components/polls/PollStatusBadge';
 
 interface PollDetailHeroProps {
@@ -8,7 +13,10 @@ interface PollDetailHeroProps {
 
 export function PollDetailHero({ poll }: PollDetailHeroProps) {
   const status = getPollStatus(poll);
-  const deadlineLabel = status === 'upcoming' ? formatStartCountdown(poll.startsAt) : formatDeadline(poll.endsAt, status);
+  const deadlineLabel =
+    status === 'upcoming'
+      ? formatStartCountdown(poll.startsAt)
+      : formatDeadline(poll.endsAt, status);
 
   return (
     <div className="overflow-hidden rounded-3xl border border-indigo-100/70 bg-white/80 backdrop-blur-sm">

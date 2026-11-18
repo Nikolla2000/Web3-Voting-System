@@ -1,15 +1,15 @@
 export type PollStatus = 'upcoming' | 'active' | 'ended';
 
-export type PollCategory = 
-  | 'sports' 
-  | 'travel' 
-  | 'entertainment' 
-  | 'lifestyle' 
-  | 'tech_science' 
-  | 'society' 
-  | 'finance' 
-  | 'politics' 
-  | 'education' 
+export type PollCategory =
+  | 'sports'
+  | 'travel'
+  | 'entertainment'
+  | 'lifestyle'
+  | 'tech_science'
+  | 'society'
+  | 'finance'
+  | 'politics'
+  | 'education'
   | 'other';
 
 export type PollSortOption = 'newest' | 'endingSoon' | 'mostVotes' | 'alphabetical';

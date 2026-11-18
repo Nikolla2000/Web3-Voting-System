@@ -49,7 +49,10 @@ export interface AvatarUploadTarget {
 export async function requestAvatarUploadUrl(
   payload: RequestAvatarUploadPayload,
 ): Promise<AvatarUploadTarget> {
-  const res = await apiClient.post<ApiResponse<AvatarUploadTarget>>('/users/me/avatar/upload-url', payload);
+  const res = await apiClient.post<ApiResponse<AvatarUploadTarget>>(
+    '/users/me/avatar/upload-url',
+    payload,
+  );
   return res.data.data;
 }
 

@@ -8,7 +8,16 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
   (
-    { label, error, id, name, rows = 4, 'aria-describedby': ariaDescribedBy, 'aria-invalid': ariaInvalid, ...props },
+    {
+      label,
+      error,
+      id,
+      name,
+      rows = 4,
+      'aria-describedby': ariaDescribedBy,
+      'aria-invalid': ariaInvalid,
+      ...props
+    },
     ref,
   ) => {
     const { controlId, errorId, controlProps } = useFieldA11y({

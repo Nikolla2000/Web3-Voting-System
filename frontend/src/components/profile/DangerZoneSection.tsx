@@ -81,7 +81,9 @@ export function DangerZoneSection({ hasPassword }: DangerZoneSectionProps) {
           }
         }}
       >
-        <AlertDialog.Trigger className={triggerButtonClasses}>Deactivate account</AlertDialog.Trigger>
+        <AlertDialog.Trigger className={triggerButtonClasses}>
+          Deactivate account
+        </AlertDialog.Trigger>
 
         <AlertDialog.Portal>
           <AlertDialog.Backdrop className="fixed inset-0 z-40 bg-slate-900/30 backdrop-blur-sm transition-opacity data-ending-style:opacity-0 data-starting-style:opacity-0" />
@@ -111,13 +113,23 @@ export function DangerZoneSection({ hasPassword }: DangerZoneSectionProps) {
                 {...register('confirmText')}
               />
 
-              {submitError && <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>}
+              {submitError && (
+                <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>
+              )}
 
               <div className="mt-2 flex justify-end gap-3">
-                <AlertDialog.Close type="button" className={cancelButtonClasses} disabled={mutation.isPending}>
+                <AlertDialog.Close
+                  type="button"
+                  className={cancelButtonClasses}
+                  disabled={mutation.isPending}
+                >
                   Cancel
                 </AlertDialog.Close>
-                <button type="submit" className={confirmButtonClasses} disabled={mutation.isPending}>
+                <button
+                  type="submit"
+                  className={confirmButtonClasses}
+                  disabled={mutation.isPending}
+                >
                   {mutation.isPending ? 'Deactivating…' : 'Deactivate account'}
                 </button>
               </div>

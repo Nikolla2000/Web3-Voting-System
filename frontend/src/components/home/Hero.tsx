@@ -18,15 +18,15 @@ export function Hero() {
       <div className="relative mb-5 flex h-[350px] w-[350px] items-center justify-center">
         <PulseRings />
         <video
-            src="/logo.webm"
-            width={300}
-            height={300}
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="relative object-contain"
-            />
+          src="/logo.webm"
+          width={300}
+          height={300}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="relative object-contain"
+        />
       </div>
 
       <h1 className="font-display text-4xl font-semibold leading-[1.15] tracking-tight text-slate-900 sm:text-5xl">
@@ -36,13 +36,20 @@ export function Hero() {
         </span>
         {/* {isAuthenticated ? user.username : 'Web3 Voting System'}
          */}
-         Web3 Voting System
+        Web3 Voting System
       </h1>
 
       <p className="mt-6 max-w-xl text-balance text-base leading-relaxed text-slate-500 sm:text-lg">
-        {isAuthenticated
-          ? 'Your account is ready. Explore active elections and make your vote count.'
-          : <span>Every vote is cast, counted and verified on-chain. <br/> No intermediaries, no black boxes.<br/>Connect your wallet and take part in elections you can audit yourself.</span>}
+        {isAuthenticated ? (
+          'Your account is ready. Explore active elections and make your vote count.'
+        ) : (
+          <span>
+            Every vote is cast, counted and verified on-chain. <br /> No intermediaries, no black
+            boxes.
+            <br />
+            Connect your wallet and take part in elections you can audit yourself.
+          </span>
+        )}
       </p>
 
       <div className="mt-10 flex flex-col items-center gap-3 sm:flex-row">

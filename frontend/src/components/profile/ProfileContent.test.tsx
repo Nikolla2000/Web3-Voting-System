@@ -40,7 +40,9 @@ describe('ProfileContent', () => {
   });
 
   it('offers "Set a password" instead of "change" to a Google-only account', async () => {
-    const { user } = renderWithQuery(<ProfileContent profile={profileFixture({ hasPassword: false })} />);
+    const { user } = renderWithQuery(
+      <ProfileContent profile={profileFixture({ hasPassword: false })} />,
+    );
 
     await user.click(screen.getByRole('button', { name: 'Security' }));
 

@@ -15,19 +15,25 @@ function axiosError(status: number, data?: unknown, headers: Record<string, stri
 
 describe('getApiErrorMessage', () => {
   it('surfaces the gateway message string', () => {
-    expect(getApiErrorMessage(axiosError(409, { message: 'Email already in use' }))).toBe('Email already in use');
+    expect(getApiErrorMessage(axiosError(409, { message: 'Email already in use' }))).toBe(
+      'Email already in use',
+    );
   });
 
   it('uses the first entry of a class-validator message array', () => {
-    expect(getApiErrorMessage(axiosError(400, { message: ['title too short', 'description too short'] }))).toBe(
-      'title too short',
-    );
+    expect(
+      getApiErrorMessage(
+        axiosError(400, { message: ['title too short', 'description too short'] }),
+      ),
+    ).toBe('title too short');
   });
 
   it('turns a 429 with Retry-After into a countdown message', () => {
-    expect(getApiErrorMessage(axiosError(429, { message: 'ThrottlerException' }, { 'retry-after': '42' }))).toBe(
-      'Too many requests — try again in 42s.',
-    );
+    expect(
+      getApiErrorMessage(
+        axiosError(429, { message: 'ThrottlerException' }, { 'retry-after': '42' }),
+      ),
+    ).toBe('Too many requests — try again in 42s.');
   });
 
   it.each<Record<string, string>>([{}, { 'retry-after': 'soon' }, { 'retry-after': '0' }])(

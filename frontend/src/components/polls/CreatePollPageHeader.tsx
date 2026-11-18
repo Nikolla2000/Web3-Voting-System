@@ -8,8 +8,8 @@ export function CreatePollPageHeader() {
         Create a poll
       </h1>
       <p className="mt-3 text-balance text-base leading-relaxed text-slate-500">
-        Set up a new poll for the community to vote on. You&apos;ll be able to share it as soon as it&apos;s
-        live.
+        Set up a new poll for the community to vote on. You&apos;ll be able to share it as soon as
+        it&apos;s live.
       </p>
     </div>
   );

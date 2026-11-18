@@ -14,7 +14,11 @@ export function PollVoteSignInPrompt({ pollId }: PollVoteSignInPromptProps) {
         <p>Sign in to cast an anonymous, zero-knowledge vote on this poll.</p>
       </div>
       {/* Back to this poll afterwards, ready to vote. */}
-      <Button href={authHref('/sign-in', `/polls/${pollId}`)} variant="primary" className="shrink-0">
+      <Button
+        href={authHref('/sign-in', `/polls/${pollId}`)}
+        variant="primary"
+        className="shrink-0"
+      >
         Sign in to vote
       </Button>
     </div>

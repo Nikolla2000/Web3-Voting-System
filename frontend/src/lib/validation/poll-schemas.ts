@@ -11,7 +11,7 @@ export const POLL_CATEGORY_VALUES = [
   'finance',
   'politics',
   'education',
-  'other'
+  'other',
 ] as const;
 
 export const MIN_POLL_END_LEAD_HOURS = 24;
@@ -40,7 +40,10 @@ export const createPollSchema = z
       .max(2000, 'Description must be under 2000 characters'),
     image: z
       .instanceof(File, { message: 'Please choose a cover image' })
-      .refine((file) => IMAGE_ALLOWED_TYPES.includes(file.type), 'Please choose a JPG, PNG or WEBP image.')
+      .refine(
+        (file) => IMAGE_ALLOWED_TYPES.includes(file.type),
+        'Please choose a JPG, PNG or WEBP image.',
+      )
       .refine((file) => file.size <= IMAGE_MAX_SIZE_BYTES, 'Image must be under 5MB.'),
     category: z.enum(POLL_CATEGORY_VALUES, { message: 'Select a category' }),
     startsAt: z.string().min(1, 'Start date is required'),
@@ -55,23 +58,35 @@ export const createPollSchema = z
           const key = normalizeOption(option.value);
           if (!key) return;
           if (seen.has(key)) {
-            ctx.addIssue({ code: 'custom', message: 'Each option must be different', path: [index, 'value'] });
+            ctx.addIssue({
+              code: 'custom',
+              message: 'Each option must be different',
+              path: [index, 'value'],
+            });
           }
           seen.add(key);
         });
       }),
   })
-  .refine((data) => new Date(data.startsAt).getTime() >= Date.now() - START_DATE_GRACE_MINUTES * 60 * 1000, {
-    message: "Start date can't be in the past",
-    path: ['startsAt'],
-  })
+  .refine(
+    (data) =>
+      new Date(data.startsAt).getTime() >= Date.now() - START_DATE_GRACE_MINUTES * 60 * 1000,
+    {
+      message: "Start date can't be in the past",
+      path: ['startsAt'],
+    },
+  )
   .refine((data) => new Date(data.endsAt).getTime() > new Date(data.startsAt).getTime(), {
     message: 'End date must be after the start date',
     path: ['endsAt'],
   })
-  .refine((data) => new Date(data.endsAt).getTime() >= Date.now() + MIN_POLL_END_LEAD_HOURS * 60 * 60 * 1000, {
-    message: 'End date must be at least 24 hours from now',
-    path: ['endsAt'],
-  });
+  .refine(
+    (data) =>
+      new Date(data.endsAt).getTime() >= Date.now() + MIN_POLL_END_LEAD_HOURS * 60 * 60 * 1000,
+    {
+      message: 'End date must be at least 24 hours from now',
+      path: ['endsAt'],
+    },
+  );
 
 export type CreatePollFormValues = z.infer<typeof createPollSchema>;

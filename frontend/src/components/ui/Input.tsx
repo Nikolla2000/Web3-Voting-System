@@ -7,7 +7,18 @@ interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(
-  ({ label, error, id, name, 'aria-describedby': ariaDescribedBy, 'aria-invalid': ariaInvalid, ...props }, ref) => {
+  (
+    {
+      label,
+      error,
+      id,
+      name,
+      'aria-describedby': ariaDescribedBy,
+      'aria-invalid': ariaInvalid,
+      ...props
+    },
+    ref,
+  ) => {
     const { controlId, errorId, controlProps } = useFieldA11y({
       id,
       name,

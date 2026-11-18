@@ -1,6 +1,9 @@
 import axios from 'axios';
 
-export function getApiErrorMessage(error: unknown, fallback = 'Something went wrong. Please try again.'): string {
+export function getApiErrorMessage(
+  error: unknown,
+  fallback = 'Something went wrong. Please try again.',
+): string {
   if (axios.isAxiosError(error)) {
     if (error.response?.status === 429) {
       const retryAfterSeconds = Number(error.response.headers?.['retry-after']);
@@ -11,7 +14,8 @@ export function getApiErrorMessage(error: unknown, fallback = 'Something went wr
 
     const message = error.response?.data?.message;
     if (typeof message === 'string') return message;
-    if (Array.isArray(message) && message.length > 0 && typeof message[0] === 'string') return message[0];
+    if (Array.isArray(message) && message.length > 0 && typeof message[0] === 'string')
+      return message[0];
   }
   return fallback;
 }

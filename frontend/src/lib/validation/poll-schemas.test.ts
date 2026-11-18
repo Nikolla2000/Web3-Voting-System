@@ -37,7 +37,9 @@ function optionMessages(values: unknown): Record<number, string[]> {
 
 function messagesFor(values: unknown, field: string): string[] {
   const result = createPollSchema.safeParse(values);
-  return result.success ? [] : result.error.issues.filter((i) => i.path[0] === field).map((i) => i.message);
+  return result.success
+    ? []
+    : result.error.issues.filter((i) => i.path[0] === field).map((i) => i.message);
 }
 
 // The 24h-lead rule reads Date.now(), so pin the clock to keep these deterministic.
@@ -69,7 +71,10 @@ describe('createPollSchema', () => {
     });
 
     it('rejects an end date before the start date', () => {
-      const messages = messagesFor({ ...validPoll(), startsAt: at(72 * HOUR), endsAt: at(48 * HOUR) }, 'endsAt');
+      const messages = messagesFor(
+        { ...validPoll(), startsAt: at(72 * HOUR), endsAt: at(48 * HOUR) },
+        'endsAt',
+      );
       expect(messages).toContain('End date must be after the start date');
     });
 
@@ -82,7 +87,9 @@ describe('createPollSchema', () => {
 
     it('measures the 24h lead from now, not from the start date', () => {
       // Starts in a week, ends 2h after starting: well past now + 24h, so valid.
-      expect(messagesFor({ ...validPoll(), startsAt: at(168 * HOUR), endsAt: at(170 * HOUR) }, 'endsAt')).toEqual([]);
+      expect(
+        messagesFor({ ...validPoll(), startsAt: at(168 * HOUR), endsAt: at(170 * HOUR) }, 'endsAt'),
+      ).toEqual([]);
     });
   });
 
@@ -98,14 +105,21 @@ describe('createPollSchema', () => {
     });
 
     it('accepts exactly 5MB and rejects one byte more', () => {
-      expect(messagesFor({ ...validPoll(), image: image('image/png', IMAGE_MAX_SIZE_BYTES) }, 'image')).toEqual([]);
-      expect(messagesFor({ ...validPoll(), image: image('image/png', IMAGE_MAX_SIZE_BYTES + 1) }, 'image')).toEqual([
-        'Image must be under 5MB.',
-      ]);
+      expect(
+        messagesFor({ ...validPoll(), image: image('image/png', IMAGE_MAX_SIZE_BYTES) }, 'image'),
+      ).toEqual([]);
+      expect(
+        messagesFor(
+          { ...validPoll(), image: image('image/png', IMAGE_MAX_SIZE_BYTES + 1) },
+          'image',
+        ),
+      ).toEqual(['Image must be under 5MB.']);
     });
 
     it('requires an image to be chosen', () => {
-      expect(messagesFor({ ...validPoll(), image: undefined }, 'image')).toEqual(['Please choose a cover image']);
+      expect(messagesFor({ ...validPoll(), image: undefined }, 'image')).toEqual([
+        'Please choose a cover image',
+      ]);
     });
   });
 
@@ -117,13 +131,20 @@ describe('createPollSchema', () => {
     });
 
     it('rejects a whitespace-only option as blank', () => {
-      expect(optionMessages({ ...validPoll(), options: [{ value: 'Lisbon' }, { value: '   ' }] })).toEqual({
+      expect(
+        optionMessages({ ...validPoll(), options: [{ value: 'Lisbon' }, { value: '   ' }] }),
+      ).toEqual({
         1: ['Option text is required'],
       });
     });
 
     it('rejects duplicate options, ignoring case and surrounding spaces, flagging each repeat', () => {
-      const options = [{ value: 'Lisbon' }, { value: 'Prague' }, { value: ' lisbon ' }, { value: 'LISBON' }];
+      const options = [
+        { value: 'Lisbon' },
+        { value: 'Prague' },
+        { value: ' lisbon ' },
+        { value: 'LISBON' },
+      ];
       expect(optionMessages({ ...validPoll(), options })).toEqual({
         2: ['Each option must be different'],
         3: ['Each option must be different'],
@@ -150,17 +171,21 @@ describe('createPollSchema', () => {
     });
 
     it('does not let padding satisfy the title minimum', () => {
-      expect(messagesFor({ ...validPoll(), title: '  ab   ' }, 'title')).toEqual(['Title must be at least 5 characters']);
+      expect(messagesFor({ ...validPoll(), title: '  ab   ' }, 'title')).toEqual([
+        'Title must be at least 5 characters',
+      ]);
     });
 
     it('rejects a blank option', () => {
-      expect(messagesFor({ ...validPoll(), options: [{ value: 'Lisbon' }, { value: '' }] }, 'options')).toEqual([
-        'Option text is required',
-      ]);
+      expect(
+        messagesFor({ ...validPoll(), options: [{ value: 'Lisbon' }, { value: '' }] }, 'options'),
+      ).toEqual(['Option text is required']);
     });
   });
 
   it('rejects an unknown category', () => {
-    expect(messagesFor({ ...validPoll(), category: 'gaming' }, 'category')).toEqual(['Select a category']);
+    expect(messagesFor({ ...validPoll(), category: 'gaming' }, 'category')).toEqual([
+      'Select a category',
+    ]);
   });
 });

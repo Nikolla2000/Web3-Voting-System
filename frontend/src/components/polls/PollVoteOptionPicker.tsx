@@ -8,7 +8,12 @@ interface PollVoteOptionPickerProps {
   disabled?: boolean;
 }
 
-export function PollVoteOptionPicker({ options, selectedOptionId, onSelect, disabled }: PollVoteOptionPickerProps) {
+export function PollVoteOptionPicker({
+  options,
+  selectedOptionId,
+  onSelect,
+  disabled,
+}: PollVoteOptionPickerProps) {
   return (
     <div className="flex flex-col gap-2.5" role="radiogroup">
       {options.map((option) => {

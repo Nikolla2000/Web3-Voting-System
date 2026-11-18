@@ -37,7 +37,10 @@ export function ChatPanel() {
     } catch {
       setMessages((prev) => {
         const next = [...prev];
-        next[next.length - 1] = { role: 'model', content: "Sorry, I couldn't get an answer that time." };
+        next[next.length - 1] = {
+          role: 'model',
+          content: "Sorry, I couldn't get an answer that time.",
+        };
         return next;
       });
     } finally {
@@ -49,7 +52,9 @@ export function ChatPanel() {
     <div className="flex h-[28rem] w-80 flex-col overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-[0_24px_60px_-20px_rgba(79,70,229,0.35)] sm:w-96">
       <div className="border-b border-slate-100 px-4 py-3">
         <p className="text-sm font-semibold text-slate-800">Ask about polls</p>
-        <p className="text-xs text-slate-400">Vote counts, dates, status — grounded in live data.</p>
+        <p className="text-xs text-slate-400">
+          Vote counts, dates, status — grounded in live data.
+        </p>
       </div>
 
       {/* A log region: new messages are announced politely, and aria-busy holds the announcement
@@ -71,7 +76,10 @@ export function ChatPanel() {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="flex items-center gap-2 border-t border-slate-100 p-3">
+      <form
+        onSubmit={handleSubmit}
+        className="flex items-center gap-2 border-t border-slate-100 p-3"
+      >
         <input
           type="text"
           value={input}

@@ -13,7 +13,7 @@ export function Navbar() {
     useShallow((state) => ({
       user: state.user,
       status: state.status,
-    }))
+    })),
   );
 
   return (
@@ -21,9 +21,7 @@ export function Navbar() {
       <nav className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 lg:px-8">
         <Link href="/" className="flex items-center gap-2.5">
           <Image src="/logo-static.png" alt="VoteChain logo" width={30} height={30} priority />
-          <span className="text-[15px] font-semibold tracking-tight text-slate-900">
-            VoteChain
-          </span>
+          <span className="text-[15px] font-semibold tracking-tight text-slate-900">VoteChain</span>
         </Link>
 
         <div className="hidden items-center gap-8 md:flex">
@@ -52,11 +50,7 @@ export function Navbar() {
                 Sign in
               </Button>
 
-              <Button
-                href="/register"
-                variant="primary"
-                className="!px-5 !py-2.5 text-[13px]"
-              >
+              <Button href="/register" variant="primary" className="!px-5 !py-2.5 text-[13px]">
                 Register
               </Button>
             </>

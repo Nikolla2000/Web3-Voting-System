@@ -10,7 +10,12 @@ interface PollsAiSearchBarProps {
   isActive: boolean;
 }
 
-export function PollsAiSearchBar({ onSearch, onClear, isSearching, isActive }: PollsAiSearchBarProps) {
+export function PollsAiSearchBar({
+  onSearch,
+  onClear,
+  isSearching,
+  isActive,
+}: PollsAiSearchBarProps) {
   const [value, setValue] = useState('');
 
   const handleSubmit = (event: FormEvent) => {

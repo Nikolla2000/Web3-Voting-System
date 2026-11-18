@@ -27,7 +27,9 @@ export function PollCard({ poll }: PollCardProps) {
   const hiddenOptionsCount = poll.options.length - visibleOptions.length;
 
   const deadlineLabel =
-    status === 'upcoming' ? formatStartCountdown(poll.startsAt) : formatDeadline(poll.endsAt, status);
+    status === 'upcoming'
+      ? formatStartCountdown(poll.startsAt)
+      : formatDeadline(poll.endsAt, status);
 
   return (
     <Link
@@ -54,8 +56,12 @@ export function PollCard({ poll }: PollCardProps) {
 
       <div className="flex flex-1 flex-col gap-4 p-5">
         <div>
-          <h3 className="font-display text-lg font-semibold leading-snug text-slate-900">{poll.title}</h3>
-          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-500">{poll.description}</p>
+          <h3 className="font-display text-lg font-semibold leading-snug text-slate-900">
+            {poll.title}
+          </h3>
+          <p className="mt-1.5 line-clamp-2 text-sm leading-relaxed text-slate-500">
+            {poll.description}
+          </p>
         </div>
 
         <div className="flex flex-col gap-2.5">
@@ -68,7 +74,9 @@ export function PollCard({ poll }: PollCardProps) {
             />
           ))}
           {hiddenOptionsCount > 0 && (
-            <span className="text-xs font-medium text-slate-400">+{hiddenOptionsCount} more options</span>
+            <span className="text-xs font-medium text-slate-400">
+              +{hiddenOptionsCount} more options
+            </span>
           )}
         </div>
 

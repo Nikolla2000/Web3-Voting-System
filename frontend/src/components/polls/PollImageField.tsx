@@ -21,9 +21,12 @@ export function PollImageField({ control, error }: PollImageFieldProps) {
   const errorId = `${baseId}-error`;
 
   // Revoke the object URL when the component unmounts or the preview changes
-  useEffect(() => () => {
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-  }, [previewUrl]);
+  useEffect(
+    () => () => {
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
+    },
+    [previewUrl],
+  );
 
   return (
     <Controller

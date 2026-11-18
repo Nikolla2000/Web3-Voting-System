@@ -9,7 +9,12 @@ interface ProfileAvatarPreviewProps {
   className?: string;
 }
 
-export function ProfileAvatarPreview({ avatarUrl, username, size = 64, className = '' }: ProfileAvatarPreviewProps) {
+export function ProfileAvatarPreview({
+  avatarUrl,
+  username,
+  size = 64,
+  className = '',
+}: ProfileAvatarPreviewProps) {
   const [failedToLoad, setFailedToLoad] = useState(false);
   const initials = username.slice(0, 2).toUpperCase();
   const style = { width: size, height: size };

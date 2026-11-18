@@ -24,12 +24,20 @@ const ACTIVE_POLL_REFETCH_INTERVAL_MS = 15_000;
 export default function PollDetailPage({ params }: PollDetailPageProps) {
   const { id } = use(params);
 
-  const { data: poll, isPending, isError, error, refetch } = useQuery({
+  const {
+    data: poll,
+    isPending,
+    isError,
+    error,
+    refetch,
+  } = useQuery({
     queryKey: ['poll', id],
     queryFn: () => fetchPollById(id),
     refetchInterval: (query) => {
       const currentPoll = query.state.data;
-      return currentPoll && getPollStatus(currentPoll) === 'active' ? ACTIVE_POLL_REFETCH_INTERVAL_MS : false;
+      return currentPoll && getPollStatus(currentPoll) === 'active'
+        ? ACTIVE_POLL_REFETCH_INTERVAL_MS
+        : false;
     },
   });
 

@@ -19,8 +19,12 @@ async function fillCreatePollForm(page: Page, title = 'Which park needs new benc
   // and its "Search polls by title" box would otherwise take the title.
   await expect(page.getByRole('heading', { level: 1, name: 'Create a poll' })).toBeVisible();
   await page.getByLabel('Title', { exact: true }).fill(title);
-  await page.getByLabel('Description', { exact: true }).fill('The city has budget for one park this year.');
-  await page.locator('input[type="file"]').setInputFiles({ name: 'cover.png', mimeType: 'image/png', buffer: PNG_BYTES });
+  await page
+    .getByLabel('Description', { exact: true })
+    .fill('The city has budget for one park this year.');
+  await page
+    .locator('input[type="file"]')
+    .setInputFiles({ name: 'cover.png', mimeType: 'image/png', buffer: PNG_BYTES });
   await page.getByLabel('Category').selectOption('lifestyle');
   await page.getByLabel('Starts at').fill(localDateTime(60 * 60 * 1000));
   await page.getByLabel('Ends at').fill(localDateTime(5 * DAY));
@@ -30,7 +34,12 @@ async function fillCreatePollForm(page: Page, title = 'Which park needs new benc
 
 test.describe('browsing polls', () => {
   test('lists polls, narrows by title, and opens one', async ({ page, gateway }) => {
-    const city = gateway.addPoll({ options: [['Lisbon', 7], ['Prague', 3]] });
+    const city = gateway.addPoll({
+      options: [
+        ['Lisbon', 7],
+        ['Prague', 3],
+      ],
+    });
     gateway.addPoll({ title: 'Favourite programming language', category: 'TECH_SCIENCE' });
 
     await page.goto('/polls');
@@ -55,14 +64,21 @@ test.describe('browsing polls', () => {
     ];
 
     await page.goto('/polls');
-    await page.getByRole('textbox', { name: 'Describe the polls you are looking for' }).fill('getting around town');
+    await page
+      .getByRole('textbox', { name: 'Describe the polls you are looking for' })
+      .fill('getting around town');
     await page.getByRole('button', { name: 'Search' }).click();
 
     await expect(page.getByRole('heading', { level: 3 })).toHaveText([trains.title, bikes.title]);
-    expect(gateway.requestsTo('POST', '/polls/search').map((r) => r.json)).toEqual([{ query: 'getting around town' }]);
+    expect(gateway.requestsTo('POST', '/polls/search').map((r) => r.json)).toEqual([
+      { query: 'getting around town' },
+    ]);
   });
 
-  test('“Sign in to vote” brings you back to the poll, ready to vote', async ({ page, gateway }) => {
+  test('“Sign in to vote” brings you back to the poll, ready to vote', async ({
+    page,
+    gateway,
+  }) => {
     gateway.addUser();
     const poll = gateway.addPoll();
     await page.goto(`/polls/${poll.id}`);
@@ -82,12 +98,17 @@ test.describe('creating a poll', () => {
     await gateway.signIn(context, gateway.addUser());
   });
 
-  test('uploads the cover as real multipart, creates the poll and opens it', async ({ page, gateway }) => {
+  test('uploads the cover as real multipart, creates the poll and opens it', async ({
+    page,
+    gateway,
+  }) => {
     await page.goto('/polls/create');
     await fillCreatePollForm(page);
     await page.getByRole('button', { name: 'Create poll' }).click();
 
-    await expect(page.getByRole('heading', { level: 1, name: 'Which park needs new benches?' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Which park needs new benches?' }),
+    ).toBeVisible();
     const created = gateway.polls[0]!;
     await expect(page).toHaveURL(`/polls/${created.id}`);
 
@@ -105,10 +126,15 @@ test.describe('creating a poll', () => {
       imageUrl: created.imageUrl,
     });
     // The local datetime-local values went out as UTC instants.
-    expect((create!.json as { startsAt: string }).startsAt).toMatch(/^\d{4}-\d\d-\d\dT\d\d:\d\d:00\.000Z$/);
+    expect((create!.json as { startsAt: string }).startsAt).toMatch(
+      /^\d{4}-\d\d-\d\dT\d\d:\d\d:00\.000Z$/,
+    );
   });
 
-  test('warns about a likely duplicate first, and creates only when told to', async ({ page, gateway }) => {
+  test('warns about a likely duplicate first, and creates only when told to', async ({
+    page,
+    gateway,
+  }) => {
     const existing = gateway.addPoll({ title: 'Which park should get benches?' });
     gateway.duplicateMatches = [{ pollId: existing.id, title: existing.title, similarity: 0.93 }];
 
@@ -116,12 +142,17 @@ test.describe('creating a poll', () => {
     await fillCreatePollForm(page);
     await page.getByRole('button', { name: 'Create poll' }).click();
 
-    await expect(page.getByRole('link', { name: existing.title })).toHaveAttribute('href', `/polls/${existing.id}`);
+    await expect(page.getByRole('link', { name: existing.title })).toHaveAttribute(
+      'href',
+      `/polls/${existing.id}`,
+    );
     expect(gateway.requestsTo('POST', '/polls')).toHaveLength(0);
     expect(gateway.requestsTo('POST', '/polls/images')).toHaveLength(0); // nothing lands in R2 yet
 
     await page.getByRole('button', { name: 'Create anyway' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Which park needs new benches?' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Which park needs new benches?' }),
+    ).toBeVisible();
     expect(gateway.requestsTo('POST', '/polls')).toHaveLength(1);
   });
 
@@ -130,14 +161,21 @@ test.describe('creating a poll', () => {
     await page.goto('/polls');
     await expect(page.getByRole('heading', { level: 3 })).toHaveCount(1);
 
-    await page.getByRole('link', { name: /create/i }).first().click();
+    await page
+      .getByRole('link', { name: /create/i })
+      .first()
+      .click();
     await fillCreatePollForm(page);
     await page.getByRole('button', { name: 'Create poll' }).click();
-    await expect(page.getByRole('heading', { level: 1, name: 'Which park needs new benches?' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Which park needs new benches?' }),
+    ).toBeVisible();
     // Client-side, as a user would. (This doesn't pin down CreatePollForm's invalidateQueries:
     // with react-query's default staleTime of 0 the list refetches on mount regardless.)
     await page.getByRole('navigation').getByRole('link', { name: 'Polls' }).click();
 
-    await expect(page.getByRole('heading', { level: 3, name: 'Which park needs new benches?' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { level: 3, name: 'Which park needs new benches?' }),
+    ).toBeVisible();
   });
 });

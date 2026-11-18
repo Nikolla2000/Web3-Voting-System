@@ -33,7 +33,11 @@ beforeEach(() => {
 describe('auth store', () => {
   it('starts idle with no user or token', async () => {
     const { useAuthStore } = await setup();
-    expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'idle' });
+    expect(snapshot(useAuthStore.getState())).toEqual({
+      user: null,
+      accessToken: null,
+      status: 'idle',
+    });
   });
 
   describe('bootstrap', () => {
@@ -73,7 +77,11 @@ describe('auth store', () => {
 
       await useAuthStore.getState().bootstrap();
 
-      expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'unauthenticated' });
+      expect(snapshot(useAuthStore.getState())).toEqual({
+        user: null,
+        accessToken: null,
+        status: 'unauthenticated',
+      });
       expect(api.fetchMe).not.toHaveBeenCalled();
     });
 
@@ -86,7 +94,11 @@ describe('auth store', () => {
 
       await useAuthStore.getState().bootstrap();
 
-      expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'unauthenticated' });
+      expect(snapshot(useAuthStore.getState())).toEqual({
+        user: null,
+        accessToken: null,
+        status: 'unauthenticated',
+      });
     });
   });
 
@@ -98,7 +110,11 @@ describe('auth store', () => {
       await useAuthStore.getState().login({ email: user.email, password: 'Secret123' });
 
       expect(api.loginRequest).toHaveBeenCalledWith({ email: user.email, password: 'Secret123' });
-      expect(snapshot(useAuthStore.getState())).toEqual({ user, accessToken: 'access-1', status: 'authenticated' });
+      expect(snapshot(useAuthStore.getState())).toEqual({
+        user,
+        accessToken: 'access-1',
+        status: 'authenticated',
+      });
     });
 
     it('rethrows on failure (so the form can show the error) and leaves state untouched', async () => {
@@ -106,8 +122,14 @@ describe('auth store', () => {
       const failure = new Error('Invalid credentials');
       api.loginRequest.mockRejectedValue(failure);
 
-      await expect(useAuthStore.getState().login({ email: user.email, password: 'x' })).rejects.toBe(failure);
-      expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'idle' });
+      await expect(
+        useAuthStore.getState().login({ email: user.email, password: 'x' }),
+      ).rejects.toBe(failure);
+      expect(snapshot(useAuthStore.getState())).toEqual({
+        user: null,
+        accessToken: null,
+        status: 'idle',
+      });
     });
   });
 
@@ -118,9 +140,15 @@ describe('auth store', () => {
       const { api, useAuthStore } = await setup();
       api.registerRequest.mockResolvedValue(authResponse);
 
-      await useAuthStore.getState().register({ username: 'alice', email: user.email, password: 'Secret123' });
+      await useAuthStore
+        .getState()
+        .register({ username: 'alice', email: user.email, password: 'Secret123' });
 
-      expect(snapshot(useAuthStore.getState())).toEqual({ user, accessToken: 'access-1', status: 'authenticated' });
+      expect(snapshot(useAuthStore.getState())).toEqual({
+        user,
+        accessToken: 'access-1',
+        status: 'authenticated',
+      });
     });
   });
 
@@ -133,7 +161,11 @@ describe('auth store', () => {
       await useAuthStore.getState().logout();
 
       expect(api.logoutRequest).toHaveBeenCalledOnce();
-      expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'unauthenticated' });
+      expect(snapshot(useAuthStore.getState())).toEqual({
+        user: null,
+        accessToken: null,
+        status: 'unauthenticated',
+      });
     });
 
     // Regression: a failed server call used to reject before clearing anything, leaving the user
@@ -145,7 +177,11 @@ describe('auth store', () => {
 
       await expect(useAuthStore.getState().logout()).resolves.toBeUndefined();
 
-      expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'unauthenticated' });
+      expect(snapshot(useAuthStore.getState())).toEqual({
+        user: null,
+        accessToken: null,
+        status: 'unauthenticated',
+      });
     });
   });
 
@@ -158,13 +194,22 @@ describe('auth store', () => {
 
       useAuthStore.getState().handleSessionExpired();
 
-      expect(snapshot(useAuthStore.getState())).toEqual({ user: null, accessToken: null, status: 'unauthenticated' });
+      expect(snapshot(useAuthStore.getState())).toEqual({
+        user: null,
+        accessToken: null,
+        status: 'unauthenticated',
+      });
       expect(assign).toHaveBeenCalledWith('/sign-in');
     });
 
     it('brings the user back to the page they were on once they sign in again', async () => {
       const assign = vi.fn();
-      vi.stubGlobal('location', { pathname: '/polls/abc', search: '?tab=results', hash: '', assign });
+      vi.stubGlobal('location', {
+        pathname: '/polls/abc',
+        search: '?tab=results',
+        hash: '',
+        assign,
+      });
       const { useAuthStore } = await setup();
 
       useAuthStore.getState().handleSessionExpired();

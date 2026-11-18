@@ -1,6 +1,10 @@
 export function PollsLoadingState() {
   return (
-    <div role="status" aria-label="Loading polls" className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
+    <div
+      role="status"
+      aria-label="Loading polls"
+      className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3"
+    >
       {Array.from({ length: 6 }).map((_, index) => (
         <div
           key={index}
@@ -15,7 +19,10 @@ export function PollsLoadingState() {
             </div>
             <div className="space-y-2.5">
               {Array.from({ length: 3 }).map((__, barIndex) => (
-                <div key={barIndex} className="h-1.5 w-full animate-pulse rounded-full bg-slate-100" />
+                <div
+                  key={barIndex}
+                  className="h-1.5 w-full animate-pulse rounded-full bg-slate-100"
+                />
               ))}
             </div>
           </div>

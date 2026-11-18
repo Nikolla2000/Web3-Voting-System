@@ -3,7 +3,12 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { AxiosError } from 'axios';
 import { AvatarUploadControl } from '@/components/profile/AvatarUploadControl';
-import { confirmAvatar, deleteAvatar, requestAvatarUploadUrl, uploadAvatarFile } from '@/lib/api/users';
+import {
+  confirmAvatar,
+  deleteAvatar,
+  requestAvatarUploadUrl,
+  uploadAvatarFile,
+} from '@/lib/api/users';
 import { useAuthStore } from '@/lib/store/auth-store';
 import { IMAGE_MAX_SIZE_BYTES } from '@/lib/validation/image-upload';
 import { apiError, deferred } from '@/test/axios-adapter';
@@ -17,7 +22,11 @@ vi.mock('@/lib/api/users', () => ({
   deleteAvatar: vi.fn(),
 }));
 
-const TARGET = { uploadUrl: 'https://r2.example/presigned', key: 'avatars/u1/abc.png', publicUrl: 'https://cdn/abc.png' };
+const TARGET = {
+  uploadUrl: 'https://r2.example/presigned',
+  key: 'avatars/u1/abc.png',
+  publicUrl: 'https://cdn/abc.png',
+};
 const png = (size = 2048) => new File([new Uint8Array(size)], 'me.png', { type: 'image/png' });
 
 function setup(avatarUrl: string | null = null) {
@@ -61,7 +70,11 @@ describe('AvatarUploadControl', () => {
   });
 
   it.each([
-    ['a non-image type', new File(['GIF89a'], 'a.gif', { type: 'image/gif' }), 'Please choose a JPG, PNG or WEBP image.'],
+    [
+      'a non-image type',
+      new File(['GIF89a'], 'a.gif', { type: 'image/gif' }),
+      'Please choose a JPG, PNG or WEBP image.',
+    ],
     ['a file over 5MB', png(IMAGE_MAX_SIZE_BYTES + 1), 'Image must be under 5MB.'],
   ])('rejects %s before any network call', async (_label, file, message) => {
     const { fileInput } = setup();
@@ -92,17 +105,24 @@ describe('AvatarUploadControl', () => {
 
     await choose(png());
 
-    await vi.waitFor(() => expect(screen.getByRole('button', { name: 'Change avatar' })).toBeDisabled());
+    await vi.waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Change avatar' })).toBeDisabled(),
+    );
     expect(screen.getByRole('button', { name: /remove photo/i })).toBeDisabled();
   });
 
   it('removes the photo and syncs the cleared avatar', async () => {
-    useAuthStore.setState((s) => ({ user: s.user && { ...s.user, avatar: 'https://cdn/old.png' } }));
+    useAuthStore.setState((s) => ({
+      user: s.user && { ...s.user, avatar: 'https://cdn/old.png' },
+    }));
     const updated = profileFixture({ avatar: null });
     vi.mocked(deleteAvatar).mockResolvedValue(updated);
     const { user, queryClient } = setup('https://cdn/old.png');
 
-    expect(screen.getByRole('img', { name: "alice's avatar" })).toHaveAttribute('src', 'https://cdn/old.png');
+    expect(screen.getByRole('img', { name: "alice's avatar" })).toHaveAttribute(
+      'src',
+      'https://cdn/old.png',
+    );
     await user.click(screen.getByRole('button', { name: /remove photo/i }));
 
     await vi.waitFor(() => expect(useAuthStore.getState().user?.avatar).toBeNull());
@@ -120,7 +140,9 @@ describe('AvatarUploadControl', () => {
     await user.click(screen.getByRole('button', { name: /remove photo/i }));
 
     await vi.waitFor(() => expect(deleteAvatar).toHaveBeenCalled());
-    await vi.waitFor(() => expect(screen.queryByText('Image must be under 5MB.')).not.toBeInTheDocument());
+    await vi.waitFor(() =>
+      expect(screen.queryByText('Image must be under 5MB.')).not.toBeInTheDocument(),
+    );
   });
 
   it('shows the server’s message when removal fails', async () => {

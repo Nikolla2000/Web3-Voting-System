@@ -5,9 +5,18 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { createPollSchema, MIN_POLL_END_LEAD_HOURS, type CreatePollFormValues } from '@/lib/validation/poll-schemas';
+import {
+  createPollSchema,
+  MIN_POLL_END_LEAD_HOURS,
+  type CreatePollFormValues,
+} from '@/lib/validation/poll-schemas';
 import { createPoll, uploadPollImage, type CreatePollPayload } from '@/lib/api/polls';
-import { checkDuplicatePoll, checkPollNeutrality, type DuplicatePollMatch, type NeutralityIssue } from '@/lib/api/ai';
+import {
+  checkDuplicatePoll,
+  checkPollNeutrality,
+  type DuplicatePollMatch,
+  type NeutralityIssue,
+} from '@/lib/api/ai';
 import { getApiErrorMessage } from '@/lib/api/errors';
 import { POLL_CATEGORY_LABELS } from '@/lib/polls/utils';
 import type { PollCategory } from '@/types/poll';
@@ -19,7 +28,10 @@ import { PollOptionsField } from '@/components/polls/PollOptionsField';
 import { PollImageField } from '@/components/polls/PollImageField';
 import { PollPreflightWarnings } from '@/components/polls/PollPreflightWarnings';
 
-const CATEGORY_OPTIONS = Object.entries(POLL_CATEGORY_LABELS).map(([value, label]) => ({ value, label }));
+const CATEGORY_OPTIONS = Object.entries(POLL_CATEGORY_LABELS).map(([value, label]) => ({
+  value,
+  label,
+}));
 
 function toDatetimeLocalValue(date: Date): string {
   const pad = (value: number) => String(value).padStart(2, '0');
@@ -156,7 +168,9 @@ export function CreatePollForm() {
 
       <PollOptionsField control={control} errors={errors} register={register} />
 
-      {submitError && <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>}
+      {submitError && (
+        <p className="rounded-lg bg-red-50 px-4 py-2 text-sm text-red-600">{submitError}</p>
+      )}
 
       {pendingValues ? (
         <PollPreflightWarnings
@@ -177,7 +191,11 @@ export function CreatePollForm() {
           className="mt-1 w-full"
           disabled={mutation.isPending || isPreflightChecking}
         >
-          {isPreflightChecking ? 'Checking your poll…' : mutation.isPending ? 'Creating poll…' : 'Create poll'}
+          {isPreflightChecking
+            ? 'Checking your poll…'
+            : mutation.isPending
+              ? 'Creating poll…'
+              : 'Create poll'}
         </Button>
       )}
     </form>

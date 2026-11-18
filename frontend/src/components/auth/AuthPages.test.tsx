@@ -35,10 +35,16 @@ describe('sign-in and register pages', () => {
 
   it('keeps ?next when switching between sign in and register', async () => {
     await renderPage(SignInPage, { next: '/profile' });
-    expect(screen.getByRole('link', { name: 'Register' })).toHaveAttribute('href', '/register?next=%2Fprofile');
+    expect(screen.getByRole('link', { name: 'Register' })).toHaveAttribute(
+      'href',
+      '/register?next=%2Fprofile',
+    );
 
     await renderPage(RegisterPage, { next: '/profile' });
-    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/sign-in?next=%2Fprofile');
+    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute(
+      'href',
+      '/sign-in?next=%2Fprofile',
+    );
   });
 
   it('ignores an off-site ?next: goes home after signing in, and does not pass it on', async () => {

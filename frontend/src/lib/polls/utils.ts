@@ -66,7 +66,10 @@ export function formatStartCountdown(startsAt: string): string {
   return `Starts ${formatRelative(diffMs)}`;
 }
 
-const compactNumber = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 });
+const compactNumber = new Intl.NumberFormat('en', {
+  notation: 'compact',
+  maximumFractionDigits: 1,
+});
 
 export function formatVoteCount(count: number): string {
   return compactNumber.format(count);
@@ -108,7 +111,8 @@ export function filterPolls(polls: Poll[], { query, status }: FilterPollsParams)
   const normalizedQuery = query.trim().toLowerCase();
 
   return polls.filter((poll) => {
-    const matchesQuery = normalizedQuery.length === 0 || poll.title.toLowerCase().includes(normalizedQuery);
+    const matchesQuery =
+      normalizedQuery.length === 0 || poll.title.toLowerCase().includes(normalizedQuery);
     const matchesStatus = status === 'all' || getPollStatus(poll) === status;
 
     return matchesQuery && matchesStatus;

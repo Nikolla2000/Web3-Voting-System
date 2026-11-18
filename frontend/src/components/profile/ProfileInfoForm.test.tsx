@@ -69,9 +69,15 @@ describe('ProfileInfoForm', () => {
     await user.click(save);
 
     expect(await screen.findByText('Profile updated.')).toBeInTheDocument();
-    expect(vi.mocked(updateProfile).mock.calls[0]![0]).toEqual({ username: 'alice_2', email: 'alice2@example.com' });
+    expect(vi.mocked(updateProfile).mock.calls[0]![0]).toEqual({
+      username: 'alice_2',
+      email: 'alice2@example.com',
+    });
     expect(queryClient.getQueryData(['profile'])).toEqual(updated);
-    expect(useAuthStore.getState().user).toMatchObject({ username: 'alice_2', email: 'alice2@example.com' });
+    expect(useAuthStore.getState().user).toMatchObject({
+      username: 'alice_2',
+      email: 'alice2@example.com',
+    });
     // The saved values become the new baseline, so there is nothing left to save.
     expect(save).toBeDisabled();
   });

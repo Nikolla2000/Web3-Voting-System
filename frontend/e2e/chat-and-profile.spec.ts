@@ -12,7 +12,9 @@ test.describe('poll assistant', () => {
 
   test('streams answers over SSE and sends the conversation so far', async ({ page, gateway }) => {
     gateway.chatReply = (message) =>
-      message.startsWith('Which') ? ['The bike lane poll ', 'has the most votes.'] : ['It ends on Friday.'];
+      message.startsWith('Which')
+        ? ['The bike lane poll ', 'has the most votes.']
+        : ['It ends on Friday.'];
     await page.goto('/polls');
 
     await page.getByRole('button', { name: 'Open poll assistant' }).click();
@@ -44,7 +46,9 @@ test.describe('poll assistant', () => {
     await page.getByPlaceholder('Ask a question…').fill('Hello?');
     await page.keyboard.press('Enter');
 
-    await expect(page.getByRole('log', { name: 'Conversation' })).toContainText('Assistant: Still here.');
+    await expect(page.getByRole('log', { name: 'Conversation' })).toContainText(
+      'Assistant: Still here.',
+    );
     const statuses = gateway.requestsTo('POST', '/polls/chat').length;
     expect(statuses).toBe(2); // the 401, then the retry after one refresh
   });
@@ -59,13 +63,19 @@ test.describe('poll assistant', () => {
 });
 
 test.describe('profile', () => {
-  test('uploads an avatar straight to the presigned URL, then confirms it', async ({ page, context, gateway }) => {
+  test('uploads an avatar straight to the presigned URL, then confirms it', async ({
+    page,
+    context,
+    gateway,
+  }) => {
     const user = gateway.addUser();
     await gateway.signIn(context, user);
     await page.goto('/profile');
     await expect(page.getByRole('heading', { level: 1, name: 'alice' })).toBeVisible();
 
-    await page.locator('input[type="file"]').setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: PNG_BYTES });
+    await page
+      .locator('input[type="file"]')
+      .setInputFiles({ name: 'me.png', mimeType: 'image/png', buffer: PNG_BYTES });
 
     await expect(page.getByRole('img', { name: "alice's avatar" }).first()).toBeVisible();
     const [put] = gateway.requestsTo('PUT', /^R2 \/avatars\//);
@@ -78,7 +88,10 @@ test.describe('profile', () => {
 });
 
 test.describe('signing out on a shared computer', () => {
-  test('the next person to sign in never sees the previous user’s cached profile', async ({ page, gateway }) => {
+  test('the next person to sign in never sees the previous user’s cached profile', async ({
+    page,
+    gateway,
+  }) => {
     gateway.addUser();
     gateway.addUser({ username: 'bob', email: 'bob@example.com' });
     const signIn = async (email: string) => {

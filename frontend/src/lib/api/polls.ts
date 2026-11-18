@@ -55,7 +55,9 @@ function mapPollResponse(raw: PollResponse): Poll {
   };
 }
 
-export async function fetchPolls(params: PollsQueryParams = {}): Promise<{ items: Poll[]; total: number }> {
+export async function fetchPolls(
+  params: PollsQueryParams = {},
+): Promise<{ items: Poll[]; total: number }> {
   const res = await apiClient.get<ApiResponse<PollsListResponse>>('/polls', { params });
   return {
     items: (res.data.data.items ?? []).map(mapPollResponse),

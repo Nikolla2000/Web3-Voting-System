@@ -72,9 +72,27 @@ describe('formatDeadline', () => {
 });
 
 describe('sortPolls / filterPolls', () => {
-  const a = poll({ id: 'a', title: 'Banana', startsAt: at(-3 * HOUR), endsAt: at(5 * HOUR), options: [option('x', 1)] });
-  const b = poll({ id: 'b', title: 'apple', startsAt: at(-1 * HOUR), endsAt: at(9 * HOUR), options: [option('x', 9)] });
-  const c = poll({ id: 'c', title: 'Cherry', startsAt: at(2 * HOUR), endsAt: at(3 * HOUR), options: [option('x', 4)] });
+  const a = poll({
+    id: 'a',
+    title: 'Banana',
+    startsAt: at(-3 * HOUR),
+    endsAt: at(5 * HOUR),
+    options: [option('x', 1)],
+  });
+  const b = poll({
+    id: 'b',
+    title: 'apple',
+    startsAt: at(-1 * HOUR),
+    endsAt: at(9 * HOUR),
+    options: [option('x', 9)],
+  });
+  const c = poll({
+    id: 'c',
+    title: 'Cherry',
+    startsAt: at(2 * HOUR),
+    endsAt: at(3 * HOUR),
+    options: [option('x', 4)],
+  });
   const polls = [a, b, c];
   const ids = (list: Poll[]) => list.map((p) => p.id);
 

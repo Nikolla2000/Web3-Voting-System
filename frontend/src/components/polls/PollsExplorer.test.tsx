@@ -16,7 +16,12 @@ const NOW = new Date('2026-06-01T12:00:00Z');
 const DAY = 24 * 60 * 60 * 1000;
 const at = (offsetDays: number) => new Date(NOW.getTime() + offsetDays * DAY).toISOString();
 
-const city = pollFixture({ id: 'city', title: 'Best city for a weekend trip?', startsAt: at(-2), endsAt: at(3) }); // active, 15 votes
+const city = pollFixture({
+  id: 'city',
+  title: 'Best city for a weekend trip?',
+  startsAt: at(-2),
+  endsAt: at(3),
+}); // active, 15 votes
 const language = pollFixture({
   id: 'language',
   title: 'Favourite programming language',
@@ -84,7 +89,9 @@ describe('PollsExplorer', () => {
     expect(screen.getByRole('status', { name: 'Loading polls' })).toBeInTheDocument();
     pending.resolve({ items: ALL, total: 4 });
 
-    expect(await screen.findByRole('heading', { name: 'Favourite programming language' })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: 'Favourite programming language' }),
+    ).toBeInTheDocument();
     expect(visibleTitles()).toEqual([
       'Favourite programming language',
       'Best pizza topping',
@@ -113,8 +120,14 @@ describe('PollsExplorer', () => {
     await user.click(within(filters).getByRole('button', { name: label }));
 
     expect(visibleTitles()).toEqual(titles);
-    expect(within(filters).getByRole('button', { name: label })).toHaveAttribute('aria-pressed', 'true');
-    expect(within(filters).getByRole('button', { name: 'All' })).toHaveAttribute('aria-pressed', 'false');
+    expect(within(filters).getByRole('button', { name: label })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    );
+    expect(within(filters).getByRole('button', { name: 'All' })).toHaveAttribute(
+      'aria-pressed',
+      'false',
+    );
   });
 
   it('combines the title search with the status filter', async () => {
@@ -127,9 +140,33 @@ describe('PollsExplorer', () => {
   });
 
   it.each([
-    ['Ending soon', ['Should the city add bike lanes?', 'Best pizza topping', 'Best city for a weekend trip?', 'Favourite programming language']],
-    ['Most votes', ['Should the city add bike lanes?', 'Best city for a weekend trip?', 'Best pizza topping', 'Favourite programming language']],
-    ['A – Z', ['Best city for a weekend trip?', 'Best pizza topping', 'Favourite programming language', 'Should the city add bike lanes?']],
+    [
+      'Ending soon',
+      [
+        'Should the city add bike lanes?',
+        'Best pizza topping',
+        'Best city for a weekend trip?',
+        'Favourite programming language',
+      ],
+    ],
+    [
+      'Most votes',
+      [
+        'Should the city add bike lanes?',
+        'Best city for a weekend trip?',
+        'Best pizza topping',
+        'Favourite programming language',
+      ],
+    ],
+    [
+      'A – Z',
+      [
+        'Best city for a weekend trip?',
+        'Best pizza topping',
+        'Favourite programming language',
+        'Should the city add bike lanes?',
+      ],
+    ],
   ])('sorts by %s', async (option, titles) => {
     const { user } = await setup();
 
@@ -177,7 +214,10 @@ describe('PollsExplorer', () => {
       await aiSearch('  transport in cities  ');
 
       await vi.waitFor(() =>
-        expect(visibleTitles()).toEqual(['Should the city add bike lanes?', 'Best city for a weekend trip?']),
+        expect(visibleTitles()).toEqual([
+          'Should the city add bike lanes?',
+          'Best city for a weekend trip?',
+        ]),
       );
       expect(searchPolls).toHaveBeenCalledWith('transport in cities');
       expect(vi.mocked(fetchPollById).mock.calls.map(([id]) => id)).toEqual(['bikes', 'city']);

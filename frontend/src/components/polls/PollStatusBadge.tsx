@@ -21,7 +21,9 @@ export function PollStatusBadge({ status }: PollStatusBadgeProps) {
         text,
       )}
     >
-      <span className={cn('h-1.5 w-1.5 rounded-full', dot, status === 'active' && 'animate-pulse')} />
+      <span
+        className={cn('h-1.5 w-1.5 rounded-full', dot, status === 'active' && 'animate-pulse')}
+      />
       {label}
     </span>
   );

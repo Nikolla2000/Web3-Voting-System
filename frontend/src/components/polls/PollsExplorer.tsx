@@ -21,13 +21,7 @@ export function PollsExplorer() {
   const [sortBy, setSortBy] = useState<PollSortOption>('newest');
   const [aiQuery, setAiQuery] = useState<string | null>(null);
 
-  const {
-    data,
-    isPending,
-    isError,
-    error,
-    refetch,
-  } = useQuery({
+  const { data, isPending, isError, error, refetch } = useQuery({
     queryKey: ['polls'],
     queryFn: () => fetchPolls({ limit: MAX_POLLS_PER_FETCH }),
     enabled: aiQuery === null,
@@ -70,7 +64,10 @@ export function PollsExplorer() {
         aiSearch.isPending ? (
           <PollsLoadingState />
         ) : aiSearch.isError ? (
-          <PollsErrorState message={getApiErrorMessage(aiSearch.error)} onRetry={() => aiSearch.refetch()} />
+          <PollsErrorState
+            message={getApiErrorMessage(aiSearch.error)}
+            onRetry={() => aiSearch.refetch()}
+          />
         ) : (
           <PollsGrid polls={aiSearch.data} hasActiveFilters />
         )

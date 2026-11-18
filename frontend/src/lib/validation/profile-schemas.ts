@@ -51,14 +51,10 @@ export const DEACTIVATE_CONFIRMATION_PHRASE: string = 'Deactivate my account';
 
 export function createDeactivateAccountSchema(requirePassword: boolean) {
   return z.object({
-    password: requirePassword
-      ? z.string().min(1, 'Password is required')
-      : z.string().optional(),
-    confirmText: z
-      .string()
-      .refine((value) => value === DEACTIVATE_CONFIRMATION_PHRASE, {
-        message: `Type "${DEACTIVATE_CONFIRMATION_PHRASE}" exactly to continue`,
-      }),
+    password: requirePassword ? z.string().min(1, 'Password is required') : z.string().optional(),
+    confirmText: z.string().refine((value) => value === DEACTIVATE_CONFIRMATION_PHRASE, {
+      message: `Type "${DEACTIVATE_CONFIRMATION_PHRASE}" exactly to continue`,
+    }),
   });
 }
 

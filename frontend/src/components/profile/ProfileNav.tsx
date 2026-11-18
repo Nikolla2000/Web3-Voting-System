@@ -43,7 +43,11 @@ export function ProfileNav({ active, onChange }: ProfileNavProps) {
           >
             <Icon
               className={`h-4 w-4 shrink-0 ${
-                isActive ? (isDanger ? 'text-red-500' : 'text-indigo-500') : 'text-slate-400 group-hover:text-slate-500'
+                isActive
+                  ? isDanger
+                    ? 'text-red-500'
+                    : 'text-indigo-500'
+                  : 'text-slate-400 group-hover:text-slate-500'
               }`}
             />
             <span className="whitespace-nowrap">{label}</span>

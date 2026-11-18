@@ -55,7 +55,9 @@ describe('RequireAuth', () => {
     useAuthStore.setState({ status: 'unauthenticated' });
     renderProtected();
 
-    expect(router.replace).toHaveBeenCalledExactlyOnceWith('/sign-in?next=%2Fpolls%2Fcreate%3Fcategory%3Dtravel');
+    expect(router.replace).toHaveBeenCalledExactlyOnceWith(
+      '/sign-in?next=%2Fpolls%2Fcreate%3Fcategory%3Dtravel',
+    );
   });
 
   it('redirects once the session check finishes and finds no session', () => {

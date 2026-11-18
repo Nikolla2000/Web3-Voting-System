@@ -29,7 +29,11 @@ describe('SignOutEverywhereCard', () => {
     await user.click(screen.getByRole('button', { name: 'Sign out everywhere' }));
 
     await vi.waitFor(() => expect(replace).toHaveBeenCalledWith('/sign-in'));
-    expect(useAuthStore.getState()).toMatchObject({ user: null, accessToken: null, status: 'unauthenticated' });
+    expect(useAuthStore.getState()).toMatchObject({
+      user: null,
+      accessToken: null,
+      status: 'unauthenticated',
+    });
   });
 
   it('stays signed in and explains when the request fails', async () => {

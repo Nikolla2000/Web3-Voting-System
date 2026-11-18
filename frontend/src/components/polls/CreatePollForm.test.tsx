@@ -55,7 +55,10 @@ function setup({ applyAccept = true } = {}) {
 
   const fillValid = async (overrides: { options?: string[]; file?: File } = {}) => {
     await user.type(screen.getByLabelText('Title'), 'Best city for a weekend trip?');
-    await user.type(screen.getByLabelText('Description'), 'Pick the city you would most like to visit.');
+    await user.type(
+      screen.getByLabelText('Description'),
+      'Pick the city you would most like to visit.',
+    );
     await user.upload(fileInput, overrides.file ?? cover);
     await user.selectOptions(screen.getByLabelText('Category'), 'travel');
     // datetime-local can't be typed into reliably under jsdom; set its value as the browser would.
@@ -95,14 +98,18 @@ describe('CreatePollForm — validation', () => {
 
     await submit();
 
-    expect(await screen.findByLabelText('Title')).toHaveAccessibleDescription('Title must be at least 5 characters');
+    expect(await screen.findByLabelText('Title')).toHaveAccessibleDescription(
+      'Title must be at least 5 characters',
+    );
     expect(screen.getByLabelText('Description')).toHaveAccessibleDescription(
       'Description must be at least 10 characters',
     );
-    expect(screen.getByRole('button', { name: 'Cover image Click to choose an image' })).toHaveAccessibleDescription(
-      'Please choose a cover image',
+    expect(
+      screen.getByRole('button', { name: 'Cover image Click to choose an image' }),
+    ).toHaveAccessibleDescription('Please choose a cover image');
+    expect(screen.getByLabelText('Starts at')).toHaveAccessibleDescription(
+      'Start date is required',
     );
-    expect(screen.getByLabelText('Starts at')).toHaveAccessibleDescription('Start date is required');
     expect(screen.getByLabelText('Ends at')).toHaveAccessibleDescription('End date is required');
     for (const label of ['Option 1', 'Option 2']) {
       expect(screen.getByLabelText(label)).toBeInvalid();
@@ -129,7 +136,9 @@ describe('CreatePollForm — validation', () => {
     await fillValid({ options: ['Lisbon', 'Prague', 'lisbon'] });
     await submit();
 
-    expect(await screen.findByLabelText('Option 3')).toHaveAccessibleDescription('Each option must be different');
+    expect(await screen.findByLabelText('Option 3')).toHaveAccessibleDescription(
+      'Each option must be different',
+    );
     expect(screen.getByLabelText('Option 1')).not.toHaveAttribute('aria-invalid');
     expect(checkDuplicatePoll).not.toHaveBeenCalled();
     expect(createPoll).not.toHaveBeenCalled();
@@ -142,7 +151,10 @@ describe('CreatePollForm — validation', () => {
     await submit();
 
     await vi.waitFor(() => expect(createPoll).toHaveBeenCalled());
-    expect(checkPollNeutrality).toHaveBeenCalledWith('Best city for a weekend trip?', ['Lisbon', 'Prague']);
+    expect(checkPollNeutrality).toHaveBeenCalledWith('Best city for a weekend trip?', [
+      'Lisbon',
+      'Prague',
+    ]);
     expect(vi.mocked(createPoll).mock.calls[0]![0].options).toEqual(['Lisbon', 'Prague']);
   });
 
@@ -183,7 +195,11 @@ describe('CreatePollForm — submission', () => {
       'Best city for a weekend trip?',
       'Pick the city you would most like to visit.',
     );
-    expect(checkPollNeutrality).toHaveBeenCalledWith('Best city for a weekend trip?', ['Lisbon', 'Prague', 'Vienna']);
+    expect(checkPollNeutrality).toHaveBeenCalledWith('Best city for a weekend trip?', [
+      'Lisbon',
+      'Prague',
+      'Vienna',
+    ]);
     expect(uploadPollImage).toHaveBeenCalledWith(cover);
     expect(createPoll).toHaveBeenCalledWith({
       title: 'Best city for a weekend trip?',
@@ -259,7 +275,8 @@ describe('CreatePollForm — submission', () => {
 });
 
 describe('CreatePollForm — preflight warnings', () => {
-  const warningsPanel = () => screen.getByText(/Review this before creating your poll/).closest('div')!.parentElement!;
+  const warningsPanel = () =>
+    screen.getByText(/Review this before creating your poll/).closest('div')!.parentElement!;
 
   it('pauses on a likely duplicate, showing the match, and creates nothing yet', async () => {
     vi.mocked(checkDuplicatePoll).mockResolvedValue([
@@ -296,7 +313,13 @@ describe('CreatePollForm — preflight warnings', () => {
   it('shows neutrality issues with their suggested rewrite', async () => {
     vi.mocked(checkPollNeutrality).mockResolvedValue({
       isNeutral: false,
-      issues: [{ text: 'Best city', explanation: 'Presumes a single best answer', suggestion: 'Which city' }],
+      issues: [
+        {
+          text: 'Best city',
+          explanation: 'Presumes a single best answer',
+          suggestion: 'Which city',
+        },
+      ],
     });
     const { fillValid, submit } = setup();
 
@@ -310,7 +333,9 @@ describe('CreatePollForm — preflight warnings', () => {
   });
 
   it('“Create anyway” submits exactly the values that were checked', async () => {
-    vi.mocked(checkDuplicatePoll).mockResolvedValue([{ pollId: 'existing-1', title: 'Similar', similarity: 0.9 }]);
+    vi.mocked(checkDuplicatePoll).mockResolvedValue([
+      { pollId: 'existing-1', title: 'Similar', similarity: 0.9 },
+    ]);
     const { user, fillValid, submit } = setup();
 
     await fillValid();
@@ -318,12 +343,16 @@ describe('CreatePollForm — preflight warnings', () => {
     await user.click(await screen.findByRole('button', { name: 'Create anyway' }));
 
     await vi.waitFor(() => expect(push).toHaveBeenCalledWith('/polls/poll-123'));
-    expect(createPoll).toHaveBeenCalledWith(expect.objectContaining({ title: 'Best city for a weekend trip?' }));
+    expect(createPoll).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Best city for a weekend trip?' }),
+    );
     expect(checkDuplicatePoll).toHaveBeenCalledOnce(); // not re-checked
   });
 
   it('“Edit my poll” dismisses the warnings and returns to the form without creating anything', async () => {
-    vi.mocked(checkDuplicatePoll).mockResolvedValue([{ pollId: 'existing-1', title: 'Similar', similarity: 0.9 }]);
+    vi.mocked(checkDuplicatePoll).mockResolvedValue([
+      { pollId: 'existing-1', title: 'Similar', similarity: 0.9 },
+    ]);
     const { user, fillValid, submit } = setup();
 
     await fillValid();
