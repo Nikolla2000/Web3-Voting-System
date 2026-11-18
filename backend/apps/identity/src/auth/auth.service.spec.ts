@@ -176,7 +176,7 @@ describe('AuthService', () => {
       );
 
       expect(error).toBeInstanceOf(RpcException);
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'Invalid credentials',
       });
     });
@@ -191,7 +191,7 @@ describe('AuthService', () => {
         service.login({ email: baseUser.email, password: 'x' }),
       );
 
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'Account is deactivated',
       });
     });
@@ -206,7 +206,7 @@ describe('AuthService', () => {
         service.login({ email: baseUser.email, password: 'x' }),
       );
 
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'This account uses Google sign-in. Please login with Google.',
       });
     });
@@ -219,7 +219,7 @@ describe('AuthService', () => {
         service.login({ email: baseUser.email, password: 'wrong' }),
       );
 
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'Invalid credentials',
       });
     });
@@ -322,7 +322,7 @@ describe('AuthService', () => {
         service.refresh(baseUser.id, 'incoming-token'),
       );
 
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'Invalid refresh token',
       });
       expect(prisma.refreshToken.delete).not.toHaveBeenCalled();
@@ -362,7 +362,7 @@ describe('AuthService', () => {
         service.refresh(baseUser.id, similarButDifferentToken),
       );
 
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'Invalid refresh token',
       });
     });

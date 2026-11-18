@@ -115,7 +115,7 @@ describe('UsersService', () => {
       );
 
       expect(error).toBeInstanceOf(RpcException);
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'Email already in use',
       });
     });
@@ -131,7 +131,7 @@ describe('UsersService', () => {
         }),
       );
 
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'Username is taken',
       });
     });
@@ -207,7 +207,7 @@ describe('UsersService', () => {
       );
 
       expect(error).toBeInstanceOf(RpcException);
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'Current password is required',
       });
       expect(prisma.user.update).not.toHaveBeenCalled();
@@ -224,7 +224,7 @@ describe('UsersService', () => {
         }),
       );
 
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'Current password is incorrect',
       });
       expect(prisma.user.update).not.toHaveBeenCalled();
@@ -330,7 +330,7 @@ describe('UsersService', () => {
       );
 
       expect(error).toBeInstanceOf(RpcException);
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'Invalid avatar key',
       });
       expect(r2.objectExists).not.toHaveBeenCalled();
@@ -344,7 +344,7 @@ describe('UsersService', () => {
         service.confirmAvatar(userId, { key: `avatars/${userId}/x.png` }),
       );
 
-      expect((error as RpcException).error).toMatchObject({
+      expect((error as RpcException).getError()).toMatchObject({
         message: 'Upload not found — please try again',
       });
       expect(prisma.user.update).not.toHaveBeenCalled();

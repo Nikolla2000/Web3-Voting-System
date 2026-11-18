@@ -104,7 +104,7 @@ describe('SemaphoreService — Sybil resistance (joinGroup)', () => {
     );
 
     expect(error).toBeInstanceOf(RpcException);
-    expect((error as RpcException).error).toEqual({
+    expect((error as RpcException).getError()).toEqual({
       code: grpcStatus.ALREADY_EXISTS,
       message: `Already joined poll ${pollId} with a different identity commitment`,
     });
@@ -126,7 +126,7 @@ describe('SemaphoreService — Sybil resistance (joinGroup)', () => {
     );
 
     expect(error).toBeInstanceOf(RpcException);
-    expect((error as RpcException).error).toEqual({
+    expect((error as RpcException).getError()).toEqual({
       code: grpcStatus.ALREADY_EXISTS,
       message: `Identity commitment already registered for poll ${pollId}`,
     });
