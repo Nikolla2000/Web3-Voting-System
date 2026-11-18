@@ -1,4 +1,4 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller } from '@nestjs/common';
 import { PollsService } from './polls.service';
 import { GrpcMethod } from '@nestjs/microservices';
 import type { FindManyInput } from './polls.service';

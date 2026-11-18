@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { status as grpcStatus } from '@grpc/grpc-js';
+import { inspect } from 'node:util';
 import { Request, Response } from 'express';
 import { ErrorResponse } from '../../types';
 
@@ -94,8 +95,9 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         return isNaN(parsed) ? null : parsed;
       };
 
-      const innerResponse = errorObj.response;
-      if (innerResponse && typeof innerResponse === 'object') {
+      const innerValue: unknown = errorObj.response;
+      if (innerValue && typeof innerValue === 'object') {
+        const innerResponse = innerValue as Record<string, any>;
         const status =
           parseStatus(innerResponse.statusCode) ??
           parseStatus(innerResponse.status) ??
@@ -178,13 +180,13 @@ export class GlobalExceptionFilter implements ExceptionFilter {
   private logError(exception: unknown, request: Request, status: number): void {
     const meta = `${request.method} ${request.url} → ${status}`;
 
-    if (status >= HttpStatus.INTERNAL_SERVER_ERROR) {
+    if (status >= Number(HttpStatus.INTERNAL_SERVER_ERROR)) {
       const errorDetail =
         exception instanceof Error
           ? exception.stack
           : typeof exception === 'object'
             ? JSON.stringify(exception, null, 2)
-            : String(exception);
+            : inspect(exception);
 
       this.logger.error(meta, errorDetail);
     } else {
@@ -193,7 +195,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
           ? exception.message
           : typeof exception === 'object'
             ? JSON.stringify(exception)
-            : String(exception);
+            : inspect(exception);
 
       this.logger.warn(`${meta} | ${errorDetail}`);
     }

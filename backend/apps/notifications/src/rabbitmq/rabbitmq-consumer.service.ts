@@ -4,6 +4,7 @@ import {
   RABBITMQ_EXCHANGE,
   ROUTING_KEYS,
   RabbitMQConnectionService,
+  UserRegisteredPayload,
 } from '@app/shared';
 import { QUEUES } from './rabbitmq.constants';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -36,7 +37,7 @@ export class RabbitMQConsumerService {
       ROUTING_KEYS.USER_REGISTERED,
     );
 
-    await channel.consume(queue, (msg) => this.handleMessage(msg), {
+    await channel.consume(queue, (msg) => void this.handleMessage(msg), {
       noAck: false,
     });
 
@@ -50,11 +51,13 @@ export class RabbitMQConsumerService {
     if (!msg || !channel) return;
 
     try {
-      const payload = JSON.parse(msg.content.toString());
+      const payload = JSON.parse(
+        msg.content.toString(),
+      ) as UserRegisteredPayload;
       await this.notificationsService.handleUserRegistered(payload);
       channel.ack(msg);
-    } catch (err: any) {
-      this.logger.error(`Failed to process message: ${err.message}`);
+    } catch (err) {
+      this.logger.error(`Failed to process message: ${(err as Error).message}`);
       channel.nack(msg, false, false);
     }
   }

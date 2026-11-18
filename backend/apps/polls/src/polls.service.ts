@@ -62,7 +62,7 @@ export class PollsService {
 
     await this.redis.getClient().incr(pollsListVersionKey());
 
-    await this.publisher.publish(ROUTING_KEYS.POLL_CREATED, {
+    this.publisher.publish(ROUTING_KEYS.POLL_CREATED, {
       pollId: poll.id,
       title: poll.title,
       description: poll.description,
@@ -94,7 +94,7 @@ export class PollsService {
 
     const cached = await this.redis.getClient().get(cacheKey);
     if (cached) {
-      const parsed = JSON.parse(cached);
+      const parsed = JSON.parse(cached) as CachedPollsPage;
       return { ...parsed, items: parsed.items.map(deserializePoll) };
     }
 
@@ -152,7 +152,7 @@ export class PollsService {
     const cacheKey = pollDetailCacheKey(id);
     const cached = await this.redis.getClient().get(cacheKey);
     if (cached) {
-      return deserializePoll(JSON.parse(cached));
+      return deserializePoll(JSON.parse(cached) as SerializedPoll);
     }
 
     const poll = await this.prisma.poll.findUnique({
@@ -175,18 +175,20 @@ export class PollsService {
   }
 }
 
+type PollWithOptions = Prisma.PollGetPayload<{ include: { options: true } }>;
+type PollDateField = 'startsAt' | 'endsAt' | 'createdAt' | 'updatedAt';
+type SerializedPoll = Omit<PollWithOptions, PollDateField> &
+  Record<PollDateField, string>;
+interface CachedPollsPage {
+  items: SerializedPoll[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 // Round-tripping through JSON turns Date fields into strings — restore them
 // so a cache hit returns the same shape findById's live Prisma read does.
-function deserializePoll<
-  T extends {
-    startsAt: string;
-    endsAt: string;
-    createdAt: string;
-    updatedAt: string;
-  },
->(
-  poll: T,
-): T & { startsAt: Date; endsAt: Date; createdAt: Date; updatedAt: Date } {
+function deserializePoll(poll: SerializedPoll): PollWithOptions {
   return {
     ...poll,
     startsAt: new Date(poll.startsAt),

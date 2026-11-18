@@ -57,8 +57,8 @@ export class VoteSyncConsumer implements OnModuleInit {
       ]);
       await this.redis.getClient().del(pollDetailCacheKey(event.pollId));
       await this.redis.getClient().incr(pollsListVersionKey());
-    } catch (error: any) {
-      if (error.code === 'P2002') {
+    } catch (error) {
+      if ((error as { code?: unknown }).code === 'P2002') {
         this.logger.warn(
           `Duplicate vote.cast игнориран (nullifier вече обработен): ${event.nullifierHash}`,
         );

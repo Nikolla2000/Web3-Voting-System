@@ -63,7 +63,7 @@ export class RabbitMQConnectionService
 
         if (!this.isShuttingDown && this.connection) {
           this.logger.log('Triggering reconnect due to channel closure...');
-          this.connect();
+          void this.connect();
         }
       });
 
@@ -89,19 +89,19 @@ export class RabbitMQConnectionService
           this.logger.warn(
             'RabbitMQ connection closed - reconnecting in 5s...',
           );
-          this.reconnectTimeout = setTimeout(() => this.connect(), 5000);
+          this.reconnectTimeout = setTimeout(() => void this.connect(), 5000);
         }
       });
 
       this.connection.on('error', (err) => {
         this.logger.error(`RabbitMQ connection error: ${err.message}`);
       });
-    } catch (err: any) {
+    } catch (err) {
       this.logger.error(
-        `Failed to connect to RabbitMQ - retrying in 5s... Error: ${err.message}`,
+        `Failed to connect to RabbitMQ - retrying in 5s... Error: ${(err as Error).message}`,
       );
       if (!this.isShuttingDown) {
-        this.reconnectTimeout = setTimeout(() => this.connect(), 5000);
+        this.reconnectTimeout = setTimeout(() => void this.connect(), 5000);
       }
     }
   }
@@ -110,6 +110,8 @@ export class RabbitMQConnectionService
     try {
       await this.channel?.close();
       await this.connection?.close();
-    } catch {}
+    } catch {
+      // Already closed or never opened; nothing left to release.
+    }
   }
 }

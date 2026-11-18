@@ -130,7 +130,7 @@ export class AuthProxyController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies?.refreshToken;
+    const refreshToken = req.cookies?.refreshToken as string | undefined;
 
     if (!refreshToken) {
       throw new UnauthorizedException('Refresh token is missing');
@@ -138,10 +138,10 @@ export class AuthProxyController {
 
     let payload: JwtPayload;
     try {
-      payload = await this.jwtService.verifyAsync(refreshToken, {
+      payload = await this.jwtService.verifyAsync<JwtPayload>(refreshToken, {
         secret: this.configService.get<string>('jwt.refreshSecret'),
       });
-    } catch (error) {
+    } catch {
       throw new UnauthorizedException('Refresh token is invalid or expired');
     }
 
@@ -162,8 +162,8 @@ export class AuthProxyController {
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies?.refreshToken;
-    const data = await this.send(AUTH_PATTERNS.LOGOUT, {
+    const refreshToken = req.cookies?.refreshToken as string | undefined;
+    const data = await this.send<unknown>(AUTH_PATTERNS.LOGOUT, {
       userId: user.sub,
       refreshToken,
     });

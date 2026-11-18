@@ -57,7 +57,7 @@ export class RabbitMQConsumerService {
 
     await channel.consume(
       assertedQueue,
-      (msg) => this.handleMessage(msg, onMessage),
+      (msg) => void this.handleMessage(msg, onMessage),
       { noAck: false },
     );
 
@@ -77,8 +77,8 @@ export class RabbitMQConsumerService {
       const payload = JSON.parse(msg.content.toString()) as T;
       await onMessage(payload, msg);
       channel.ack(msg);
-    } catch (err: any) {
-      this.logger.error(`Failed to process message: ${err.message}`);
+    } catch (err) {
+      this.logger.error(`Failed to process message: ${(err as Error).message}`);
       channel.nack(msg, false, false);
     }
   }

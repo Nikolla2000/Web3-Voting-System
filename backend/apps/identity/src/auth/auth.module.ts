@@ -1,7 +1,7 @@
 // PATH: auth-service/src/auth/auth.module.ts
 
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
@@ -16,7 +16,9 @@ import { RabbitMQModule } from '../rabbitmq/rabbitmq.module';
       useFactory: (configService: ConfigService) => ({
         secret: configService.get<string>('jwt.accessSecret'),
         signOptions: {
-          expiresIn: configService.get<any>('jwt.accessExpiresIn'),
+          expiresIn: configService.get<JwtSignOptions['expiresIn']>(
+            'jwt.accessExpiresIn',
+          ),
         },
       }),
     }),

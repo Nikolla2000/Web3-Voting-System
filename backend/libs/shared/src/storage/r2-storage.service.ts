@@ -115,9 +115,11 @@ export class R2StorageService {
       await this.client.send(
         new DeleteObjectCommand({ Bucket: this.bucket, Key: key }),
       );
-    } catch (err: any) {
+    } catch (err) {
       // Best-effort cleanup — a failure here shouldn't block the caller.
-      this.logger.warn(`Failed to delete R2 object "${key}": ${err.message}`);
+      this.logger.warn(
+        `Failed to delete R2 object "${key}": ${(err as Error).message}`,
+      );
     }
   }
 }

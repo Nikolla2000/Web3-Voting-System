@@ -1,5 +1,3 @@
-import { UserPayload } from '../users/users.types';
-
 export interface JwtPayload {
   sub: string;
   email: string;

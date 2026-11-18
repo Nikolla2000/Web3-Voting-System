@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { HttpService } from '@nestjs/axios';
-import { ConfigService } from '@nestjs/config';
 import { Request } from 'express';
-import { firstValueFrom } from 'rxjs';
-import { AxiosRequestConfig } from 'axios';
 
 @Injectable()
 export class AuthProxyService {

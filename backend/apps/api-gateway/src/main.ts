@@ -3,7 +3,7 @@ import { ApiGatewayModule } from './api-gateway.module';
 import { ConfigService } from '@nestjs/config';
 import { Logger, ValidationPipe, VersioningType } from '@nestjs/common';
 import { setupSwagger } from './config/swagger';
-import cookieParser = require('cookie-parser');
+import cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(ApiGatewayModule);

@@ -9,7 +9,6 @@ import {
 } from '@app/shared';
 import type { GoogleProfile } from '@app/shared';
 import { UsersService } from '../users/users.service';
-import { UpdateUserDto } from '../users/dto/update-user.dto';
 
 @Controller()
 export class AuthController {

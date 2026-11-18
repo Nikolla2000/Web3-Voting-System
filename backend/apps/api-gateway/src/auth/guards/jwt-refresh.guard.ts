@@ -19,7 +19,7 @@ export class JwtRefreshGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest<Request>();
 
-    const refreshToken = request.cookies?.refreshToken;
+    const refreshToken = request.cookies?.refreshToken as string | undefined;
 
     if (!refreshToken) {
       throw new UnauthorizedException('Missing refresh token');

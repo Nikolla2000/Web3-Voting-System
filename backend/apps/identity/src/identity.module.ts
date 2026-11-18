@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common';
-import { IdentityController } from './identity.controller';
-import { IdentityService } from './identity.service';
 import { ConfigModule } from '@nestjs/config';
 import appConfig, { envValidationSchema } from './config/app.config';
-import { ClientsModule, Transport } from '@nestjs/microservices';
 import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import jwtConfig from './config/jwt.config';

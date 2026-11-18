@@ -5,7 +5,7 @@ import {
   SwaggerModule,
 } from '@nestjs/swagger';
 
-export const setupSwagger = async (app: INestApplication) => {
+export const setupSwagger = (app: INestApplication) => {
   const config = new DocumentBuilder()
     .setTitle('API Gateway')
     .setDescription('The API Gateway for the Web3 Voting System')

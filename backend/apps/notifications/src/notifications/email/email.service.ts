@@ -28,10 +28,12 @@ export class EmailService {
         html: this.buildWelcomeTemplate(firstName),
       });
       this.logger.log(`Welcome email send → ${to}`);
-    } catch (err: any) {
+    } catch (err) {
       // not throw err above, message is already acked in the consumer
       // Failed sending of email should not block the queue
-      this.logger.error(`Failed sending email to ${to}: ${err.message}`);
+      this.logger.error(
+        `Failed sending email to ${to}: ${(err as Error).message}`,
+      );
     }
   }
 

@@ -1,10 +1,6 @@
-import {
-  ForbiddenException,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
+import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 // import { PrismaService } from "prisma/prisma.service";
 // import { Role } from "src/generated/prisma/enums";
 // import { UsersService } from "src/users/users.service";
@@ -65,11 +61,15 @@ export class AuthService {
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload, {
         secret: this.configService.get<string>('jwt.accessSecret'),
-        expiresIn: this.configService.get<any>('jwt.accessExpiresIn'),
+        expiresIn: this.configService.get<JwtSignOptions['expiresIn']>(
+          'jwt.accessExpiresIn',
+        ),
       }),
       this.jwtService.signAsync(refreshPayload, {
         secret: this.configService.get<string>('jwt.refreshSecret'),
-        expiresIn: this.configService.get<any>('jwt.refreshExpiresIn'),
+        expiresIn: this.configService.get<JwtSignOptions['expiresIn']>(
+          'jwt.refreshExpiresIn',
+        ),
       }),
     ]);
 
