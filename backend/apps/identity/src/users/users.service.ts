@@ -105,10 +105,7 @@ export class UsersService {
       throw new RpcBadRequestException('Current password is required');
     }
 
-    const passwordMatch = await bcrypt.compare(
-      currentPassword,
-      user.password,
-    );
+    const passwordMatch = await bcrypt.compare(currentPassword, user.password);
 
     if (!passwordMatch) {
       throw new RpcUnauthorizedException('Current password is incorrect');
@@ -180,9 +177,7 @@ export class UsersService {
     const exists = await this.r2.objectExists(dto.key);
 
     if (!exists) {
-      throw new RpcBadRequestException(
-        'Upload not found — please try again',
-      );
+      throw new RpcBadRequestException('Upload not found — please try again');
     }
 
     const previousKey = user.avatar

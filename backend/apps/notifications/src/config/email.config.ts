@@ -15,4 +15,4 @@ export const emailValidationSchema = {
   EMAIL_SECURE: Joi.string().valid('true', 'false').default('false'),
   EMAIL_USER: Joi.string().email().required(),
   EMAIL_PASS: Joi.string().required(),
-}
+};

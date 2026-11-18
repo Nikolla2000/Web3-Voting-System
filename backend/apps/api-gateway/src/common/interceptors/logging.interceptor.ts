@@ -63,7 +63,13 @@ export class LoggingInterceptor implements NestInterceptor {
    * Dropping query strings on sensitive auth routes so credentials never appear in logs
    */
   private sanitizePath(url: string): string {
-    const sensitiveSegments = ['/auth', '/login', '/register', '/refresh', '/google'];
+    const sensitiveSegments = [
+      '/auth',
+      '/login',
+      '/register',
+      '/refresh',
+      '/google',
+    ];
     const isSensitive = sensitiveSegments.some((seg) => url.includes(seg));
     return isSensitive ? url.split('?')[0] : url;
   }

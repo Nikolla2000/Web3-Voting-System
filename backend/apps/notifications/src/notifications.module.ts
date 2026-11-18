@@ -17,7 +17,7 @@ import emailConfig from './config/email.config';
       validationOptions: {
         allowUnknown: true,
         abortEarly: true,
-      }
+      },
     }),
     WelcomeEmailModule,
   ],

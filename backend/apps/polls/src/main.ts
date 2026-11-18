@@ -12,9 +12,9 @@ async function bootstrap() {
       options: {
         package: 'polls',
         protoPath: join(process.cwd(), 'libs/shared/src/polls/polls.proto'),
-        url: '0.0.0.0:3002'
-      }
-    }
+        url: '0.0.0.0:3002',
+      },
+    },
   );
 
   app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));

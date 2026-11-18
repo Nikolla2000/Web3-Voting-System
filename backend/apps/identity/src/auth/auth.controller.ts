@@ -1,10 +1,15 @@
-import { Controller } from "@nestjs/common";
-import { MessagePattern, Payload } from "@nestjs/microservices";
-import { AuthService } from "./auth.service";
-import { AUTH_PATTERNS, AuthResponse, RegisterDto, LoginDto } from "@app/shared";
-import type { GoogleProfile } from "@app/shared";
-import { UsersService } from "../users/users.service";
-import { UpdateUserDto } from "../users/dto/update-user.dto";
+import { Controller } from '@nestjs/common';
+import { MessagePattern, Payload } from '@nestjs/microservices';
+import { AuthService } from './auth.service';
+import {
+  AUTH_PATTERNS,
+  AuthResponse,
+  RegisterDto,
+  LoginDto,
+} from '@app/shared';
+import type { GoogleProfile } from '@app/shared';
+import { UsersService } from '../users/users.service';
+import { UpdateUserDto } from '../users/dto/update-user.dto';
 
 @Controller()
 export class AuthController {
@@ -22,8 +27,8 @@ export class AuthController {
       tokens: {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
-      }
-    }
+      },
+    };
   }
 
   @MessagePattern({ cmd: AUTH_PATTERNS.LOGIN })
@@ -35,21 +40,24 @@ export class AuthController {
       tokens: {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
-      }
-    }
+      },
+    };
   }
 
   @MessagePattern({ cmd: AUTH_PATTERNS.REFRESH })
-  async refresh(@Payload() payload: { userId: string, refreshToken: string }) {
-    const tokens = await this.authService.refresh(payload.userId, payload.refreshToken);
+  async refresh(@Payload() payload: { userId: string; refreshToken: string }) {
+    const tokens = await this.authService.refresh(
+      payload.userId,
+      payload.refreshToken,
+    );
     return {
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
-    }
+    };
   }
 
   @MessagePattern({ cmd: AUTH_PATTERNS.LOGOUT })
-  async logout(@Payload() payload: { userId: string, refreshToken: string }) {
+  async logout(@Payload() payload: { userId: string; refreshToken: string }) {
     await this.authService.logout(payload.userId, payload.refreshToken);
     return { message: 'Logged out successfully' };
   }
@@ -69,7 +77,7 @@ export class AuthController {
       tokens: {
         accessToken: tokens.accessToken,
         refreshToken: tokens.refreshToken,
-      }
-    }
+      },
+    };
   }
 }

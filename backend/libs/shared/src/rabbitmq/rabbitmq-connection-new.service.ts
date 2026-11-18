@@ -1,20 +1,28 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as amqp from 'amqp-connection-manager';
 import { Channel } from 'amqplib';
 import { RABBITMQ_EXCHANGE } from './rabbitmq.constants';
 
 @Injectable()
-export class RabbitMQConnectionService implements OnModuleInit, OnModuleDestroy {
+export class RabbitMQConnectionService
+  implements OnModuleInit, OnModuleDestroy
+{
   private readonly logger = new Logger(RabbitMQConnectionService.name);
-  
+
   private connectionWrapper: amqp.AmqpConnectionManager | null = null;
   private channelWrapper: amqp.ChannelWrapper | null = null;
 
   constructor(private readonly configService: ConfigService) {}
 
   async onModuleInit(): Promise<void> {
-    const url = this.configService.get<string>('rabbitmq.url') || 'amqp://localhost';
+    const url =
+      this.configService.get<string>('rabbitmq.url') || 'amqp://localhost';
 
     this.connectionWrapper = amqp.connect([url]);
 
@@ -28,8 +36,12 @@ export class RabbitMQConnectionService implements OnModuleInit, OnModuleDestroy 
 
     this.channelWrapper = this.connectionWrapper.createChannel({
       setup: async (channel: Channel) => {
-        await channel.assertExchange(RABBITMQ_EXCHANGE, 'topic', { durable: true });
-        this.logger.log(`Exchange '${RABBITMQ_EXCHANGE}' asserted successfully.`);
+        await channel.assertExchange(RABBITMQ_EXCHANGE, 'topic', {
+          durable: true,
+        });
+        this.logger.log(
+          `Exchange '${RABBITMQ_EXCHANGE}' asserted successfully.`,
+        );
       },
     });
   }

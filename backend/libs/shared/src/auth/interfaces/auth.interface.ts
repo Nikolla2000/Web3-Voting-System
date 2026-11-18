@@ -1,13 +1,13 @@
-import { UserPayload } from '../../users/interfaces/user.interface'
+import { UserPayload } from '../../users/interfaces/user.interface';
 
 export interface AuthTokens {
-    accessToken: string;
-    refreshToken: string;
+  accessToken: string;
+  refreshToken: string;
 }
 
 export interface AuthResponse {
-    user: UserPayload;
-    tokens: AuthTokens;
+  user: UserPayload;
+  tokens: AuthTokens;
 }
 
 export interface UserRegisteredPayload {

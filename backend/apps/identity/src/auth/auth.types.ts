@@ -1,16 +1,16 @@
-import { UserPayload } from "../users/users.types"
+import { UserPayload } from '../users/users.types';
 
 export interface JwtPayload {
-    sub: string;
-    email: string;
-    username: string;
-    role: string;
-    iat?: number;
-    exp?: number;
+  sub: string;
+  email: string;
+  username: string;
+  role: string;
+  iat?: number;
+  exp?: number;
 }
 
 export interface JwtRefreshPayload extends JwtPayload {
-    refreshToken: string;
+  refreshToken: string;
 }
 
 export interface ErrorResponse {

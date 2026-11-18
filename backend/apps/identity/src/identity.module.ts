@@ -22,7 +22,7 @@ import { RabbitMQModule } from './rabbitmq/rabbitmq.module';
       validationOptions: {
         allowUnknown: true,
         abortEarly: true,
-      }
+      },
     }),
     PrismaModule,
     AuthModule,

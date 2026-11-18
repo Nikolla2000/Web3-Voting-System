@@ -14,14 +14,16 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.enableVersioning({ type: VersioningType.URI });
 
-  app.useGlobalPipes(new ValidationPipe({
-    whitelist: true,
-    forbidNonWhitelisted: true,
-    transform: true,
-    transformOptions: {
-      enableImplicitConversion: true,
-    }
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+      transformOptions: {
+        enableImplicitConversion: true,
+      },
+    }),
+  );
 
   app.use(cookieParser());
 
@@ -32,7 +34,12 @@ async function bootstrap() {
     // Rate-limit headers aren't on the CORS-safelisted response header list,
     // so the frontend can't read them (Retry-After in particular) unless
     // they're explicitly exposed here.
-    exposedHeaders: ['Retry-After', 'X-RateLimit-Limit', 'X-RateLimit-Remaining', 'X-RateLimit-Reset'],
+    exposedHeaders: [
+      'Retry-After',
+      'X-RateLimit-Limit',
+      'X-RateLimit-Remaining',
+      'X-RateLimit-Reset',
+    ],
   });
 
   if (configService.get<string>('app.nodeEnv') !== 'production') {

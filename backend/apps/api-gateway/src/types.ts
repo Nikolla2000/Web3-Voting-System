@@ -1,10 +1,10 @@
 export interface ErrorResponse {
-    statusCode: number;
-    timestamp: string;
-    path: string;
-    method: string;
-    message: string | string[];
-    error: string;
+  statusCode: number;
+  timestamp: string;
+  path: string;
+  method: string;
+  message: string | string[];
+  error: string;
 }
 
 export interface ApiResponse<T> {
@@ -13,4 +13,3 @@ export interface ApiResponse<T> {
   data: T;
   timestamp: string;
 }
-

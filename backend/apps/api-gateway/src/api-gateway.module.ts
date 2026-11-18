@@ -26,12 +26,19 @@ import { RedisThrottlerStorage } from './throttler/redis-throttler-storage';
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
-      load: [appConfig, jwtConfig, servicesConfig, r2Config, googleConfig, redisConfig],
+      load: [
+        appConfig,
+        jwtConfig,
+        servicesConfig,
+        r2Config,
+        googleConfig,
+        redisConfig,
+      ],
       validationSchema: envValidationSchema,
       validationOptions: {
         allowUknown: true,
         abortEarly: true,
-      }
+      },
     }),
     ThrottlerModule.forRootAsync({
       imports: [RedisModule],

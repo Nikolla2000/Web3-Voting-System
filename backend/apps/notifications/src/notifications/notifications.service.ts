@@ -12,7 +12,9 @@ export class NotificationsService {
     const { email, userId, username } = payload;
 
     if (!email) {
-      this.logger.warn(`user.registered for userId=${userId} without email - skip`);
+      this.logger.warn(
+        `user.registered for userId=${userId} without email - skip`,
+      );
       return;
     }
 

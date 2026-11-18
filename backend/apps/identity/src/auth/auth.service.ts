@@ -1,286 +1,308 @@
-import { ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
+import {
+  ForbiddenException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
 // import { PrismaService } from "prisma/prisma.service";
 // import { Role } from "src/generated/prisma/enums";
 // import { UsersService } from "src/users/users.service";
-import { UsersService } from "../users/users.service";
-import { JwtPayload } from "./auth.types";
-import type { GoogleProfile } from "@app/shared";
-import { RpcForbiddenException, RpcUnauthorizedException, UserRegisteredPayload } from "@app/shared";
-import { AuthTokens } from "@app/shared";
+import { UsersService } from '../users/users.service';
+import { JwtPayload } from './auth.types';
+import type { GoogleProfile } from '@app/shared';
+import {
+  RpcForbiddenException,
+  RpcUnauthorizedException,
+  UserRegisteredPayload,
+} from '@app/shared';
+import { AuthTokens } from '@app/shared';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
-import { RegisterDto, LoginDto } from "@app/shared";
+import { RegisterDto, LoginDto } from '@app/shared';
 // import { User } from "src/generated/prisma/client";
 // import { SafeUser } from "src/users/users.types";
-import { SafeUser } from "../users/users.types";
-import { PrismaService } from "apps/identity/prisma/prisma.service";
-import { Role } from "../generated/prisma/enums";
-import { RefreshToken, User } from "../generated/prisma/client";
-import { AuthResponse } from "@app/shared";
-import { ROUTING_KEYS } from "@app/shared";
-import { RabbitMQPublisherService } from "../rabbitmq/rabbitmq.service";
+import { SafeUser } from '../users/users.types';
+import { PrismaService } from 'apps/identity/prisma/prisma.service';
+import { Role } from '../generated/prisma/enums';
+import { RefreshToken, User } from '../generated/prisma/client';
+import { AuthResponse } from '@app/shared';
+import { ROUTING_KEYS } from '@app/shared';
+import { RabbitMQPublisherService } from '../rabbitmq/rabbitmq.service';
 
 @Injectable()
 export class AuthService {
-    constructor (
-        private readonly prisma: PrismaService,
-        private readonly usersService: UsersService,
-        private readonly jwtService: JwtService,
-        private readonly configService: ConfigService,
-        private readonly rabbitMQService: RabbitMQPublisherService,
-    ) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+    private readonly configService: ConfigService,
+    private readonly rabbitMQService: RabbitMQPublisherService,
+  ) {}
 
-   /**
-    * Generates both access and refresh tokens for a user
-    */
-    private async generateTokens(
-        userId: string,
-        email: string,
-        username: string,
-        role: Role,
-    ) : Promise<AuthTokens> {
-        const payload: JwtPayload = {
-            sub: userId,
-            email,
-            username,
-            role
-        }
-        // jti guarantees the refresh token is unique even if issued in the
-        // same second as another one for this user (iat has second-level
-        // granularity, and signing is otherwise deterministic) — without it,
-        // two such tokens would be byte-identical and collide against
-        // RefreshToken.token's unique constraint once stored.
-        const refreshPayload = { ...payload, jti: crypto.randomUUID() };
+  /**
+   * Generates both access and refresh tokens for a user
+   */
+  private async generateTokens(
+    userId: string,
+    email: string,
+    username: string,
+    role: Role,
+  ): Promise<AuthTokens> {
+    const payload: JwtPayload = {
+      sub: userId,
+      email,
+      username,
+      role,
+    };
+    // jti guarantees the refresh token is unique even if issued in the
+    // same second as another one for this user (iat has second-level
+    // granularity, and signing is otherwise deterministic) — without it,
+    // two such tokens would be byte-identical and collide against
+    // RefreshToken.token's unique constraint once stored.
+    const refreshPayload = { ...payload, jti: crypto.randomUUID() };
 
-        const [accessToken, refreshToken] = await Promise.all([
-            this.jwtService.signAsync(payload, {
-                secret: this.configService.get<string>('jwt.accessSecret'),
-                expiresIn: this.configService.get<any>('jwt.accessExpiresIn')
-            }),
-            this.jwtService.signAsync(refreshPayload, {
-                secret: this.configService.get<string>('jwt.refreshSecret'),
-                expiresIn: this.configService.get<any>('jwt.refreshExpiresIn'),
-            })
-        ]);
+    const [accessToken, refreshToken] = await Promise.all([
+      this.jwtService.signAsync(payload, {
+        secret: this.configService.get<string>('jwt.accessSecret'),
+        expiresIn: this.configService.get<any>('jwt.accessExpiresIn'),
+      }),
+      this.jwtService.signAsync(refreshPayload, {
+        secret: this.configService.get<string>('jwt.refreshSecret'),
+        expiresIn: this.configService.get<any>('jwt.refreshExpiresIn'),
+      }),
+    ]);
 
-        return { accessToken, refreshToken }
+    return { accessToken, refreshToken };
+  }
+
+  /**
+   * Refresh tokens are high-entropy, server-generated JWTs, not
+   * low-entropy human passwords — bcrypt (meant to slow down brute-forcing
+   * guessable secrets) is the wrong tool, and worse, silently truncates
+   * its input at 72 bytes, well under a JWT's length. Since JWTs for the
+   * same user share an identical header and most of the payload, any two
+   * of that user's tokens collide under bcrypt once truncated — breaking
+   * one-time-use rotation entirely. SHA-256 has no such limit.
+   */
+  private hashRefreshToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
+  }
+
+  private refreshTokenMatches(
+    incomingToken: string,
+    storedHash: string,
+  ): boolean {
+    const candidate = Buffer.from(this.hashRefreshToken(incomingToken));
+    const stored = Buffer.from(storedHash);
+    if (candidate.length !== stored.length) return false;
+    return crypto.timingSafeEqual(candidate, stored);
+  }
+
+  /**
+   * Stores hashed refresh token in DB for validation on refresh
+   */
+  private async storeRefreshToken(
+    userId: string,
+    refreshToken: string,
+  ): Promise<void> {
+    const hashedToken = this.hashRefreshToken(refreshToken);
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    await this.prisma.refreshToken.create({
+      data: {
+        token: hashedToken,
+        userId,
+        expiresAt,
+      },
+    });
+  }
+
+  async register(dto: RegisterDto): Promise<AuthResponse> {
+    const user = await this.usersService.create(dto);
+    const tokens = await this.generateTokens(
+      user.id,
+      user.email,
+      user.username,
+      user.role,
+    );
+
+    await this.storeRefreshToken(user.id, tokens.refreshToken);
+
+    this.rabbitMQService.publish<UserRegisteredPayload>(
+      ROUTING_KEYS.USER_REGISTERED,
+      {
+        userId: user.id,
+        email: user.email,
+        username: user.username,
+        registeredViaGoogle: false,
+      },
+    );
+
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        avatar: user.avatar,
+        role: user.role,
+      },
+      tokens,
+    };
+  }
+
+  async login(dto: LoginDto): Promise<AuthResponse> {
+    const user = await this.usersService.findByEmail(dto.email);
+
+    if (!user) {
+      throw new RpcUnauthorizedException('Invalid credentials');
     }
 
-    /**
-     * Refresh tokens are high-entropy, server-generated JWTs, not
-     * low-entropy human passwords — bcrypt (meant to slow down brute-forcing
-     * guessable secrets) is the wrong tool, and worse, silently truncates
-     * its input at 72 bytes, well under a JWT's length. Since JWTs for the
-     * same user share an identical header and most of the payload, any two
-     * of that user's tokens collide under bcrypt once truncated — breaking
-     * one-time-use rotation entirely. SHA-256 has no such limit.
-     */
-    private hashRefreshToken(token: string): string {
-        return crypto.createHash('sha256').update(token).digest('hex');
+    if (!user.isActive) {
+      throw new RpcForbiddenException('Account is deactivated');
     }
 
-    private refreshTokenMatches(incomingToken: string, storedHash: string): boolean {
-        const candidate = Buffer.from(this.hashRefreshToken(incomingToken));
-        const stored = Buffer.from(storedHash);
-        if (candidate.length !== stored.length) return false;
-        return crypto.timingSafeEqual(candidate, stored);
+    if (!user.password) {
+      throw new RpcUnauthorizedException(
+        'This account uses Google sign-in. Please login with Google.',
+      );
     }
 
-    /**
-     * Stores hashed refresh token in DB for validation on refresh
-     */
-    private async storeRefreshToken(
-        userId: string,
-        refreshToken: string,
-    ) : Promise<void> {
-        const hashedToken = this.hashRefreshToken(refreshToken);
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 7);
+    const passwordMatch = await bcrypt.compare(dto.password, user.password);
 
-        await this.prisma.refreshToken.create({
-            data: {
-                token: hashedToken,
-                userId,
-                expiresAt,
-            }
-        })
+    if (!passwordMatch) {
+      throw new RpcUnauthorizedException('Invalid credentials');
     }
 
-    async register(dto: RegisterDto): Promise<AuthResponse> {
-        const user = await this.usersService.create(dto);
-        const tokens = await this.generateTokens(
-            user.id,
-            user.email,
-            user.username,
-            user.role
-        )
+    const tokens = await this.generateTokens(
+      user.id,
+      user.email,
+      user.username,
+      user.role,
+    );
 
-        await this.storeRefreshToken(user.id, tokens.refreshToken);
+    await this.storeRefreshToken(user.id, tokens.refreshToken);
 
-        this.rabbitMQService.publish<UserRegisteredPayload>(ROUTING_KEYS.USER_REGISTERED, {
-            userId: user.id,
-            email: user.email,
-            username: user.username,
-            registeredViaGoogle: false,
-        });
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        avatar: user.avatar,
+        role: user.role,
+      },
+      tokens,
+    };
+  }
 
-        return {
-            user: {
-                id: user.id,
-                email: user.email,
-                username: user.username,
-                avatar: user.avatar,
-                role: user.role
-            },
-            tokens
-        };
+  async googleAuth(profile: GoogleProfile): Promise<AuthResponse> {
+    let user: User | SafeUser | null = await this.usersService.findByEmail(
+      profile.email,
+    );
+
+    if (!user) {
+      let username = profile.username;
+      const existing = await this.usersService.findByUsername(profile.username);
+
+      if (existing) {
+        username = `${username}_${Date.now()}`;
+      }
+
+      user = await this.usersService.create({
+        email: profile.email,
+        username: username,
+        avatar: profile.avatar,
+      });
+
+      this.rabbitMQService.publish<UserRegisteredPayload>(
+        ROUTING_KEYS.USER_REGISTERED,
+        {
+          userId: user.id,
+          email: user.email,
+          username: user.username,
+          registeredViaGoogle: true,
+        },
+      );
     }
 
-    async login(dto: LoginDto): Promise<AuthResponse> {
-        const user = await this.usersService.findByEmail(dto.email);
+    const tokens = await this.generateTokens(
+      user.id,
+      user.email,
+      user.username,
+      user.role,
+    );
 
-        if (!user) {
-            throw new RpcUnauthorizedException('Invalid credentials');
-        }
+    await this.storeRefreshToken(user.id, tokens.refreshToken);
 
-        if (!user.isActive) {
-            throw new RpcForbiddenException('Account is deactivated');
-        }
+    return {
+      user: {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        avatar: user.avatar,
+        role: user.role,
+      },
+      tokens,
+    };
+  }
 
-        if (!user.password) {
-            throw new RpcUnauthorizedException('This account uses Google sign-in. Please login with Google.');
-        }
+  async refresh(
+    userId: string,
+    incomingRefreshToken: string,
+  ): Promise<AuthTokens> {
+    const tokens = await this.prisma.refreshToken.findMany({
+      where: {
+        userId,
+        expiresAt: { gt: new Date() },
+      },
+    });
 
-        const passwordMatch = await bcrypt.compare(dto.password, user.password);
-
-        if (!passwordMatch) {
-            throw new RpcUnauthorizedException('Invalid credentials');
-        }
-
-        const tokens = await this.generateTokens(
-            user.id,
-            user.email,
-            user.username,
-            user.role,
-        )
-
-        await this.storeRefreshToken(user.id, tokens.refreshToken);
-
-        return {
-            user: {
-                id: user.id,
-                email: user.email,
-                username: user.username,
-                avatar: user.avatar,
-                role: user.role,
-            },
-            tokens
-        }
+    let matchedToken: RefreshToken | null = null;
+    for (const stored of tokens) {
+      if (this.refreshTokenMatches(incomingRefreshToken, stored.token)) {
+        matchedToken = stored;
+        break;
+      }
     }
 
-    async googleAuth(profile: GoogleProfile): Promise<AuthResponse> {
-        let user: User | SafeUser | null = await this.usersService.findByEmail(profile.email);
-
-        if (!user) {
-            let username = profile.username;
-            const existing = await this.usersService.findByUsername(profile.username);
-
-            if (existing) {
-                username = `${username}_${Date.now()}`;
-            }
-
-            user = await this.usersService.create({
-                email: profile.email,
-                username: username,
-                avatar: profile.avatar
-            });
-
-            this.rabbitMQService.publish<UserRegisteredPayload>(ROUTING_KEYS.USER_REGISTERED, {
-                userId: user.id,
-                email: user.email,
-                username: user.username,
-                registeredViaGoogle: true,
-            });
-        }
-
-        const tokens = await this.generateTokens(
-            user.id,
-            user.email,
-            user.username,
-            user.role,
-        );
-
-        await this.storeRefreshToken(user.id, tokens.refreshToken);
-
-        return {
-            user: {
-                id: user.id,
-                email: user.email,
-                username: user.username,
-                avatar: user.avatar,
-                role: user.role,
-            },
-            tokens
-        }
+    if (!matchedToken) {
+      throw new RpcUnauthorizedException('Invalid refresh token');
     }
 
-    async refresh(userId: string, incomingRefreshToken: string): Promise<AuthTokens> {
-        const tokens = await this.prisma.refreshToken.findMany({
-            where: {
-                userId,
-                expiresAt: { gt: new Date() }
-            }
-        })
+    await this.prisma.refreshToken.delete({
+      where: { id: matchedToken.id },
+    });
 
-        let matchedToken: RefreshToken | null = null;
-        for (const stored of tokens) {
-            if (this.refreshTokenMatches(incomingRefreshToken, stored.token)) {
-                matchedToken = stored;
-                break;
-            }
-        }
+    const user = await this.usersService.findById(userId);
+    const newTokens = await this.generateTokens(
+      user.id,
+      user.email,
+      user.username,
+      user.role,
+    );
 
-        if (!matchedToken) {
-            throw new RpcUnauthorizedException('Invalid refresh token');
-        }
+    await this.storeRefreshToken(user.id, newTokens.refreshToken);
 
-        await this.prisma.refreshToken.delete({
-            where: { id: matchedToken.id }
-        });
+    return newTokens;
+  }
 
-        const user = await this.usersService.findById(userId);
-        const newTokens = await this.generateTokens(
-            user.id,
-            user.email,
-            user.username,
-            user.role,
-        );
+  async logout(userId: string, refreshToken: string): Promise<void> {
+    const tokens = await this.prisma.refreshToken.findMany({
+      where: { userId },
+    });
 
-        await this.storeRefreshToken(user.id, newTokens.refreshToken);
-
-        return newTokens;
+    for (const stored of tokens) {
+      if (this.refreshTokenMatches(refreshToken, stored.token)) {
+        await this.prisma.refreshToken.delete({ where: { id: stored.id } });
+        return;
+      }
     }
+  }
 
-    async logout(userId: string, refreshToken: string): Promise<void> {
-        const tokens = await this.prisma.refreshToken.findMany({
-            where: { userId }
-        });
-
-        for (const stored of tokens) {
-            if (this.refreshTokenMatches(refreshToken, stored.token)) {
-                await this.prisma.refreshToken.delete({ where: { id: stored.id } });
-                return;
-            }
-        }
-    }
-
-
-    async logoutAll(userId: string): Promise<void> {
-        await this.prisma.refreshToken.deleteMany({
-            where: { userId }
-        });
-    }
-
+  async logoutAll(userId: string): Promise<void> {
+    await this.prisma.refreshToken.deleteMany({
+      where: { userId },
+    });
+  }
 }

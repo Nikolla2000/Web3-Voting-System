@@ -1,4 +1,10 @@
-import { ArrayMinSize, IsArray, IsString, MaxLength, MinLength } from 'class-validator';
+import {
+  ArrayMinSize,
+  IsArray,
+  IsString,
+  MaxLength,
+  MinLength,
+} from 'class-validator';
 
 export class CheckPollNeutralityDto {
   @IsString()

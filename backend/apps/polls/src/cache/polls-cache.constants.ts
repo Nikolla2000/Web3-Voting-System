@@ -30,7 +30,10 @@ export interface PollsListCacheParams {
   search?: string;
 }
 
-export function pollsListCacheKey(version: string | number, params: PollsListCacheParams): string {
+export function pollsListCacheKey(
+  version: string | number,
+  params: PollsListCacheParams,
+): string {
   const { status, sortBy, page, limit, search = '' } = params;
   return `polls:list:v${version}:${status}:${sortBy}:${page}:${limit}:${search}`;
 }

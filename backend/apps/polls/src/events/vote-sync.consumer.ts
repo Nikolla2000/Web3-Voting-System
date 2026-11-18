@@ -1,7 +1,14 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { RabbitMQConsumerService, ROUTING_KEYS, RedisService } from '@app/shared';
+import {
+  RabbitMQConsumerService,
+  ROUTING_KEYS,
+  RedisService,
+} from '@app/shared';
 import { PrismaService } from '../..//prisma/prisma.service';
-import { pollDetailCacheKey, pollsListVersionKey } from '../cache/polls-cache.constants';
+import {
+  pollDetailCacheKey,
+  pollsListVersionKey,
+} from '../cache/polls-cache.constants';
 
 interface VoteCastEvent {
   pollId: string;
@@ -36,15 +43,25 @@ export class VoteSyncConsumer implements OnModuleInit {
   private async handleVoteCast(event: VoteCastEvent) {
     try {
       await this.prisma.$transaction([
-        this.prisma.processedVote.create({ data: { pollId: event.pollId, nullifierHash: event.nullifierHash } }),
-        this.prisma.pollOption.update({ where: { id: event.optionId }, data: { votes: { increment: 1 } } }),
-        this.prisma.poll.update({ where: { id: event.pollId }, data: { totalVotes: { increment: 1 } } }),
+        this.prisma.processedVote.create({
+          data: { pollId: event.pollId, nullifierHash: event.nullifierHash },
+        }),
+        this.prisma.pollOption.update({
+          where: { id: event.optionId },
+          data: { votes: { increment: 1 } },
+        }),
+        this.prisma.poll.update({
+          where: { id: event.pollId },
+          data: { totalVotes: { increment: 1 } },
+        }),
       ]);
       await this.redis.getClient().del(pollDetailCacheKey(event.pollId));
       await this.redis.getClient().incr(pollsListVersionKey());
     } catch (error: any) {
       if (error.code === 'P2002') {
-        this.logger.warn(`Duplicate vote.cast игнориран (nullifier вече обработен): ${event.nullifierHash}`);
+        this.logger.warn(
+          `Duplicate vote.cast игнориран (nullifier вече обработен): ${event.nullifierHash}`,
+        );
         return;
       }
       throw error;

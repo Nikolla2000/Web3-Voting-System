@@ -15,13 +15,18 @@ export class RedisService implements OnModuleDestroy {
   private readonly client: Redis;
 
   constructor(private readonly configService: ConfigService) {
-    this.client = new Redis(this.configService.getOrThrow<string>('redis.url'), {
-      lazyConnect: false,
-      maxRetriesPerRequest: 3,
-    });
+    this.client = new Redis(
+      this.configService.getOrThrow<string>('redis.url'),
+      {
+        lazyConnect: false,
+        maxRetriesPerRequest: 3,
+      },
+    );
 
     this.client.on('connect', () => this.logger.log('Connected to Redis'));
-    this.client.on('error', (err) => this.logger.error(`Redis connection error: ${err.message}`));
+    this.client.on('error', (err) =>
+      this.logger.error(`Redis connection error: ${err.message}`),
+    );
   }
 
   getClient(): Redis {

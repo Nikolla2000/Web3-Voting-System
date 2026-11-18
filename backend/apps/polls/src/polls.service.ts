@@ -2,7 +2,11 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from './generated/prisma';
 // import { RabbitMQPublisherService } from './rabbitmq/rabbitmq.service';
-import { RabbitMQPublisherService, ROUTING_KEYS, RedisService } from '@app/shared';
+import {
+  RabbitMQPublisherService,
+  ROUTING_KEYS,
+  RedisService,
+} from '@app/shared';
 import { RpcException } from '@nestjs/microservices';
 import { status as grpcStatus } from '@grpc/grpc-js';
 import {
@@ -34,7 +38,7 @@ export interface FindManyInput {
 
 @Injectable()
 export class PollsService {
-  constructor (
+  constructor(
     private readonly prisma: PrismaService,
     private readonly publisher: RabbitMQPublisherService,
     private readonly redis: RedisService,
@@ -46,13 +50,14 @@ export class PollsService {
         title: input.title,
         description: input.description,
         imageUrl: input.imageUrl,
-        category: input.category.toUpperCase() as Prisma.PollCreateInput['category'],
+        category:
+          input.category.toUpperCase() as Prisma.PollCreateInput['category'],
         startsAt: new Date(input.startsAt),
         endsAt: new Date(input.endsAt),
         creatorId: input.creatorId,
         options: { create: input.options.map((label) => ({ label })) },
       },
-      include: { options: true }
+      include: { options: true },
     });
 
     await this.redis.getClient().incr(pollsListVersionKey());
@@ -70,9 +75,22 @@ export class PollsService {
     return poll;
   }
 
-  async findMany({ search, status = 'all', sortBy = 'newest', page = 1, limit = 12 }: FindManyInput) {
-    const version = (await this.redis.getClient().get(pollsListVersionKey())) ?? '0';
-    const cacheKey = pollsListCacheKey(version, { search, status, sortBy, page, limit });
+  async findMany({
+    search,
+    status = 'all',
+    sortBy = 'newest',
+    page = 1,
+    limit = 12,
+  }: FindManyInput) {
+    const version =
+      (await this.redis.getClient().get(pollsListVersionKey())) ?? '0';
+    const cacheKey = pollsListCacheKey(version, {
+      search,
+      status,
+      sortBy,
+      page,
+      limit,
+    });
 
     const cached = await this.redis.getClient().get(cacheKey);
     if (cached) {
@@ -106,7 +124,13 @@ export class PollsService {
             : { startsAt: 'desc' };
 
     const [items, total] = await this.prisma.$transaction([
-      this.prisma.poll.findMany({ where, orderBy, skip: (page - 1) * limit, take: limit, include: { options: true } }),
+      this.prisma.poll.findMany({
+        where,
+        orderBy,
+        skip: (page - 1) * limit,
+        take: limit,
+        include: { options: true },
+      }),
       this.prisma.poll.count({ where }),
     ]);
 
@@ -114,7 +138,12 @@ export class PollsService {
 
     await this.redis
       .getClient()
-      .set(cacheKey, JSON.stringify(result), 'EX', POLLS_LIST_CACHE_TTL_SECONDS);
+      .set(
+        cacheKey,
+        JSON.stringify(result),
+        'EX',
+        POLLS_LIST_CACHE_TTL_SECONDS,
+      );
 
     return result;
   }
@@ -126,10 +155,16 @@ export class PollsService {
       return deserializePoll(JSON.parse(cached));
     }
 
-    const poll = await this.prisma.poll.findUnique({ where: { id }, include: { options: true } });
+    const poll = await this.prisma.poll.findUnique({
+      where: { id },
+      include: { options: true },
+    });
 
     if (!poll) {
-      throw new RpcException({ code: grpcStatus.NOT_FOUND, message: `Poll ${id} not found` });
+      throw new RpcException({
+        code: grpcStatus.NOT_FOUND,
+        message: `Poll ${id} not found`,
+      });
     }
 
     await this.redis
@@ -142,7 +177,14 @@ export class PollsService {
 
 // Round-tripping through JSON turns Date fields into strings — restore them
 // so a cache hit returns the same shape findById's live Prisma read does.
-function deserializePoll<T extends { startsAt: string; endsAt: string; createdAt: string; updatedAt: string }>(
+function deserializePoll<
+  T extends {
+    startsAt: string;
+    endsAt: string;
+    createdAt: string;
+    updatedAt: string;
+  },
+>(
   poll: T,
 ): T & { startsAt: Date; endsAt: Date; createdAt: Date; updatedAt: Date } {
   return {

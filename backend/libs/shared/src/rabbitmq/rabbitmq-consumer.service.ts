@@ -47,15 +47,23 @@ export class RabbitMQConsumerService {
     const routingKeys = Array.isArray(routingKey) ? routingKey : [routingKey];
 
     await channel.prefetch(prefetch);
-    const { queue: assertedQueue } = await channel.assertQueue(queue, { durable: true });
+    const { queue: assertedQueue } = await channel.assertQueue(queue, {
+      durable: true,
+    });
 
     for (const key of routingKeys) {
       await channel.bindQueue(assertedQueue, RABBITMQ_EXCHANGE, key);
     }
 
-    await channel.consume(assertedQueue, (msg) => this.handleMessage(msg, onMessage), { noAck: false });
+    await channel.consume(
+      assertedQueue,
+      (msg) => this.handleMessage(msg, onMessage),
+      { noAck: false },
+    );
 
-    this.logger.log(`Consuming [${routingKeys.join(', ')}] → queue '${assertedQueue}'`);
+    this.logger.log(
+      `Consuming [${routingKeys.join(', ')}] → queue '${assertedQueue}'`,
+    );
   }
 
   private async handleMessage<T>(

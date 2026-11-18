@@ -6,5 +6,7 @@ export default registerAs('redis', () => ({
 }));
 
 export const redisEnvValidation = {
-  REDIS_URL: Joi.string().uri({ scheme: ['redis', 'rediss'] }).required(),
+  REDIS_URL: Joi.string()
+    .uri({ scheme: ['redis', 'rediss'] })
+    .required(),
 };

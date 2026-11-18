@@ -60,7 +60,7 @@ export class RabbitMQConnectionService
       this.channel.on('close', () => {
         this.channel = null;
         this.logger.warn('RabbitMQ channel closed');
-        
+
         if (!this.isShuttingDown && this.connection) {
           this.logger.log('Triggering reconnect due to channel closure...');
           this.connect();
@@ -86,7 +86,9 @@ export class RabbitMQConnectionService
         this.channel = null;
 
         if (!this.isShuttingDown) {
-          this.logger.warn('RabbitMQ connection closed - reconnecting in 5s...');
+          this.logger.warn(
+            'RabbitMQ connection closed - reconnecting in 5s...',
+          );
           this.reconnectTimeout = setTimeout(() => this.connect(), 5000);
         }
       });

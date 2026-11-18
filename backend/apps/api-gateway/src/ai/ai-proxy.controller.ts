@@ -1,10 +1,22 @@
-import { Body, Controller, Inject, OnModuleInit, Post, Res } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Inject,
+  OnModuleInit,
+  Post,
+  Res,
+} from '@nestjs/common';
 import type { ClientGrpc } from '@nestjs/microservices';
 import { Throttle } from '@nestjs/throttler';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom, Observable } from 'rxjs';
 import type { Response } from 'express';
-import { ChatDto, CheckDuplicatePollDto, CheckPollNeutralityDto, SearchPollsDto } from '@app/shared';
+import {
+  ChatDto,
+  CheckDuplicatePollDto,
+  CheckPollNeutralityDto,
+  SearchPollsDto,
+} from '@app/shared';
 import { Public } from '../auth/decorators/public.decorator';
 
 interface ChatChunk {
@@ -35,7 +47,8 @@ export class AiProxyController implements OnModuleInit {
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('duplicate-check')
   @ApiOperation({
-    summary: 'Check a draft poll title/description against existing polls for semantic similarity',
+    summary:
+      'Check a draft poll title/description against existing polls for semantic similarity',
   })
   async checkDuplicatePoll(@Body() dto: CheckDuplicatePollDto) {
     return firstValueFrom(this.aiService.checkDuplicatePoll(dto));
@@ -48,7 +61,8 @@ export class AiProxyController implements OnModuleInit {
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('search')
   @ApiOperation({
-    summary: 'Search polls with a free-text natural-language query (semantic + date/category filters)',
+    summary:
+      'Search polls with a free-text natural-language query (semantic + date/category filters)',
   })
   async searchPolls(@Body() dto: SearchPollsDto) {
     return firstValueFrom(this.aiService.searchPolls(dto));
@@ -57,7 +71,8 @@ export class AiProxyController implements OnModuleInit {
   @Throttle({ default: { limit: 10, ttl: 60000 } })
   @Post('neutrality-check')
   @ApiOperation({
-    summary: "Check a draft poll's title/options for neutral, non-leading framing",
+    summary:
+      "Check a draft poll's title/options for neutral, non-leading framing",
   })
   async checkPollNeutrality(@Body() dto: CheckPollNeutralityDto) {
     return firstValueFrom(this.aiService.checkPollNeutrality(dto));
@@ -72,7 +87,10 @@ export class AiProxyController implements OnModuleInit {
   // several tool-calling rounds, so it's the most expensive call per request.
   @Throttle({ default: { limit: 5, ttl: 60000 } })
   @Post('chat')
-  @ApiOperation({ summary: 'Ask a natural-language question about poll data (streamed response)' })
+  @ApiOperation({
+    summary:
+      'Ask a natural-language question about poll data (streamed response)',
+  })
   async chat(@Body() dto: ChatDto, @Res() res: Response) {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -81,10 +99,14 @@ export class AiProxyController implements OnModuleInit {
     await new Promise<void>((resolve) => {
       this.aiService.chat(dto).subscribe({
         next: (chunk) => {
-          res.write(`data: ${JSON.stringify({ textDelta: chunk.textDelta })}\n\n`);
+          res.write(
+            `data: ${JSON.stringify({ textDelta: chunk.textDelta })}\n\n`,
+          );
         },
         error: () => {
-          res.write(`data: ${JSON.stringify({ error: 'The assistant hit an error.' })}\n\n`);
+          res.write(
+            `data: ${JSON.stringify({ error: 'The assistant hit an error.' })}\n\n`,
+          );
           res.end();
           resolve();
         },

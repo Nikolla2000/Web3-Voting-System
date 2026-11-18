@@ -11,7 +11,15 @@ declare module 'ioredis' {
       ttlMs: number,
       limit: number,
       blockDurationMs: number,
-    ): Result<[totalHits: number, timeToExpire: number, isBlocked: number, timeToBlockExpire: number], Context>;
+    ): Result<
+      [
+        totalHits: number,
+        timeToExpire: number,
+        isBlocked: number,
+        timeToBlockExpire: number,
+      ],
+      Context
+    >;
   }
 }
 
@@ -61,7 +69,10 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
     this.client = redisService.getClient();
 
     if (typeof this.client.throttlerIncrement !== 'function') {
-      this.client.defineCommand('throttlerIncrement', { numberOfKeys: 2, lua: INCREMENT_SCRIPT });
+      this.client.defineCommand('throttlerIncrement', {
+        numberOfKeys: 2,
+        lua: INCREMENT_SCRIPT,
+      });
     }
   }
 
@@ -75,13 +86,14 @@ export class RedisThrottlerStorage implements ThrottlerStorage {
     const hitsKey = `throttle:${throttlerName}:${key}`;
     const blockedKey = `${hitsKey}:blocked`;
 
-    const [totalHits, timeToExpire, isBlocked, timeToBlockExpire] = await this.client.throttlerIncrement(
-      hitsKey,
-      blockedKey,
-      ttl,
-      limit,
-      blockDuration,
-    );
+    const [totalHits, timeToExpire, isBlocked, timeToBlockExpire] =
+      await this.client.throttlerIncrement(
+        hitsKey,
+        blockedKey,
+        ttl,
+        limit,
+        blockDuration,
+      );
 
     return {
       totalHits,
