@@ -1,0 +1,153 @@
+name: CI
+
+on:
+  push:
+    branches: [main, development]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  changes:
+    name: Detect changed projects
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+      ai-service: ${{ steps.filter.outputs.ai-service }}
+      contracts: ${{ steps.filter.outputs.contracts }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            workflow: &workflow
+              - '.github/workflows/ci.yml'
+            backend:
+              - *workflow
+              - 'backend/**'
+            frontend:
+              - *workflow
+              - 'frontend/**'
+            ai-service:
+              - *workflow
+              - 'ai-service/**'
+              # gRPC stubs are generated from these at build time.
+              - 'backend/libs/shared/src/ai/**/*.proto'
+              - 'backend/libs/shared/src/polls/**/*.proto'
+            contracts:
+              - *workflow
+              - 'contracts/**'
+
+  backend:
+    name: Backend
+    needs: changes
+    if: needs.changes.outputs.backend == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Generate Prisma clients
+        run: |
+          for app in identity polls blockchain; do
+            (cd "apps/$app" && npx prisma generate)
+          done
+      - name: Typecheck
+        run: npx tsc --noEmit -p tsconfig.json
+      - name: Unit tests
+        run: npx jest --ci
+
+  frontend:
+    name: Frontend
+    needs: changes
+    if: needs.changes.outputs.frontend == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Typecheck
+        run: npx tsc --noEmit
+      - name: Unit tests
+        run: npm test
+
+  ai-service:
+    name: AI service
+    needs: changes
+    if: needs.changes.outputs.ai-service == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ai-service
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          cache-dependency-glob: ai-service/uv.lock
+      - name: Install dependencies
+        run: uv sync --locked
+      - name: Generate gRPC stubs
+        run: uv run python scripts/gen_proto.py
+      - name: Unit tests
+        run: uv run pytest
+
+  contracts:
+    name: Contracts
+    needs: changes
+    if: needs.changes.outputs.contracts == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: contracts/package-lock.json
+      - run: npm ci
+      - name: Compile
+        run: npx hardhat compile
+      - name: Tests
+        run: npx hardhat test
+
+  # The one check to mark as required in branch protection: path-filtered
+  # jobs report "skipped" when their project is untouched, which a required
+  # check would otherwise wait on forever.
+  ci-result:
+    name: CI result
+    needs: [changes, backend, frontend, ai-service, contracts]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Fail if any project job failed or was cancelled
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
+      - run: echo "All changed projects passed."
