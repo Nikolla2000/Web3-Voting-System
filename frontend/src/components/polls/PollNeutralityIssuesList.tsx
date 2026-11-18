@@ -7,7 +7,9 @@ interface PollNeutralityIssuesListProps {
 export function PollNeutralityIssuesList({ issues }: PollNeutralityIssuesListProps) {
   return (
     <div className="flex flex-col gap-2">
-      <p className="text-sm font-medium text-amber-900">This poll's wording may not be neutral</p>
+      <p className="text-sm font-medium text-amber-900">
+        This poll&apos;s wording may not be neutral
+      </p>
       <ul className="flex flex-col gap-2">
         {issues.map((issue) => (
           <li
