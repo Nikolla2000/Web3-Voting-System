@@ -25,6 +25,7 @@ jobs:
       frontend: ${{ steps.filter.outputs.frontend }}
       ai-service: ${{ steps.filter.outputs.ai-service }}
       contracts: ${{ steps.filter.outputs.contracts }}
+      frontend-e2e: ${{ steps.filter.outputs.frontend-e2e }}
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
@@ -48,6 +49,11 @@ jobs:
             contracts:
               - *workflow
               - 'contracts/**'
+            frontend-e2e:
+              - *workflow
+              - 'frontend/**'
+              # The vote test checks its proof against the backend's own encoding.
+              - 'backend/libs/shared/src/blockchain/identifier.util.ts'
 
   backend:
     name: Backend
@@ -79,6 +85,40 @@ jobs:
       - name: Unit tests
         run: npx jest --ci
 
+  # The slower suites below run on pull requests (and manual runs) only, so
+  # pushes to development keep fast feedback.
+
+  backend-docker:
+    name: Backend integration & e2e
+    needs: changes
+    if: >-
+      (github.event_name == 'pull_request' && needs.changes.outputs.backend == 'true')
+      || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+      - run: npm ci
+      - name: Generate Prisma clients
+        run: |
+          for app in identity polls blockchain; do
+            (cd "apps/$app" && npx prisma generate)
+          done
+      # Both suites start their own containers through testcontainers (Redis;
+      # Postgres plus a real identity process) and pass every setting
+      # explicitly, so no .env or secrets are needed.
+      - name: Integration tests
+        run: npm run test:integration -- --ci
+      - name: E2E tests
+        run: npm run test:e2e -- --ci
+
   frontend:
     name: Frontend
     needs: changes
@@ -103,6 +143,56 @@ jobs:
         run: npx tsc --noEmit
       - name: Unit tests
         run: npm test
+
+  frontend-e2e:
+    name: Frontend e2e
+    needs: changes
+    if: >-
+      (github.event_name == 'pull_request' && needs.changes.outputs.frontend-e2e == 'true')
+      || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('frontend/package-lock.json') }}
+      - name: Install Chromium
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: npx playwright install --with-deps chromium
+      - name: Install Chromium system dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: npx playwright install-deps chromium
+      # e2e/support/test.ts serves Semaphore's circuit files from this folder,
+      # downloading them only on a miss.
+      - name: Cache Semaphore circuit files
+        uses: actions/cache@v4
+        with:
+          path: frontend/e2e/.cache/snark-artifacts
+          key: snark-artifacts-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: snark-artifacts-
+      - name: E2E tests
+        run: npm run test:e2e
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            frontend/playwright-report/
+            frontend/test-results/
+          retention-days: 7
 
   ai-service:
     name: AI service
@@ -151,7 +241,7 @@ jobs:
   # check would otherwise wait on forever.
   ci-result:
     name: CI result
-    needs: [changes, backend, frontend, ai-service, contracts]
+    needs: [changes, backend, backend-docker, frontend, frontend-e2e, ai-service, contracts]
     if: always()
     runs-on: ubuntu-latest
     steps:
