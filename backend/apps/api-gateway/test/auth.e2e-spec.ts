@@ -41,7 +41,7 @@ import googleConfig from '../src/config/google.config';
  * ts-jest's CommonJS transform — is handled the same way webpack already
  * handles it for the real dev/prod build, rather than needing identity's
  * source loaded into this Jest process at all). Run via
- * `npm run test:e2e:gateway`; excluded from the default `npm test` run.
+ * `npm run test:e2e`; excluded from the default `npm test` run.
  */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access --
  * supertest's Response#body is typed `any`, so every `res.body.data.*` access here is

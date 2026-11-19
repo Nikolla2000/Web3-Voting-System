@@ -13,7 +13,7 @@ Four independent projects, not a unified monorepo tool (no root package.json):
 
 ## CI (`.github/workflows/ci.yml`)
 
-One path-filtered workflow: each project's job runs only when that project changed (ai-service also runs on changes to the backend `.proto` files it generates stubs from). `CI result` is the single aggregate check to require in branch protection. Jobs run lint, typecheck and unit tests; the backend lints without `--fix` (Prettier is enforced through eslint-plugin-prettier), and the frontend also runs `npm run format:check`. CI has no `.env` files, so config must not require secrets just to load (see `contracts/hardhat.config.ts`'s `configVariable`). Formatting-only commits are listed in `.git-blame-ignore-revs`.
+One path-filtered workflow: each project's job runs only when that project changed (ai-service also runs on changes to the backend `.proto` files it generates stubs from). `CI result` is the single aggregate check to require in branch protection. Jobs run lint, typecheck and unit tests; the backend lints without `--fix` (Prettier is enforced through eslint-plugin-prettier), and the frontend also runs `npm run format:check`. The slower suites (backend `test:integration` + `test:e2e` via testcontainers, frontend Playwright) run only on pull requests and manual runs, not on plain pushes; Playwright's report is uploaded as an artifact when it fails. CI has no `.env` files, so config must not require secrets just to load (see `contracts/hardhat.config.ts`'s `configVariable`). Formatting-only commits are listed in `.git-blame-ignore-revs`.
 
 ## Project purpose & vision
 
@@ -77,7 +77,7 @@ npm test                       # jest, all *.spec.ts under apps/ and libs/
 npx jest path/to/file.spec.ts  # single test file
 npm run test:watch
 npm run test:cov
-npm run test:e2e               # gateway + auth e2e suites (testcontainers: needs Docker running)
+npm run test:e2e               # gateway e2e suite (testcontainers: needs Docker running)
 npm run test:integration       # gateway integration tests
 ```
 
