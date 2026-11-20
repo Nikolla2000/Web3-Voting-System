@@ -1,0 +1,27 @@
+# Production image (Dockerfile is the dev image docker-compose.yml uses).
+# Build context is the repo root: scripts/gen_proto.py reads the .proto files
+# from ../backend/libs/shared/src, so the build mirrors that layout.
+
+FROM python:3.12-slim AS build
+COPY --from=ghcr.io/astral-sh/uv:0.12.10 /uv /bin/uv
+ENV UV_COMPILE_BYTECODE=1 UV_LINK_MODE=copy
+WORKDIR /repo/ai-service
+COPY ai-service/pyproject.toml ai-service/uv.lock ./
+# The dev group is only needed for grpc_tools.protoc; it's removed below.
+RUN uv sync --locked --group dev --no-install-project
+COPY ai-service/ ./
+COPY backend/libs/shared/src/ai/ai.proto /repo/backend/libs/shared/src/ai/
+COPY backend/libs/shared/src/polls/polls.proto /repo/backend/libs/shared/src/polls/
+RUN uv run --no-sync python scripts/gen_proto.py
+RUN uv sync --locked --no-dev --no-editable
+
+FROM python:3.12-slim
+WORKDIR /repo/ai-service
+COPY --from=build /repo/ai-service/.venv ./.venv
+# alembic.ini and its migrations are read from the working directory.
+COPY --from=build /repo/ai-service/alembic.ini ./
+COPY --from=build /repo/ai-service/alembic ./alembic
+ENV PATH="/repo/ai-service/.venv/bin:$PATH"
+RUN useradd --system --no-create-home app
+USER app
+CMD ["sh", "-c", "alembic upgrade head && exec python -m ai_service.main"]

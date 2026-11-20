@@ -1,0 +1,26 @@
+# Production image (Dockerfile is the dev image docker-compose.yml uses):
+# Next's standalone output, so the runtime stage needs no node_modules.
+
+FROM node:24-alpine AS build
+WORKDIR /app
+# husky's prepare script expects a .git directory.
+ENV HUSKY=0
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+# NEXT_PUBLIC_* is inlined at build time. The browser calls the gateway from
+# outside the Docker network, so this is the gateway's host-mapped address.
+ARG NEXT_PUBLIC_API_GATEWAY_URL=http://localhost:3000
+ENV NEXT_PUBLIC_API_GATEWAY_URL=$NEXT_PUBLIC_API_GATEWAY_URL
+ENV NEXT_OUTPUT=standalone
+RUN npx next build
+
+FROM node:24-alpine
+WORKDIR /app
+ENV NODE_ENV=production PORT=5000 HOSTNAME=0.0.0.0
+COPY --from=build --chown=node:node /app/.next/standalone ./
+COPY --from=build --chown=node:node /app/.next/static ./.next/static
+COPY --from=build --chown=node:node /app/public ./public
+USER node
+EXPOSE 5000
+CMD ["node", "server.js"]

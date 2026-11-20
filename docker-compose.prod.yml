@@ -1,0 +1,99 @@
+# Runs the production images CI publishes to GHCR (.github/workflows/docker.yml)
+# instead of building from source:
+#
+#   docker compose -f docker-compose.prod.yml up
+#
+# Same .env files as docker-compose.yml (the root one for the database
+# credentials, plus each service's own). IMAGE_TAG picks a version: latest
+# (default), a release like 1.2.0, or a commit like sha-abc1234.
+
+# Postgres comes from docker-compose.yml (extends), which puts it on this network.
+x-app: &app
+  restart: unless-stopped
+  networks: [voting-system]
+
+networks:
+  voting-system:
+
+volumes:
+  postgres-identity-data:
+  postgres-polls-data:
+  postgres-blockchain-data:
+  postgres-ai-data:
+
+services:
+  postgres-identity:
+    extends: { file: docker-compose.yml, service: postgres-identity }
+  postgres-polls:
+    extends: { file: docker-compose.yml, service: postgres-polls }
+  postgres-blockchain:
+    extends: { file: docker-compose.yml, service: postgres-blockchain }
+  postgres-ai:
+    extends: { file: docker-compose.yml, service: postgres-ai }
+
+  identity:
+    image: ghcr.io/nikolla2000/web3-voting-identity:${IMAGE_TAG:-latest}
+    <<: *app
+    env_file: ./backend/apps/identity/.env
+    environment:
+      DATABASE_URL: postgresql://${IDENTITY_DB_USER}:${IDENTITY_DB_PASSWORD_URLENC}@postgres-identity:5432/identity_service_db
+    ports: ["3001:3001"]
+    depends_on:
+      postgres-identity: { condition: service_healthy }
+
+  polls:
+    image: ghcr.io/nikolla2000/web3-voting-polls:${IMAGE_TAG:-latest}
+    <<: *app
+    env_file: ./backend/apps/polls/.env
+    environment:
+      POLLS_SERVICE_DATABASE_URL: postgresql://${POLLS_DB_USER}:${POLLS_DB_PASSWORD_URLENC}@postgres-polls:5432/polls_service_db
+    ports: ["3002:3002"]
+    depends_on:
+      postgres-polls: { condition: service_healthy }
+
+  blockchain:
+    image: ghcr.io/nikolla2000/web3-voting-blockchain:${IMAGE_TAG:-latest}
+    <<: *app
+    env_file: ./backend/apps/blockchain/.env
+    environment:
+      BLOCKCHAIN_SERVICE_DATABASE_URL: postgresql://${BLOCKCHAIN_DB_USER}:${BLOCKCHAIN_DB_PASSWORD}@postgres-blockchain:5432/blockchain?schema=public
+    ports: ["3003:3003"]
+    depends_on:
+      postgres-blockchain: { condition: service_healthy }
+
+  notifications:
+    image: ghcr.io/nikolla2000/web3-voting-notifications:${IMAGE_TAG:-latest}
+    <<: *app
+    env_file: ./backend/apps/notifications/.env
+
+  ai-service:
+    image: ghcr.io/nikolla2000/web3-voting-ai-service:${IMAGE_TAG:-latest}
+    <<: *app
+    env_file: ./ai-service/.env
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${AI_DB_USER}:${AI_DB_PASSWORD}@postgres-ai:5432/ai_service_db
+      POLLS_SERVICE_HOST: polls
+    ports: ["3004:3004"]
+    depends_on:
+      postgres-ai: { condition: service_healthy }
+      polls: { condition: service_started }
+
+  api-gateway:
+    image: ghcr.io/nikolla2000/web3-voting-api-gateway:${IMAGE_TAG:-latest}
+    <<: *app
+    env_file: ./backend/.env
+    environment:
+      IDENTITY_SERVICE_HOST: identity
+      POLLS_SERVICE_HOST: polls
+      BLOCKCHAIN_SERVICE_HOST: blockchain
+      AI_SERVICE_HOST: ai-service
+    ports: ["3000:3000"]
+    depends_on: [identity, polls, blockchain, ai-service]
+
+  # NEXT_PUBLIC_API_GATEWAY_URL is baked into this image as
+  # http://localhost:3000 (see frontend/Dockerfile.prod).
+  frontend:
+    image: ghcr.io/nikolla2000/web3-voting-frontend:${IMAGE_TAG:-latest}
+    <<: *app
+    ports: ["5000:5000"]
+    depends_on: [api-gateway]
