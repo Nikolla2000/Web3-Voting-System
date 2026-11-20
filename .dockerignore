@@ -15,3 +15,7 @@ ai-service/**/__pycache__
 ai-service/src/ai_service/grpc_gen
 contracts/node_modules
 .git
+# Secrets must never end up in an image layer.
+**/.env
+**/.env.*
+!**/.env.example
