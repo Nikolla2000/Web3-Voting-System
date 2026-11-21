@@ -1,0 +1,77 @@
+name: Deploy contracts
+
+# Manual Sepolia deploy of contracts/ignition/modules/PollVoting.ts. Secrets
+# live in the "sepolia" GitHub Environment, whose required reviewer replaces
+# Ignition's interactive confirmation. Ignition resumes from the committed
+# deployment record (contracts/ignition/deployments/chain-11155111), so an
+# unchanged module deploys nothing.
+on:
+  workflow_dispatch:
+    inputs:
+      verify:
+        description: Verify the contracts on Etherscan
+        type: boolean
+        default: true
+
+concurrency:
+  group: deploy-sepolia
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to Sepolia
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment:
+      name: sepolia
+      url: https://sepolia.etherscan.io/address/${{ steps.addresses.outputs.poll-voting }}
+    defaults:
+      run:
+        working-directory: contracts
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: contracts/package-lock.json
+      - run: npm ci
+      - name: Tests
+        run: npx hardhat test
+      - name: Deploy
+        env:
+          SEPOLIA_RPC_URL: ${{ secrets.SEPOLIA_RPC_URL }}
+          DEPLOYER_PRIVATE_KEY: ${{ secrets.DEPLOYER_PRIVATE_KEY }}
+          ETHERSCAN_API_KEY: ${{ secrets.ETHERSCAN_API_KEY }}
+          # Public, so a variable rather than a secret. Must stay the
+          # blockchain service's relayer: it's PollVoting's owner.
+          RELAYER_ADDRESS: ${{ vars.RELAYER_ADDRESS }}
+          HARDHAT_IGNITION_CONFIRM_DEPLOYMENT: 'false'
+          VERIFY: ${{ inputs.verify }}
+        run: |
+          test -n "$RELAYER_ADDRESS" || { echo "Set the RELAYER_ADDRESS variable on the sepolia environment"; exit 1; }
+          args=(ignition/modules/PollVoting.ts --network sepolia)
+          if [ "$VERIFY" = true ]; then args+=(--verify); fi
+          npx hardhat ignition deploy "${args[@]}"
+      - name: Summarize addresses
+        id: addresses
+        run: |
+          file=ignition/deployments/chain-11155111/deployed_addresses.json
+          echo "poll-voting=$(jq -r '."PollVotingModule#PollVoting"' "$file")" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Sepolia deployment"
+            echo "| Contract | Address |"
+            echo "|---|---|"
+            jq -r 'to_entries[] | "| \(.key | sub("PollVotingModule#"; "")) | [\(.value)](https://sepolia.etherscan.io/address/\(.value)) |"' "$file"
+            echo
+            echo "If anything new was deployed, commit the \`deployment-record\` artifact over contracts/ignition/deployments/chain-11155111 and set the new PollVoting address as POLL_VOTING_CONTRACT_ADDRESS in apps/blockchain/.env."
+          } >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: deployment-record
+          path: contracts/ignition/deployments/chain-11155111
+          retention-days: 30
