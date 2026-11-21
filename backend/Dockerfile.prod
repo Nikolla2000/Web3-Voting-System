@@ -1,0 +1,42 @@
+# Production image for any Nest app in the monorepo, picked with --build-arg
+# APP=<api-gateway|identity|polls|blockchain|notifications>. The per-app
+# Dockerfiles under apps/ are the dev (hot-reload) images docker-compose.yml
+# uses; this one is what CI publishes to GHCR.
+#
+# Build context is backend/.
+
+FROM node:24-alpine AS build
+# node-gyp builds bcrypt's native binding here, so the runtime stage
+# doesn't need a compiler.
+RUN apk add --no-cache python3 make g++ openssl
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+ARG APP
+RUN test -n "$APP" || (echo "Pass --build-arg APP=<app>" && exit 1)
+# All three, not just $APP's: libs/shared imports identity's generated Role
+# enum, so every app compiles against it.
+RUN for app in identity polls blockchain; do \
+      (cd "apps/$app" && npx prisma generate) || exit 1; \
+    done
+RUN npx nest build "$APP"
+RUN npm prune --omit=dev
+
+FROM node:24-alpine
+# openssl: Prisma's schema engine (migrate deploy / db push at startup).
+RUN apk add --no-cache openssl
+WORKDIR /app
+ENV NODE_ENV=production
+ARG APP
+ENV APP=$APP
+COPY --from=build /app/package.json ./
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/dist/apps/$APP ./dist/apps/$APP
+# gRPC .proto files are loaded at runtime from process.cwd()/libs/shared/src.
+COPY --from=build /app/libs/shared/src ./libs/shared/src
+# Schema, migrations and prisma.config.ts, for the startup schema sync.
+COPY --from=build /app/apps/$APP ./apps/$APP
+COPY docker-entrypoint.prod.sh ./
+USER node
+ENTRYPOINT ["sh", "docker-entrypoint.prod.sh"]

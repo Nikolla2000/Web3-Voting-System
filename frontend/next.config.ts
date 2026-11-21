@@ -5,6 +5,8 @@ const nextConfig: NextConfig = {
   // build time), so it gets its own output folder: otherwise a later `next start` would silently
   // serve that build. See playwright.config.ts.
   distDir: process.env.NEXT_DIST_DIR || '.next',
+  // Set by Dockerfile.prod only, so `next start` (dev, Playwright) is unaffected.
+  ...(process.env.NEXT_OUTPUT === 'standalone' && { output: 'standalone' as const }),
   // Only applies with the webpack dev server (Docker's Dockerfile runs
   // `next dev --webpack` instead of the default Turbopack specifically for
   // this), and only takes effect when actually set — Docker Desktop on
