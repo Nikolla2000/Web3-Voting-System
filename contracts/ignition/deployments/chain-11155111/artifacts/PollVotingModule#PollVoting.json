@@ -1,0 +1,327 @@
+{
+  "_format": "hh3-artifact-1",
+  "contractName": "PollVoting",
+  "sourceName": "contracts/PollVoting.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "contract ISemaphore",
+          "name": "_semaphore",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_relayer",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableInvalidOwner",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "OwnableUnauthorizedAccount",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "pollId",
+          "type": "uint256"
+        }
+      ],
+      "name": "PollAlreadyExists",
+      "type": "error"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "pollId",
+          "type": "uint256"
+        }
+      ],
+      "name": "PollDoesNotExist",
+      "type": "error"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "previousOwner",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "OwnershipTransferred",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "pollId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        }
+      ],
+      "name": "PollCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "uint256",
+          "name": "pollId",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "message",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "nullifier",
+          "type": "uint256"
+        }
+      ],
+      "name": "VoteCast",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "pollId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "identityCommitment",
+          "type": "uint256"
+        }
+      ],
+      "name": "addMember",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "pollId",
+          "type": "uint256"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "merkleTreeDepth",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "merkleTreeRoot",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "nullifier",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "message",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "scope",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256[8]",
+              "name": "points",
+              "type": "uint256[8]"
+            }
+          ],
+          "internalType": "struct ISemaphore.SemaphoreProof",
+          "name": "proof",
+          "type": "tuple"
+        }
+      ],
+      "name": "castVote",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "pollId",
+          "type": "uint256"
+        }
+      ],
+      "name": "createPoll",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "owner",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "pollId",
+          "type": "uint256"
+        }
+      ],
+      "name": "pollExists",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "exists",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "pollId",
+          "type": "uint256"
+        }
+      ],
+      "name": "pollGroupId",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "groupId",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "renounceOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "semaphore",
+      "outputs": [
+        {
+          "internalType": "contract ISemaphore",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "newOwner",
+          "type": "address"
+        }
+      ],
+      "name": "transferOwnership",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x60a060405234801561000f575f80fd5b506040516107cf3803806107cf83398101604081905261002e916100de565b806001600160a01b03811661005c57604051631e4fbdf760e01b81525f600482015260240160405180910390fd5b61006581610078565b50506001600160a01b0316608052610116565b5f80546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b6001600160a01b03811681146100db575f80fd5b50565b5f80604083850312156100ef575f80fd5b82516100fa816100c7565b602084015190925061010b816100c7565b809150509250929050565b60805161068d6101425f395f818160c9015281816101f90152818161030701526103cd015261068d5ff3fe608060405234801561000f575f80fd5b5060043610610090575f3560e01c806388d21ff31161006357806388d21ff3146101085780638b0852471461013a5780638da5cb5b14610167578063d9c6aac814610177578063f2fde38b1461018a575f80fd5b80630d0b1176146100945780631783efc3146100a9578063715018a6146100bc5780637b5d2534146100c4575b5f80fd5b6100a76100a2366004610558565b61019d565b005b6100a76100b736600461058f565b6102a1565b6100a761036a565b6100eb7f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020015b60405180910390f35b61012a6101163660046105af565b60026020525f908152604090205460ff1681565b60405190151581526020016100ff565b6101596101483660046105af565b60016020525f908152604090205481565b6040519081526020016100ff565b5f546001600160a01b03166100eb565b6101596101853660046105af565b61037d565b6100a76101983660046105c6565b6104a0565b5f8281526002602052604090205460ff166101d35760405163a86ecdd560e01b8152600481018390526024015b60405180910390fd5b5f828152600160205260409081902054905163d0d898dd60e01b81526001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000169163d0d898dd9161022f919085906004016105f3565b5f604051808303815f87803b158015610246575f80fd5b505af1158015610258573d5f803e3d5ffd5b505060408051606085013581528185013560208201528593507f24930ecca7f60d4736cd965cb5522694ea4b32308405d3f88fea2f59eff63caa92500160405180910390a25050565b6102a96104dd565b5f8281526002602052604090205460ff166102da5760405163a86ecdd560e01b8152600481018390526024016101ca565b5f8281526001602052604090819020549051631783efc360e01b81526004810191909152602481018290527f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031690631783efc3906044015f604051808303815f87803b158015610350575f80fd5b505af1158015610362573d5f803e3d5ffd5b505050505050565b6103726104dd565b61037b5f610509565b565b5f6103866104dd565b5f8281526002602052604090205460ff16156103b85760405163243d973f60e01b8152600481018390526024016101ca565b6040516302e1f9db60e51b81523060048201527f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031690635c3f3b60906024016020604051808303815f875af115801561041b573d5f803e3d5ffd5b505050506040513d601f19601f8201168201806040525081019061043f9190610640565b5f8381526001602081815260408084208590556002825292839020805460ff1916909217909155905182815291925083917f79fb617314647013123901234cea859ab2df200423a4048a35d9cf59437a9b64910160405180910390a2919050565b6104a86104dd565b6001600160a01b0381166104d157604051631e4fbdf760e01b81525f60048201526024016101ca565b6104da81610509565b50565b5f546001600160a01b0316331461037b5760405163118cdaa760e01b81523360048201526024016101ca565b5f80546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b5f808284036101c081121561056b575f80fd5b833592506101a0601f1982011215610581575f80fd5b506020830190509250929050565b5f80604083850312156105a0575f80fd5b50508035926020909101359150565b5f602082840312156105bf575f80fd5b5035919050565b5f602082840312156105d6575f80fd5b81356001600160a01b03811681146105ec575f80fd5b9392505050565b5f6101c08201905083825282356020830152602083013560408301526040830135606083015260608301356080830152608083013560a083015261010060a0840160c08401379392505050565b5f60208284031215610650575f80fd5b505191905056fea26469706673582212200d58c4113f73e6998d09aeef065e07ec54739e1dd72bdc68c4eea2bea165c14964736f6c63430008170033",
+  "deployedBytecode": "0x608060405234801561000f575f80fd5b5060043610610090575f3560e01c806388d21ff31161006357806388d21ff3146101085780638b0852471461013a5780638da5cb5b14610167578063d9c6aac814610177578063f2fde38b1461018a575f80fd5b80630d0b1176146100945780631783efc3146100a9578063715018a6146100bc5780637b5d2534146100c4575b5f80fd5b6100a76100a2366004610558565b61019d565b005b6100a76100b736600461058f565b6102a1565b6100a761036a565b6100eb7f000000000000000000000000000000000000000000000000000000000000000081565b6040516001600160a01b0390911681526020015b60405180910390f35b61012a6101163660046105af565b60026020525f908152604090205460ff1681565b60405190151581526020016100ff565b6101596101483660046105af565b60016020525f908152604090205481565b6040519081526020016100ff565b5f546001600160a01b03166100eb565b6101596101853660046105af565b61037d565b6100a76101983660046105c6565b6104a0565b5f8281526002602052604090205460ff166101d35760405163a86ecdd560e01b8152600481018390526024015b60405180910390fd5b5f828152600160205260409081902054905163d0d898dd60e01b81526001600160a01b037f0000000000000000000000000000000000000000000000000000000000000000169163d0d898dd9161022f919085906004016105f3565b5f604051808303815f87803b158015610246575f80fd5b505af1158015610258573d5f803e3d5ffd5b505060408051606085013581528185013560208201528593507f24930ecca7f60d4736cd965cb5522694ea4b32308405d3f88fea2f59eff63caa92500160405180910390a25050565b6102a96104dd565b5f8281526002602052604090205460ff166102da5760405163a86ecdd560e01b8152600481018390526024016101ca565b5f8281526001602052604090819020549051631783efc360e01b81526004810191909152602481018290527f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031690631783efc3906044015f604051808303815f87803b158015610350575f80fd5b505af1158015610362573d5f803e3d5ffd5b505050505050565b6103726104dd565b61037b5f610509565b565b5f6103866104dd565b5f8281526002602052604090205460ff16156103b85760405163243d973f60e01b8152600481018390526024016101ca565b6040516302e1f9db60e51b81523060048201527f00000000000000000000000000000000000000000000000000000000000000006001600160a01b031690635c3f3b60906024016020604051808303815f875af115801561041b573d5f803e3d5ffd5b505050506040513d601f19601f8201168201806040525081019061043f9190610640565b5f8381526001602081815260408084208590556002825292839020805460ff1916909217909155905182815291925083917f79fb617314647013123901234cea859ab2df200423a4048a35d9cf59437a9b64910160405180910390a2919050565b6104a86104dd565b6001600160a01b0381166104d157604051631e4fbdf760e01b81525f60048201526024016101ca565b6104da81610509565b50565b5f546001600160a01b0316331461037b5760405163118cdaa760e01b81523360048201526024016101ca565b5f80546001600160a01b038381166001600160a01b0319831681178455604051919092169283917f8be0079c531659141344cd1fd0a4f28419497f9722a3daafe3b4186f6b6457e09190a35050565b5f808284036101c081121561056b575f80fd5b833592506101a0601f1982011215610581575f80fd5b506020830190509250929050565b5f80604083850312156105a0575f80fd5b50508035926020909101359150565b5f602082840312156105bf575f80fd5b5035919050565b5f602082840312156105d6575f80fd5b81356001600160a01b03811681146105ec575f80fd5b9392505050565b5f6101c08201905083825282356020830152602083013560408301526040830135606083015260608301356080830152608083013560a083015261010060a0840160c08401379392505050565b5f60208284031215610650575f80fd5b505191905056fea26469706673582212200d58c4113f73e6998d09aeef065e07ec54739e1dd72bdc68c4eea2bea165c14964736f6c63430008170033",
+  "linkReferences": {},
+  "deployedLinkReferences": {},
+  "immutableReferences": {
+    "374": [
+      {
+        "length": 32,
+        "start": 201
+      },
+      {
+        "length": 32,
+        "start": 505
+      },
+      {
+        "length": 32,
+        "start": 775
+      },
+      {
+        "length": 32,
+        "start": 973
+      }
+    ]
+  },
+  "inputSourceName": "project/contracts/PollVoting.sol",
+  "buildInfoId": "solc-0_8_23-595dad299fe72067578c1110b14b4ee23b104abe"
+}

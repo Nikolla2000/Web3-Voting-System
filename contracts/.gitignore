@@ -3,5 +3,9 @@ artifacts
 cache
 cache_hardhat
 typechain-types
-ignition/deployments
+# Only the Sepolia record is kept: Ignition needs it to know what is already
+# deployed, so a re-run of the deploy workflow skips instead of redeploying.
+ignition/deployments/*
+!ignition/deployments/chain-11155111/
+!ignition/deployments/chain-11155111/artifacts/
 .env
