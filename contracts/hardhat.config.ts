@@ -35,5 +35,10 @@ export default defineConfig({
     etherscan: {
       apiKey: process.env.ETHERSCAN_API_KEY ?? '',
     },
+    // Etherscan and Sourcify are enough; Blockscout's API rate-limits the
+    // back-to-back submissions of a full deploy and fails the run.
+    blockscout: {
+      enabled: false,
+    },
   },
 });
