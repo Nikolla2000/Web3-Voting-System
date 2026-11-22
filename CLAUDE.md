@@ -15,6 +15,7 @@ Four independent projects, not a unified monorepo tool (no root package.json):
 
 - `ci.yml`: path-filtered per project; `CI result` is the one required check on `main`. Docker-backed and Playwright suites run on PRs only. CI has no `.env`, so config must load without secrets.
 - `docker.yml`: on `main`/tags, publishes production images (`*/Dockerfile.prod`) to GHCR; `docker-compose.prod.yml` runs them. The plain `Dockerfile`s are the dev images.
+- `release.yml` (on `v*` tags) and `deploy-contracts.yml` (manual, `sepolia` environment). Ignition resumes from the committed `contracts/ignition/deployments/chain-11155111`; never `--reset` it.
 
 ## Project purpose & vision
 
