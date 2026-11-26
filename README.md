@@ -33,6 +33,8 @@ Every vote is a zero-knowledge proof: anyone can check the tally on-chain, and n
 8. [Running locally](#running-locally)
 9. [Challenges and solutions](#challenges-and-solutions)
 10. [What I learned](#what-i-learned)
+11. [Credits](#credits)
+12. [License](#license)
 
 ## About
 
@@ -60,6 +62,8 @@ It is also a deliberately broad portfolio project. It is built as a set of micro
 ## Architecture
 
 The browser only ever talks to the API gateway. Behind it, each service owns one job and its own database, and the services find out about each other's work through RabbitMQ events.
+
+> **A note on the choices.** Microservices are not the ideal architecture for a project this size, and a single well-structured application would be simpler to build and run. I chose them because I wanted hands-on experience with this style: several services, separate databases, and different ways of communicating between them. The same goes for several other technologies here. Where a choice was made to learn something rather than because it was the best fit, I say so.
 
 ```mermaid
 flowchart LR
@@ -432,3 +436,74 @@ cd frontend  && npm test && npm run test:e2e
 cd ai-service && uv run pytest
 cd contracts && npx hardhat test
 ```
+
+## Challenges and solutions
+
+### Learning to build across service boundaries
+
+This was my first microservices project, and almost nothing about it resembled a normal HTTP backend. Every boundary had its own rules for how data and errors travel:
+
+- **Errors changed shape at every hop.** A plain `NotFoundException` thrown in `identity` doesn't survive the TCP transport, and gRPC services report numeric status codes, not HTTP ones. The fix was two layers: services throw RPC-safe exceptions that carry a status, and one global filter in the gateway turns each kind (HTTP, TCP errors, gRPC status codes) into a consistent HTTP error for the client.
+- **Only the gateway shapes responses.** Services return plain data, and the gateway wraps it in the standard response envelope, so the clients see one format no matter which protocol served the request.
+- **Protocol quirks.** For example, proto3 silently drops fields that hold default values, so gRPC clients need `loader: { defaults: true }` or a zero or empty value just disappears from the response.
+- **Events add a new failure mode.** RabbitMQ delivers at least once, so consumers have to tolerate duplicates. The vote tally uses a unique constraint on `(pollId, nullifierHash)` and swallows the duplicate-key error, which makes redelivery harmless.
+
+Learning when each protocol fits, and where the translation between them belongs, was the biggest lesson of the project.
+
+### Making the voting flow work end to end
+
+The voting flow was the hardest part. It touches zero-knowledge proofs, Merkle trees, a smart contract, a relayer and an event pipeline, and each piece has to agree with the others exactly. The key was deciding where each fact lives:
+
+- **Who may vote** is the poll's Semaphore group, which exists on-chain and as a mirror in the `blockchain` service.
+- **What was voted** lives on the contract. The `polls` database only keeps cached tallies, built from the contract's `VoteCast` events.
+- **Who already voted** is never stored as an account list. The nullifier does that job: the contract rejects a reused one, and the tally ignores a repeated one.
+
+Getting the vote flow right meant understanding the pieces first, then wiring them one at a time, with the e2e test generating a real proof to make sure the browser and the backend agree.
+
+### A UUID that wouldn't fit in a proof
+
+Semaphore's proof takes a `scope` (the poll) and a `message` (the chosen option), and I wanted those to be the poll and option UUIDs. Passing the UUID as a string failed: the library converts strings with `encodeBytes32String`, which rejects anything over 31 bytes, and a UUID is 36 characters.
+
+The fix was to skip the string path. Removing the dashes leaves 32 hex characters, which is 128 bits, well inside the field, so the UUID can be passed as a `bigint` directly. The same function turns it back into a UUID when the contract's events are read. The catch is that the browser and the backend have to implement it identically, or every valid vote fails verification. They live in separate npm projects, so the function is duplicated on purpose with a comment pointing at the other copy, and the Playwright vote test verifies a real proof against the backend's own implementation.
+
+### A Merkle tree that survives restarts
+
+Semaphore proofs need the group's Merkle tree, and that tree is an in-memory object. The first design question was where to keep it. Putting it in Redis would mean rebuilding it into a `Group` before every operation, and a stale copy would silently break voting.
+
+The solution was to treat the `GroupMember` table as the source of truth and the tree as a cache. The service rebuilds a poll's tree from the rows in index order the first time it's needed and keeps it per poll in memory. A restart costs one rebuild and loses nothing, and proofs already issued stay valid because the same members in the same order produce the same root.
+
+### Cache invalidation for a listing with too many keys
+
+The polls list can be filtered, searched, sorted and paginated, so the number of distinct queries is huge. Caching it is easy, but invalidating it when a vote arrives is not: a single write could affect any of them, and scanning Redis to delete matching keys is slow and error-prone.
+
+The solution was to put a version number inside every cache key. Creating a poll, tallying a vote or deploying a contract just increments the version, which orphans every cached listing at once in constant time. The old entries expire on their own after 30 seconds. Poll detail pages use the more usual approach of deleting a single key when the poll changes, since there the key is known.
+
+## What I learned
+
+- **Distributed systems push complexity to the edges.** The business logic was the easy part. The effort went into the boundaries: how data is serialized, how errors cross a protocol, and what happens when a message arrives twice.
+- **Pick each fact's source of truth early.** Deciding what lives on-chain, what is a cache and what is derived made the voting flow much easier to reason about.
+- **Anonymity is a property of the whole system.** Zero-knowledge proofs only hide so much. Timing, group size and the account-to-commitment link all matter, so it's better to write down what is and isn't protected.
+- **Test the seams.** The bugs that mattered happened between the pieces, so the tests that paid off were the ones that run real containers or a real proof.
+- **Learning projects should say they are learning projects.** Some of my choices aren't the simplest or cheapest option, and being upfront about why is better than defending them.
+
+## Credits
+
+The cover photos of the demo polls come from [Wikimedia Commons](https://commons.wikimedia.org/). Search the file title there to see each photo's page.
+
+| Poll | Photo | Author | License |
+|---|---|---|---|
+| Work setup | Home-office-336377 | Free-Photos (Pixabay) | CC0 |
+| City weekend | Prague, Old Town Square, COVID | Tadeáš Gregor | CC BY-SA 4.0 |
+| Sport | LFP - Barcelona vs Mallorca pre-match - Oct 3rd 2010 | Paolo Costa Baldi | CC BY-SA 3.0 |
+| Programming language | Programmers | Lbronn | CC BY-SA 4.0 |
+| AI artwork | Gallery display of American paintings formerly in the collection of the Corcoran Gallery of Art | Ser Amantio di Nicolao | CC BY-SA 4.0 |
+| Investing | Trading apps on an iPhone screen | forextime.com | CC BY 2.0 |
+| School hours | Boxwood PS Hallway 3 | ChinaFlag | Public domain |
+| Mandatory voting | Ballot dropped into ballot box 2024 Swedish EU election at Stångenässkolan, Brastad 2 | W.carter | CC BY-SA 4.0 |
+| Cars in cities | Fietsdemonstratie tegen autoverkeer in binnenstad in Amsterdam | Rob Mieremet / Anefo | CC0 |
+
+Semaphore is by the [Privacy and Scaling Explorations](https://pse.dev/) team at the Ethereum Foundation.
+
+## License
+
+Released under the [MIT License](LICENSE).
