@@ -317,3 +317,118 @@ Each choice below is there for a reason, and a few are there mainly to show a di
 | GitHub Actions | Path-filtered CI, image publishing, releases and a gated deployment. See [Testing and CI/CD](#testing-and-cicd). |
 | GitHub Container Registry | Hosts the production image of each service, tagged by commit and by version. |
 | CloudAMQP, Upstash and Cloudflare R2 | Hosted free tiers for the broker, Redis and storage, so there is less to run locally. |
+
+## Testing and CI/CD
+
+### Test suites
+
+| Project | What runs | Notes |
+|---|---|---|
+| Backend | Jest unit tests, integration tests and gateway e2e tests | The slow suites start real Postgres and RabbitMQ containers with Testcontainers, so they exercise real wiring rather than mocks. |
+| Frontend | Vitest and React Testing Library | Tests mock at the network edge by swapping Axios's adapter, so the real interceptors and token refresh logic run. |
+| Frontend e2e | Playwright in Chromium, against a production build | A stateful in-memory gateway answers the requests, and the vote test generates a real zero-knowledge proof and checks it with the backend's own field-element conversion. |
+| AI service | pytest | Covers the search, duplicate and chat logic. |
+| Contracts | Hardhat tests | Covers poll creation, adding members and the owner-only restriction. |
+
+### Pipeline
+
+Every push and pull request goes through the same flow. Only the projects whose files changed are tested, and the slow suites (Docker-backed backend tests and Playwright) run on pull requests only.
+
+```mermaid
+flowchart LR
+    PR["Pull request or push"] --> F["Detect changed projects"]
+    F --> B["Backend<br/>lint, typecheck, unit"]
+    F --> BE["Backend integration and e2e<br/>PRs only"]
+    F --> FE["Frontend<br/>lint, format, typecheck, unit"]
+    F --> PW["Frontend e2e<br/>PRs only"]
+    F --> AI["AI service<br/>pytest"]
+    F --> C["Contracts<br/>compile, test"]
+    B & BE & FE & PW & AI & C --> R{"CI result<br/>required check"}
+    R -->|"merge to main"| D["Build and publish images<br/>ghcr.io"]
+    T["Tag v1.2.3"] --> REL["GitHub Release<br/>with generated notes"]
+    T --> D
+    M["Manual run"] --> S["Deploy contracts<br/>Sepolia, approval required"]
+```
+
+- **`CI result` is the only required check** on `main`. It succeeds when every job that was meant to run passed, and skipped jobs for untouched projects don't block a merge.
+- **Docker images.** Each of the seven services has a production Dockerfile. Pushes to `main` publish `latest` and a commit tag, and version tags publish the version. The frontend image is about 300 MB thanks to Next's standalone output.
+- **Releases.** Pushing a `v*` tag creates a GitHub Release whose notes are generated from the merged pull requests. Tags with a suffix, like `v1.0.0-rc.1`, are marked as pre-releases.
+- **Contract deployment.** A manual workflow that only runs from `main`. It waits for approval in the `sepolia` environment, keeps the secrets there and resumes from the committed deployment record, so an unchanged module deploys nothing.
+
+## Running locally
+
+### Prerequisites
+
+- Docker with Compose
+- Node.js 24 and Python 3.12 with [uv](https://docs.astral.sh/uv/), only if you want to run services outside Docker
+- A funded Sepolia wallet for the relayer (testnet ETH is free from a faucet)
+
+Some pieces are hosted rather than self-run, all with free tiers:
+
+| For | Service |
+|---|---|
+| Message broker | [CloudAMQP](https://www.cloudamqp.com/) |
+| Cache and rate limits | [Upstash Redis](https://upstash.com/) |
+| Image storage | [Cloudflare R2](https://www.cloudflare.com/developer-platform/products/r2/) |
+| Sepolia access | An RPC URL, for example from Alchemy or Infura |
+| Embeddings | [Voyage AI](https://www.voyageai.com/) |
+| LLM | [Google Gemini](https://ai.google.dev/) |
+| Optional | A Google OAuth client for Google sign-in, and an SMTP account for welcome emails |
+
+### 1. Deploy your own contract
+
+Only the relayer's address can add members to a poll, so you need your own deployment rather than the one this project used.
+
+```bash
+cd contracts
+npm ci
+# .env: SEPOLIA_RPC_URL, DEPLOYER_PRIVATE_KEY, RELAYER_ADDRESS, ETHERSCAN_API_KEY
+npm run deploy:sepolia
+```
+
+Copy the printed `PollVoting` address for the next step. `RELAYER_ADDRESS` must be the address of the key you give the `blockchain` service below.
+
+### 2. Configure the services
+
+Each project reads its own `.env` file. Docker Compose reads database credentials from a root `.env`.
+
+| File | Main variables |
+|---|---|
+| `.env` (repo root) | `IDENTITY_DB_USER`, `IDENTITY_DB_PASSWORD`, and the same pair for `POLLS`, `BLOCKCHAIN` and `AI` |
+| `backend/.env` (gateway) | `JWT_ACCESS_SECRET`, `JWT_REFRESH_SECRET`, `REDIS_URL`, `RABBITMQ_URL`, `R2_*`, `FRONTEND_URL`, Google OAuth settings, service hosts and ports |
+| `backend/apps/identity/.env` | database URL, JWT secrets and expiry, `RABBITMQ_URL`, `R2_*` |
+| `backend/apps/polls/.env` | database URL, `REDIS_URL`, `RABBITMQ_URL` |
+| `backend/apps/blockchain/.env` | database URL, `RPC_URL`, `RELAYER_PRIVATE_KEY`, `POLL_VOTING_CONTRACT_ADDRESS`, `RABBITMQ_URL` |
+| `backend/apps/notifications/.env` | `RABBITMQ_URL`, `EMAIL_*` |
+| `ai-service/.env` | see `.env.example`: `DATABASE_URL`, `RABBITMQ_URL`, `VOYAGE_API_KEY`, `GEMINI_API_KEY` |
+| `frontend/.env` | `NEXT_PUBLIC_API_GATEWAY_URL` |
+
+### 3. Start everything
+
+```bash
+docker compose up
+```
+
+This starts the four databases and every service with hot reload. When it settles:
+
+| URL | What |
+|---|---|
+| http://localhost:5000 | The app |
+| http://localhost:3000/docs | Swagger docs for the gateway |
+
+### Run the published images instead
+
+To run the production images without building anything, pick a tag from the releases page, or use `latest`:
+
+```bash
+IMAGE_TAG=latest docker compose -f docker-compose.prod.yml up
+```
+
+### Run the tests
+
+```bash
+cd backend   && npm test && npm run test:integration && npm run test:e2e   # the last two need Docker
+cd frontend  && npm test && npm run test:e2e
+cd ai-service && uv run pytest
+cd contracts && npx hardhat test
+```
