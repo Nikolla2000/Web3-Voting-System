@@ -1,3 +1,7 @@
+from collections.abc import Iterator
+from contextlib import contextmanager
+
+from grpclib import GRPCError, Status
 from grpclib.server import Stream
 
 from ai_service.grpc_gen.ai_grpc import AiServiceBase
@@ -14,10 +18,21 @@ from ai_service.grpc_gen.ai_pb2 import (
     SearchPollsRequest,
     SearchPollsResponse,
 )
+from ai_service.llm.gemini_client import LlmUnavailableError
 from ai_service.moderation.neutrality_check import check_poll_neutrality
 from ai_service.qa_agent.chat import stream_chat_response
 from ai_service.search.duplicate_detection import find_similar_polls
 from ai_service.search.poll_search import search_polls
+
+
+@contextmanager
+def _llm_unavailable_as_grpc() -> Iterator[None]:
+    # UNAVAILABLE (not grpclib's default UNKNOWN) lets the gateway tell the
+    # user to try again later instead of reporting a generic failure.
+    try:
+        yield
+    except LlmUnavailableError as error:
+        raise GRPCError(Status.UNAVAILABLE, "The AI model is busy right now") from error
 
 
 class AiServicer(AiServiceBase):
@@ -38,7 +53,8 @@ class AiServicer(AiServiceBase):
 
     async def SearchPolls(self, stream: Stream[SearchPollsRequest, SearchPollsResponse]) -> None:
         request = await stream.recv_message()
-        results = await search_polls(request.query)
+        with _llm_unavailable_as_grpc():
+            results = await search_polls(request.query)
 
         await stream.send_message(
             SearchPollsResponse(
@@ -50,7 +66,8 @@ class AiServicer(AiServiceBase):
         self, stream: Stream[CheckPollNeutralityRequest, CheckPollNeutralityResponse]
     ) -> None:
         request = await stream.recv_message()
-        result = await check_poll_neutrality(request.title, list(request.options))
+        with _llm_unavailable_as_grpc():
+            result = await check_poll_neutrality(request.title, list(request.options))
 
         await stream.send_message(
             CheckPollNeutralityResponse(
@@ -66,5 +83,6 @@ class AiServicer(AiServiceBase):
         request = await stream.recv_message()
         history = [{"role": turn.role, "content": turn.content} for turn in request.history]
 
-        async for text_delta in stream_chat_response(request.message, history):
-            await stream.send_message(ChatChunk(textDelta=text_delta))
+        with _llm_unavailable_as_grpc():
+            async for text_delta in stream_chat_response(request.message, history):
+                await stream.send_message(ChatChunk(textDelta=text_delta))
