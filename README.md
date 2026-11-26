@@ -221,3 +221,99 @@ Other honest limits:
 - **The voting identity lives in `localStorage`.** Clearing site data, or switching browser, after joining means you can't vote in that poll any more, since your account has already used its one slot.
 - **Small groups give weak anonymity.** A group with one member is trivially identifiable. The guarantee gets stronger as more people join.
 - **Sepolia testnet only.** The contracts are the standard Semaphore ones plus a thin owner-restricted wrapper, but nothing here has been audited.
+
+## Features
+
+### Accounts
+
+- Email and password registration with validation, and Google sign-in.
+- Short-lived access tokens held in memory only, plus a rotating refresh token in an httpOnly cookie. Refreshes are single-flight, so parallel requests never race each other with a used token.
+- Profile page: account details, password change, avatar upload straight to R2 with a presigned URL, sign out everywhere and account deactivation behind a typed confirmation.
+- Welcome email sent asynchronously through RabbitMQ.
+
+### Polls
+
+- Create polls with a title, description, category, schedule, cover image and two or more unique options.
+- Browse with text search, status filters (all, active, upcoming, ended), sorting and pagination.
+- Live vote bars on each card and on the poll page, refreshed automatically while a poll is active.
+- Cover images are uploaded as pending files and only attached to the poll once it is created, so abandoned uploads expire on their own.
+
+### Voting
+
+- One anonymous vote per account per poll, using a Semaphore proof generated in the browser. See [How anonymous voting works](#how-anonymous-voting-works).
+- A step-by-step progress indicator while the identity is registered, the proof is generated and the transaction is submitted.
+- A transaction hash with a link to Etherscan once the vote is on-chain.
+
+### AI assistance
+
+- **Duplicate detection.** While you write a poll, its title and description are compared with existing polls using pgvector similarity, and you see the closest match with a percentage.
+- **Neutrality check.** Flags loaded or leading wording in the title and options and suggests rewrites. It runs in parallel with the duplicate check and both land in one warning panel.
+- **Natural-language search.** Type something like "climate polls from last month" and the model extracts a topic plus category and date filters for a single vector and SQL query.
+- **Q&A chat.** A tool-calling agent that answers questions about polls by reading live data, streamed to the browser over Server-Sent Events.
+
+<div align="center">
+<img src="docs/media/duplicate-check.gif" alt="Creating a poll with a similar title triggers a duplicate warning with a similarity percentage" width="620" />
+</div>
+
+<!-- TODO: add a GIF or screenshot of the AI chat once the chat error is fixed. -->
+
+## Under the hood
+
+Each choice below is there for a reason, and a few are there mainly to show a different technique.
+
+### Frontend
+
+| Tool | Why |
+|---|---|
+| Next.js 16 and React 19 | App Router, and a standalone build that makes the production image small (about 300 MB). |
+| Tailwind CSS v4 and shadcn-style components | Every UI element is its own small component, with no template-library look. |
+| TanStack Query | Server state, caching and the active-poll refetch, instead of hand-written loading flags. |
+| Zustand | A tiny in-memory store for the access token, which must never touch `localStorage`. |
+| react-hook-form and zod | One schema validates a form and types it. |
+| Semaphore JS packages | Identity creation and Groth16 proving in the browser, so the secret never leaves it. |
+| Axios with an interceptor | Attaches the token and retries once through the refresh endpoint on a 401. |
+
+### Backend
+
+| Tool | Why |
+|---|---|
+| NestJS monorepo | Several apps share one `libs/shared` for constants, DTOs, proto files and the RabbitMQ and R2 wrappers. |
+| Prisma and PostgreSQL | A separate database per service, so no service reads another's tables. |
+| gRPC (`@grpc/grpc-js`) | Strongly typed contracts shared with the Python service, plus streaming for the chat. |
+| Raw `amqplib` | This is publish and subscribe with independent consumers, not request and reply, which is what Nest's built-in RMQ transport is for. |
+| Redis (ioredis) | Cache-aside for poll data and storage for rate-limit counters, via a Lua script. |
+| Cloudflare R2 | S3-compatible image storage with a separate bucket and scoped token per service. |
+| viem | Typed contract calls, transaction signing and event watching for the relayer. |
+| `@semaphore-protocol/*` | Group and Merkle proof handling, and off-chain proof verification before spending gas. |
+| Passport, JWT and bcrypt | Google OAuth and password sign-in, with the gateway as the only token authority. |
+| Swagger | Generated API docs at the gateway. |
+
+### Smart contracts
+
+| Tool | Why |
+|---|---|
+| Solidity 0.8.23 | `PollVoting` is a thin wrapper that adds poll bookkeeping to Semaphore. |
+| Semaphore | An audited, widely used protocol for anonymous membership proofs, instead of a home-made one. |
+| OpenZeppelin `Ownable` | Only the relayer can create polls and add members, while anyone can submit a valid proof. |
+| Hardhat 3 and viem | Compilation and tests, using the same client library as the backend. |
+| Hardhat Ignition | Repeatable deployments, with the Sepolia deployment record committed so a redeploy is a no-op. |
+
+### AI service
+
+| Tool | Why |
+|---|---|
+| Python 3.12 and uv | Fast, locked, reproducible environments. |
+| Voyage embeddings | A generous free tier and a good retrieval model for short texts. |
+| pgvector | Similarity search inside the same Postgres as the rest of the service's data, with no separate vector database. |
+| Gemini | The model behind search parsing, the neutrality check and the chat agent. |
+| `grpclib` | A pure-Python gRPC implementation, wire-compatible with the Node client. |
+| SQLAlchemy and Alembic | Async access and versioned migrations. |
+
+### Infrastructure
+
+| Tool | Why |
+|---|---|
+| Docker Compose | One command for the local databases, and a production file that runs published images. |
+| GitHub Actions | Path-filtered CI, image publishing, releases and a gated deployment. See [Testing and CI/CD](#testing-and-cicd). |
+| GitHub Container Registry | Hosts the production image of each service, tagged by commit and by version. |
+| CloudAMQP, Upstash and Cloudflare R2 | Hosted free tiers for the broker, Redis and storage, so there is less to run locally. |
