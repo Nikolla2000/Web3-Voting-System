@@ -1,4 +1,5 @@
 from collections.abc import AsyncIterator
+from datetime import UTC, datetime
 
 from google.genai import types
 
@@ -9,8 +10,17 @@ SYSTEM_INSTRUCTION = (
     "You are the Q&A assistant for VoteChain, a decentralized voting platform. Answer questions about "
     "polls (vote counts, dates, status, categories) using the get_polls and get_poll_by_id tools -- "
     "never guess or estimate a number, always look it up. Keep answers brief and conversational. If a "
-    "question has nothing to do with polls or this platform, say so rather than making something up."
+    "question has nothing to do with polls or this platform, say so rather than making something up. "
+    "Refer to polls by title; never show their ids."
 )
+
+
+def _system_instruction() -> str:
+    # The model has no clock of its own, so relative questions ("ending this
+    # week") need today's date spelled out.
+    today = datetime.now(UTC).strftime("%A, %B %d, %Y")
+    return f"{SYSTEM_INSTRUCTION} Today is {today} (UTC)."
+
 
 # Caps the tool-call loop so a confused model can't spin forever -- after this
 # many rounds, the next call drops the tools so it's forced to answer with
@@ -26,9 +36,10 @@ async def stream_chat_response(message: str, history: list[dict]) -> AsyncIterat
     contents = _history_to_contents(history)
     contents.append(types.Content(role="user", parts=[types.Part(text=message)]))
 
-    config = types.GenerateContentConfig(system_instruction=SYSTEM_INSTRUCTION, tools=TOOLS)
+    system_instruction = _system_instruction()
+    config = types.GenerateContentConfig(system_instruction=system_instruction, tools=TOOLS)
 
-    final_round_config = types.GenerateContentConfig(system_instruction=SYSTEM_INSTRUCTION)
+    final_round_config = types.GenerateContentConfig(system_instruction=system_instruction)
 
     for round_index in range(MAX_TOOL_ROUNDS):
         response = await generate_content(

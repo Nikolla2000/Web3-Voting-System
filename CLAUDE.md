@@ -144,7 +144,7 @@ uv run python scripts/gen_proto.py  # regenerate grpc_gen/ (gitignored) from ai.
 
 - `grpclib`, not `grpcio` — `grpcio`'s compiled extension is blocked by Smart App Control on the primary dev machine. `grpclib` is pure-Python, wire-compatible with the Node `@grpc/grpc-js` client. `grpcio-tools` stays dev-only, just for the `protoc` compiler.
 - `AiModule`'s gRPC client needs `loader: { defaults: true }` (see its comment) or proto3 silently drops default-valued fields from responses.
-- LLM is Gemini (`google-genai`), not Anthropic — no free tier on the Messages API. Model is pinned, not the `-latest` alias (see `llm/constants.py` for why).
+- LLM is Gemini (`google-genai`), not Anthropic — no free tier on the Messages API. Model is pinned, not the `-latest` alias, with a second pinned model as fallback when the first is overloaded (see `llm/constants.py`); the chat shows a "busy" message when both are.
 - Embeddings are Voyage (`voyage-4-lite`, 200M free tokens, no card required).
 - `poll_embeddings` (own Postgres, `vector(1024)`): one row per poll, populated from `ROUTING_KEYS.POLL_CREATED`. Write-once — polls have no update/delete RPC.
 - `polls_client.py` — a `grpclib` client to the real `polls` service, used only by the Q&A agent's tools.

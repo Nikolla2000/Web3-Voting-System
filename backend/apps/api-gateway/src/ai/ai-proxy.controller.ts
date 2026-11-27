@@ -10,6 +10,7 @@ import type { ClientGrpc } from '@nestjs/microservices';
 import { Throttle } from '@nestjs/throttler';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { firstValueFrom, Observable } from 'rxjs';
+import { status as grpcStatus } from '@grpc/grpc-js';
 import type { Response } from 'express';
 import {
   ChatDto,
@@ -18,6 +19,12 @@ import {
   SearchPollsDto,
 } from '@app/shared';
 import { Public } from '../auth/decorators/public.decorator';
+
+// ai-service answers UNAVAILABLE when every Gemini model it tries is
+// overloaded or out of quota, which is temporary, unlike any other failure.
+const CHAT_BUSY_MESSAGE =
+  'The assistant is busy right now. Please try again in a minute.';
+const CHAT_ERROR_MESSAGE = 'The assistant hit an error.';
 
 interface ChatChunk {
   textDelta: string;
@@ -103,10 +110,12 @@ export class AiProxyController implements OnModuleInit {
             `data: ${JSON.stringify({ textDelta: chunk.textDelta })}\n\n`,
           );
         },
-        error: () => {
-          res.write(
-            `data: ${JSON.stringify({ error: 'The assistant hit an error.' })}\n\n`,
-          );
+        error: (error: { code?: number }) => {
+          const message =
+            error?.code === grpcStatus.UNAVAILABLE
+              ? CHAT_BUSY_MESSAGE
+              : CHAT_ERROR_MESSAGE;
+          res.write(`data: ${JSON.stringify({ error: message })}\n\n`);
           res.end();
           resolve();
         },
